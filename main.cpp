@@ -1,5 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QCamera>
+#include <QCameraInfo>
+#include <QVideoProbe>
+#include <QMediaPlayer>
+#include <QMediaRecorder>
+#include <QObject>
+#include <QVideoFrame>
+
 
 int main(int argc, char *argv[])
 {
