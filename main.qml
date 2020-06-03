@@ -9,12 +9,11 @@ ApplicationWindow {
     visible: true
     width: 1400
     height: 800
-    title: qsTr("Stack")
+    title: qsTr("qZoom")
 
 
     Item {
-        width: 1400
-        height: 800
+       anchors.fill: parent
 
         Camera {
             id: camera
