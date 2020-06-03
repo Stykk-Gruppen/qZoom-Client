@@ -3,7 +3,6 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 
-
 ApplicationWindow {
     id: window
     visible: true
@@ -11,20 +10,15 @@ ApplicationWindow {
     height: 800
     title: qsTr("Stack")
 
-
     Item {
         width: 1400
         height: 800
 
         Camera {
             id: camera
+            deviceId: cameraHandler.getDeviceId()
 
             imageProcessing.whiteBalanceMode: CameraImageProcessing.WhiteBalanceFlash
-            focus {
-                        focusMode: Camera.FocusMacro
-                        focusPointMode: Camera.FocusPointCustom
-                        customFocusPoint: Qt.point(0.2, 0.2) // Focus relative to top-left corner
-                    }
             exposure {
                 exposureCompensation: -1.0
                 exposureMode: Camera.ExposurePortrait
@@ -35,7 +29,6 @@ ApplicationWindow {
             imageCapture {
                 onImageCaptured: {
                     photoPreview.source = preview  // Show the preview in an Image
-
 
                 }
             }
