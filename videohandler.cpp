@@ -20,12 +20,9 @@ VideoHandler::VideoHandler(QObject* parent): QObject(parent)
 
 }
 
-
 void VideoHandler::setup(QObject* qmlCamera)
 {
     camera = qvariant_cast<QCamera*>(qmlCamera->property("mediaObject"));
-
-
 
     connect(videoProbe,SIGNAL(videoFrameProbed(QVideoFrame)),this,SLOT(handleFrame(QVideoFrame)));
 
