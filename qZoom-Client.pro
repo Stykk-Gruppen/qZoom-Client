@@ -1,4 +1,4 @@
-QT += quick multimedia core
+QT += quick multimedia core multimediawidgets
 
 CONFIG += c++17 console
 
@@ -15,7 +15,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         camerahandler.cpp \
-        main.cpp
+        main.cpp \
+        videohandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -31,4 +32,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    camerahandler.h
+    camerahandler.h \
+    videohandler.h

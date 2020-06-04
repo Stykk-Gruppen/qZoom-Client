@@ -15,7 +15,7 @@ ApplicationWindow {
 
         Camera {
             id: camera
-            deviceId: cameraHandler.getDeviceId()
+            objectName: "qrCameraQML"
 
             imageProcessing.whiteBalanceMode: CameraImageProcessing.WhiteBalanceFlash
             exposure {
@@ -42,5 +42,6 @@ ApplicationWindow {
         Image {
             id: photoPreview
         }
+
     }
 }
