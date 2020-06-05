@@ -10,13 +10,12 @@ ApplicationWindow {
     height: 800
     title: qsTr("qZoom")
 
-    Item {
-       anchors.fill: parent
 
-        Camera {
+
+
+        /*Camera {
             id: camera
             objectName: "qrCameraQML"
-
             imageProcessing.whiteBalanceMode: CameraImageProcessing.WhiteBalanceFlash
             exposure {
                 exposureCompensation: -1.0
@@ -42,6 +41,7 @@ ApplicationWindow {
         Image {
             id: photoPreview
         }
+*/
 
     }
-}
+

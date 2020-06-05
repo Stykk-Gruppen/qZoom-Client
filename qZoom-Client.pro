@@ -15,10 +15,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         camerahandler.cpp \
+        cameratest.cpp \
         main.cpp \
         videohandler.cpp
 
 RESOURCES += qml.qrc
+LIBS += -L/usr/lib -lavformat -lavdevice -lavutil -lswresample -lavcodec -I/usr/include/x86_64-linux-gnu
+
+
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -33,4 +37,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     camerahandler.h \
+    cameratest.h \
     videohandler.h
