@@ -71,9 +71,11 @@ public:
     OutputStream video_st = { 0 }, audio_st = { 0 };
     void grabFrames();
     AVOutputFormat *ofmt;
+    AVCodecContext inputCodecContext;
     AVFormatContext *ifmt_ctx, *ofmt_ctx, *fmt;
     AVCodecContext* c;
     QString cDeviceName;
+    AVCodecContext* cv;
     QString aDeviceName;
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
