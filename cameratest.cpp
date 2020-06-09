@@ -82,11 +82,6 @@ int CameraTest::init() {
     }
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
-
-
-
-
-
     avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
        fprintf(stderr, "Could not create output context\n");
@@ -98,29 +93,30 @@ int CameraTest::init() {
     ofmt = av_guess_format(NULL, filename, NULL);
 
 
-    AVCodec* videoCodec = avcodec_find_encoder(ofmt->video_codec);
-    AVCodec* audioCodec = avcodec_find_encoder(ofmt->audio_codec);
+    outputVideoCodec = avcodec_find_encoder(ofmt->video_codec);
+    outputAudioCodec = avcodec_find_encoder(ofmt->audio_codec);
 
-    cv = avcodec_alloc_context3(videoCodec);
-
-    qDebug() << cv->width;
-
-    video_st.enc = cv;
+    outputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
+    video_st.enc = outputVideoCodecContext;
     video_st.enc->pix_fmt = AV_PIX_FMT_YUV420P;
-    AVCodecContext* ca = avcodec_alloc_context3(audioCodec);
-    audio_st.enc = ca;
+    outputAudioCodecContext = avcodec_alloc_context3(outputAudioCodec);
+    audio_st.enc = outputAudioCodecContext;
 
     for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
        AVStream *in_stream = ifmt_ctx->streams[i];
        AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
 
-       if (ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+       if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+
+           inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
+           inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
+
            videoStream = i;
-           cv->bit_rate = 400000;
-           cv->width = in_stream->codecpar->width;
-           cv->height = in_stream->codecpar->height;
-           cv->pix_fmt = AV_PIX_FMT_YUV420P;
-           avcodec_parameters_from_context(out_stream->codecpar, cv);
+           outputVideoCodecContext->bit_rate = 400000;
+           outputVideoCodecContext->width = in_stream->codecpar->width;
+           outputVideoCodecContext->height = in_stream->codecpar->height;
+           outputVideoCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+           avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
            qDebug() << "Fant en videoStream\n";
 
 
@@ -128,25 +124,30 @@ int CameraTest::init() {
                         in_stream->codecpar->width,
                        in_stream->codecpar->height,
                        in_stream->codec->pix_fmt,
-                       cv->width,
-                       cv->height,
-                       cv->pix_fmt,
+                       outputVideoCodecContext->width,
+                       outputVideoCodecContext->height,
+                       outputVideoCodecContext->pix_fmt,
                        SWS_BICUBIC,
                        NULL, NULL, NULL);
        }
-       else if (ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+       else if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+           inputAudioCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
+           inputAudioCodecContext = avcodec_alloc_context3(inputAudioCodec);
+
+
            audioStream = i;
-           ca->sample_rate = 48000;
-           ca->bit_rate = 96000;
-           ca->channels = 2;
-           ca->channel_layout = av_get_default_channel_layout(2);
-           ca->frame_size = in_stream->codecpar->frame_size;
+
+           outputAudioCodecContext->sample_rate = 48000;
+           outputAudioCodecContext->bit_rate = 96000;
+           outputAudioCodecContext->channels = 2;
+           outputAudioCodecContext->channel_layout = av_get_default_channel_layout(2);
+           outputAudioCodecContext->frame_size = in_stream->codecpar->frame_size;
 
            /* Set the sample rate for the container. */
            out_stream->time_base.den = 48000;
            out_stream->time_base.num = 1;
 
-           avcodec_parameters_from_context(out_stream->codecpar, ca);
+           avcodec_parameters_from_context(out_stream->codecpar, outputAudioCodecContext);
            //avcodec_parameters_copy(out_stream->codecpar,in_stream->codecpar);
            qDebug() << "Fant en audioStream\n";
        }
@@ -212,10 +213,13 @@ void CameraTest::grabFrames() {
     while (av_read_frame(ifmt_ctx, pkt) >= 0)
     {
 
-        if(pkt->stream_index == videoStream)
+        /*if(pkt->stream_index == videoStream)
         {
             scaledFrame = av_frame_alloc();
             qDebug() << "kommer inn i videoStreamgreiene\n";
+
+
+            avcodec_open2(inputVideoCodecContext, inputVideoCodec, &opt);
 
             ret = avcodec_send_packet(ifmt_ctx->streams[videoStream]->codec, pkt);
             if(ret < 0) qDebug() << "Send packet error";
@@ -245,27 +249,27 @@ void CameraTest::grabFrames() {
             outPacket.data = NULL;
             outPacket.size = 0;
 
-            avcodec_send_frame(cv, videoFrame);
+            avcodec_send_frame(outputVideoCodecContext, scaledFrame);
 
-            avcodec_receive_packet(cv, pkt);
-        }
+            avcodec_receive_packet(outputVideoCodecContext, pkt);
+        }*/
 
-        qDebug() << "Etter hele videoIf greier\n";
+        //qDebug() << "Etter hele videoIf greier\n";
 
-        AVStream *in_stream, *out_stream;
-        in_stream  = ifmt_ctx->streams[pkt->stream_index];
-        out_stream = ofmt_ctx->streams[pkt->stream_index];
+        //AVStream *in_stream, *out_stream;
+        //in_stream  = ifmt_ctx->streams[pkt->stream_index];
+        //out_stream = ofmt_ctx->streams[pkt->stream_index];
 
 
 
         /* copy packet */
 
-        pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
-        pkt->pos = -1;
+        //pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+        //pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+        //pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+        //pkt->pos = -1;
 
-        int ret = av_interleaved_write_frame(ofmt_ctx, pkt);
+        int ret = av_write_frame(ofmt_ctx, pkt);
         //int ret = av_write_frame(ofmt_ctx, pkt);
         if (ret < 0) {
            qDebug() << "Error muxing packet";

@@ -75,7 +75,17 @@ public:
     AVFormatContext *ifmt_ctx, *ofmt_ctx, *fmt;
     AVCodecContext* c;
     QString cDeviceName;
-    AVCodecContext* cv;
+    AVCodecContext* outputVideoCodecContext;
+    AVCodecContext* outputAudioCodecContext;
+    AVCodec* inputVideoCodec;
+    AVCodec* inputAudioCodec;
+
+    AVCodec* outputVideoCodec;
+    AVCodec* outputAudioCodec;
+
+    AVCodecContext* inputVideoCodecContext;
+    AVCodecContext* inputAudioCodecContext;
+
     QString aDeviceName;
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
