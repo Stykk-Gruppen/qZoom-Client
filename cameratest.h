@@ -10,6 +10,8 @@
 #include <QObject>
 #include <QVideoFrame>
 #include <QCameraImageCapture>
+#include <QAudioDeviceInfo>
+#include <QAudio>
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -68,7 +70,8 @@ public:
     void add_stream(OutputStream *ost, AVFormatContext *oc,
                                   AVCodec **codec,
                                   enum AVCodecID codec_id);
-    OutputStream video_st = { 0 }, audio_st = { 0 };
+    OutputStream video_st = {};
+    OutputStream audio_st = {};
     void grabFrames();
     AVOutputFormat *ofmt;
     AVCodecContext inputCodecContext;
@@ -82,6 +85,8 @@ public:
     bool done;
     const char* filename = "nyTest.mp4";
     struct SwsContext* img_convert_ctx;
+    Q_INVOKABLE QVariantList getAudioInputDevices();
+    Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;

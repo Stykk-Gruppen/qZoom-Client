@@ -122,16 +122,19 @@ int CameraTest::init() {
            cv->pix_fmt = AV_PIX_FMT_YUV420P;
            avcodec_parameters_from_context(out_stream->codecpar, cv);
            qDebug() << "Fant en videoStream\n";
+           qDebug() << in_stream->codec->pix_fmt;
+           qDebug() << cv->width;
+           qDebug() << cv->pix_fmt;
 
 
            img_convert_ctx = sws_getContext(
-                        in_stream->codecpar->width,
-                       in_stream->codecpar->height,
-                       in_stream->codec->pix_fmt,
                        cv->width,
                        cv->height,
-                       cv->pix_fmt,
-                       SWS_BICUBIC,
+                       AV_PIX_FMT_YUYV422,
+                       cv->width,
+                       cv->height,
+                       AV_PIX_FMT_YUV420P,
+                       SCALE_FLAGS,
                        NULL, NULL, NULL);
        }
        else if (ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
@@ -293,4 +296,23 @@ void CameraTest::grabFrames() {
 
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
+
+QVariantList CameraTest::getAudioInputDevices()
+{
+    QList<QVariant> q;
+    QList<QAudioDeviceInfo> x = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    for (auto i: x)
+    {
+        q.append(i.deviceName());
+        //todo sjekk om den faktisk er gyldig før den legges til i listen.
+    }
+    return q;
+}
+
+void CameraTest::changeAudioInputDevice(QString deviceName)
+{
+    qDebug() << deviceName;
+    //todo. må vel kanskje kjøre init på nytt?
+}
+
 

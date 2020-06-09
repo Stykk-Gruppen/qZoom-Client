@@ -68,7 +68,6 @@ void VideoHandler::handleFrame(QVideoFrame videoFrame)
     frame->width  = c->width;
     frame->height = c->height;
 
-
     // Allocate a buffer large enough for all data
     //int size = avpicture_get_size(frame->format, frame->width, frame->height);
     //uint8_t* buffer = (uint8_t*)av_malloc(size);
