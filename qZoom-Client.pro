@@ -14,13 +14,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        audiohandler.cpp \
         camerahandler.cpp \
         cameratest.cpp \
         main.cpp \
         videohandler.cpp
 
 RESOURCES += qml.qrc
-LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcodec -lavfilter -I/usr/include
+LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcodec -lavfilter
+INCLUDEPATH += /usr/include
 
 
 
@@ -36,6 +38,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    audiohandler.h \
     camerahandler.h \
     cameratest.h \
     videohandler.h

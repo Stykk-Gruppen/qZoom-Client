@@ -78,7 +78,7 @@ public:
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
     bool done;
-    const char* filename = "nyTest.avi";
+    const char* filename = "nyTest.mp4";
 public slots:
     void toggleDone();
 };

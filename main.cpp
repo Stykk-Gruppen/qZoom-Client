@@ -14,6 +14,7 @@
 #include "camerahandler.h"
 #include "videohandler.h"
 #include "cameratest.h"
+#include "audiohandler.h"
 #include <QCameraViewfinder>
 #include <QVariant>
 #include <libavutil/opt.h>
@@ -46,8 +47,10 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "hw:2"));
-    cameraTest->init();
+    //QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "default"));
+    QScopedPointer<AudioHandler> audio(new AudioHandler);
+    audio->main();
+    //cameraTest->init();
 
     return app.exec();
 }
