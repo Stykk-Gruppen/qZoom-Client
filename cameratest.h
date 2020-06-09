@@ -24,7 +24,6 @@ extern "C" {
 #include "libavformat/avio.h"
 #include "libavutil/frame.h"
 #include "libavcodec/avcodec.h"
-
 #include "libavfilter/avfilter.h"
 #include "libavutil/avutil.h"
 #include "libavutil/dict.h"
@@ -39,7 +38,6 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <x264.h>
 
 
 class CameraTest : public QObject
@@ -80,7 +78,7 @@ public:
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
     bool done;
-    const char* filename = "nyTest.mp4";
+    const char* filename = "nyTest.avi";
 public slots:
     void toggleDone();
 };

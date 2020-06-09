@@ -103,6 +103,8 @@ int CameraTest::init() {
 
     AVCodecContext* cv = avcodec_alloc_context3(videoCodec);
 
+    qDebug() << cv->width;
+
     video_st.enc = cv;
     AVCodecContext* ca = avcodec_alloc_context3(audioCodec);
     audio_st.enc = ca;
@@ -126,7 +128,9 @@ int CameraTest::init() {
            ret = AVERROR_UNKNOWN;
            return -1;
        }
-       ret = avcodec_copy_context(out_stream->codec, in_stream->codec);
+       ret = avcodec_parameters_copy(out_stream->codecpar,in_stream->codecpar);
+       //ret = copy_stream_props(out_stream,in_stream);
+       //ret = avcodec_copy_context(out_stream->codecpar, in_stream->codecpar);
        if (ret < 0) {
            fprintf(stderr, "Failed to copy context from input to output stream codec context\n");
            return -1;

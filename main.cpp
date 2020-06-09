@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "hw:0"));
+    QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "hw:2"));
     cameraTest->init();
 
     return app.exec();
