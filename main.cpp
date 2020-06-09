@@ -45,9 +45,12 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    engine.load(url);
 
     QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "default"));
+    engine.rootContext()->setContextProperty("cameraTest", cameraTest.data());
+    engine.load(url);
+
+
     //QScopedPointer<AudioHandler> audio(new AudioHandler);
     //audio->main();
     cameraTest->init();

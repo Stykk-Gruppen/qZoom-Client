@@ -12,8 +12,8 @@ ApplicationWindow {
 
 
 
-
-        /*Camera {
+/*
+        Camera {
             id: camera
             objectName: "qrCameraQML"
             imageProcessing.whiteBalanceMode: CameraImageProcessing.WhiteBalanceFlash
@@ -40,8 +40,28 @@ ApplicationWindow {
 
         Image {
             id: photoPreview
-        }
-*/
+        } */
+
+        ComboBox {
+                width: 200
+                model: ListModel {
+                    id: t
+                    function getAudioTypes() {
+                        var inputList = cameraTest.getAudioInputDevices()
+                        clear()
+                        for (var title in inputList) {
+                            append({text: inputList[title]})
+                        }
+                    }
+                }
+                onActivated: {
+                    //console.log("switched Audio Input Device to: " + currentValue)
+                    cameraTest.changeAudioInputDevice(currentValue);
+                }
+            }
+
+            Component.onCompleted: t.getAudioTypes()
+
 
     }
 
