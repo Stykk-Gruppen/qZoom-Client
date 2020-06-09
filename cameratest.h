@@ -79,6 +79,10 @@ public:
     int audioStream, videoStream;
     bool done;
     const char* filename = "nyTest.mp4";
+    struct SwsContext* img_convert_ctx;
+
+    AVFrame* videoFrame;
+
 public slots:
     void toggleDone();
 };

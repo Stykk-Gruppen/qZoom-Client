@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    //QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "default"));
-    QScopedPointer<AudioHandler> audio(new AudioHandler);
-    audio->main();
-    //cameraTest->init();
+    QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "default"));
+    //QScopedPointer<AudioHandler> audio(new AudioHandler);
+    //audio->main();
+    cameraTest->init();
 
     return app.exec();
 }
