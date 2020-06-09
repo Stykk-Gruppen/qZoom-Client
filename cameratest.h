@@ -82,6 +82,7 @@ public:
     struct SwsContext* img_convert_ctx;
 
     AVFrame* videoFrame;
+    AVFrame* scaledFrame;
 
 public slots:
     void toggleDone();

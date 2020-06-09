@@ -106,6 +106,7 @@ int CameraTest::init() {
     qDebug() << cv->width;
 
     video_st.enc = cv;
+    video_st.enc->pix_fmt = AV_PIX_FMT_YUV420P;
     AVCodecContext* ca = avcodec_alloc_context3(audioCodec);
     audio_st.enc = ca;
 
@@ -197,13 +198,41 @@ int CameraTest::init() {
 void CameraTest::grabFrames() {
     AVPacket pkt;
     int ret;
-    while (av_read_frame(ifmt_ctx, &pkt) >= 0) {
+    int frameFinished;
+    while (av_read_frame(ifmt_ctx, &pkt) >= 0)
+    {
 
         if(pkt.stream_index == videoStream)
         {
-            //avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, )
+            videoFrame = av_frame_alloc();
+            scaledFrame = av_frame_alloc();
+            qDebug() << "kommer inn i videoStreamgreiene\n";
+            ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, &pkt);
+            qDebug() << "Etter decode video\n";
+            if(ret < 0)
+            {
+                qDebug() << "Error with avcodec_decode video " << ret <<"\n";
+                exit(1);
+            }
+            if (ifmt_ctx->streams[videoStream]->codec->pix_fmt != AV_PIX_FMT_YUV420P)
+            {
+                ret = sws_scale(img_convert_ctx, videoFrame->data,
+                videoFrame->linesize, 0,
+                ifmt_ctx->streams[videoStream]->codec->height,
+                scaledFrame->data, scaledFrame->linesize);
+                qDebug() << "Etter swsScale\n";
+
+                if(ret < 0)
+                {
+                 qDebug() << "Error with scale " << ret <<"\n";
+                 exit(1);
+                }
+            }
+
+
         }
 
+        qDebug() << "Etter hele videoIf greier\n";
 
         AVStream *in_stream, *out_stream;
         in_stream  = ifmt_ctx->streams[pkt.stream_index];
@@ -228,6 +257,9 @@ void CameraTest::grabFrames() {
 
         if(done) break;
     }
+
+
+
     av_write_trailer(ofmt_ctx);
 
 
