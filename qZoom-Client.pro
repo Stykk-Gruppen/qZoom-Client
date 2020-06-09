@@ -20,7 +20,7 @@ SOURCES += \
         videohandler.cpp
 
 RESOURCES += qml.qrc
-LIBS += -L/usr/lib -lavformat -lavdevice -lavutil -lswresample -lavcodec -I/usr/include/x86_64-linux-gnu
+LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcodec -lavfilter -I/usr/include
 
 
 

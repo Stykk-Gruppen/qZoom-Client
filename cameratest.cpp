@@ -2,14 +2,34 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QDebug>
 
+
+
+
+#include "videohandler.h"
+//#define STREAM_DURATION   5.0
+#define STREAM_FRAME_RATE 10 /* 25 images/s */
+#define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
+#define SCALE_FLAGS SWS_BICUBIC
+#define QFRAMES_PER_MOVIE 100
+
+
+
+
+
+
+
+
+
+
+
+
 CameraTest::CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent): QObject(parent)
 {
     done = false;
     this->cDeviceName = cDeviceName;
     this->aDeviceName = aDeviceName;
-    av_register_all();
-    avcodec_register_all();
-    avdevice_register_all();
+    //c->pix_fmt = STREAM_PIX_FMT;
+
 }
 
 void CameraTest::toggleDone() {
@@ -17,25 +37,57 @@ void CameraTest::toggleDone() {
 }
 
 int CameraTest::init() {
+
+    av_register_all();
+    avcodec_register_all();
+    avdevice_register_all();
+
     ofmt = NULL;
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
 
-    QString fullDName = cDeviceName;// + ":" + aDeviceName;
-    qDebug() << fullDName;
-    AVInputFormat *fmt = av_find_input_format("v4l2");
+    AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
+
+    if(videoInputFormat == NULL)
+    {
+        qDebug() << "Not found videoFormat\n";
+        return -1;
+    }
+
+    AVInputFormat* audioInputFormat = av_find_input_format("alsa");
+
+    if(!(audioInputFormat != NULL))
+    {
+        qDebug() << "Not found audioFormat\n";
+        return -1;
+    }
+
     int ret, i;
 
-    if (avformat_open_input(&ifmt_ctx, fullDName.toUtf8().data(), fmt, NULL) < 0) {
-       fprintf(stderr, "Could not open input file '%s'", fullDName.toUtf8().data());
+
+    if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
+       fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
        return -1;
     }
+
+    if(avformat_open_input(&ifmt_ctx, aDeviceName.toUtf8().data(), audioInputFormat, NULL) < 0)
+    {
+        fprintf(stderr, "Could not open audio input file '%s'", aDeviceName.toUtf8().data());
+        return -1;
+    }
+
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
        fprintf(stderr, "Failed to retrieve input stream information");
        return -1;
     }
-    av_dump_format(ifmt_ctx, 0, fullDName.toUtf8().data(), 0);
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, "test.avi");
+    av_dump_format(ifmt_ctx, 0, NULL, 0);
+
+
+
+
+
+
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
        fprintf(stderr, "Could not create output context\n");
        ret = AVERROR_UNKNOWN;
@@ -43,15 +95,23 @@ int CameraTest::init() {
     }
     ofmt = ofmt_ctx->oformat;
 
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+
+
+    AVCodec* videoCodec = avcodec_find_encoder(ofmt->video_codec);
+    AVCodec* audioCodec = avcodec_find_encoder(ofmt->audio_codec);
+
+    for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
        AVStream *in_stream = ifmt_ctx->streams[i];
        AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
 
-       if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+       if (ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
            videoStream = i;
+           qDebug() << "Fant en videoStream\n";
        }
-       else if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+       else if (ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
            audioStream = i;
+           qDebug() << "Fant en audioStream\n";
+
        }
 
        if (!out_stream) {
@@ -64,18 +124,22 @@ int CameraTest::init() {
            fprintf(stderr, "Failed to copy context from input to output stream codec context\n");
            return -1;
        }
-       out_stream->codecpar->codec_tag = 0;
+       out_stream->codec->codec_tag = 0;
        if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
            out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
-    av_dump_format(ofmt_ctx, 0, "test.avi", 1);
+
+    av_dump_format(ofmt_ctx, 0, filename, 1);
     if (!(ofmt->flags & AVFMT_NOFILE)) {
-       ret = avio_open(&ofmt_ctx->pb, "test.avi", AVIO_FLAG_WRITE);
+       ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
        if (ret < 0) {
-           fprintf(stderr, "Could not open output file '%s'", "test.avi");
+           fprintf(stderr, "Could not open output file '%s'", filename);
            return -1;
        }
     }
+
+    av_dump_format(ofmt_ctx, 0, filename, 1);
+
     ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0) {
        fprintf(stderr, "Error occurred when opening output file\n");
@@ -122,3 +186,4 @@ void CameraTest::grabFrames() {
 
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
+
