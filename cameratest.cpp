@@ -95,10 +95,17 @@ int CameraTest::init() {
     }
     ofmt = ofmt_ctx->oformat;
 
+    ofmt = av_guess_format(NULL, filename, NULL);
 
 
     AVCodec* videoCodec = avcodec_find_encoder(ofmt->video_codec);
     AVCodec* audioCodec = avcodec_find_encoder(ofmt->audio_codec);
+
+    AVCodecContext* cv = avcodec_alloc_context3(videoCodec);
+
+    video_st.enc = cv;
+    AVCodecContext* ca = avcodec_alloc_context3(audioCodec);
+    audio_st.enc = ca;
 
     for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
        AVStream *in_stream = ifmt_ctx->streams[i];
