@@ -123,9 +123,9 @@ int CameraTest::init() {
 
 
             /*Bare her for å løse errors lenger nede, må finne ordentlig løsning på dette*/
-            inputVideoCodecContext->pix_fmt = AV_PIX_FMT_YUYV422;
-            inputVideoCodecContext->width = 1280;
-            inputVideoCodecContext->height = 720;
+            inputVideoCodecContext->pix_fmt = (AVPixelFormat)in_stream->codecpar->format;
+            inputVideoCodecContext->width = in_stream->codecpar->width;
+            inputVideoCodecContext->height = in_stream->codecpar->height;
             /*********************************''*****************************************/
 
 
@@ -139,6 +139,11 @@ int CameraTest::init() {
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
+
+            outputVideoCodecContext->time_base = (AVRational){1, 25};
+            outputVideoCodecContext->framerate = (AVRational){25, 1};
+            outputVideoCodecContext->gop_size = 10;
+
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
 
@@ -219,7 +224,7 @@ void CameraTest::grabFrames() {
     AVPacket* pkt = av_packet_alloc();
     pkt->size = 0;
     pkt->data = NULL;
-    //av_grow_packet(pkt, 5000);
+    //
     if(pkt == NULL)
     {
         qDebug() << "pkt = null\n";
@@ -238,11 +243,13 @@ void CameraTest::grabFrames() {
     scaledFrame->height = outputVideoCodecContext->height;
     scaledFrame->format = outputVideoCodecContext->pix_fmt;
     int ret;
-    while (av_read_frame(ifmt_ctx, pkt) >= 0)
+    while ((ret = av_read_frame(ifmt_ctx, pkt)) >= 0)
     {
 
+        qDebug() << "Av_read_frame: " << ret << "\n";
         if(pkt->stream_index == videoStream)
         {
+            av_grow_packet(pkt, 1842688);
             qDebug() << "kommer inn i videoStreamgreiene\n";
             videoFrame->pkt_size = pkt->size;
             ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
@@ -267,12 +274,19 @@ void CameraTest::grabFrames() {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }
-
+            int num_bytes = avpicture_get_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
+            uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
+            avpicture_fill((AVPicture*)scaledFrame, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
 
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
+                int num_bytes = avpicture_get_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
+                uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
+                avpicture_fill((AVPicture*)scaledFrame, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
+
+
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
                     videoFrame->linesize, 0,
                     inputVideoCodecContext->height,
@@ -286,39 +300,78 @@ void CameraTest::grabFrames() {
                 }
             }
 
+            AVStream *in_stream, *out_stream;
+            in_stream  = ifmt_ctx->streams[pkt->stream_index];
+            out_stream = ofmt_ctx->streams[pkt->stream_index];
+
+
+
+            /* copy packet */
+
+            pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+            pkt->pos = -1;
+
             AVPacket outPacket;
             av_init_packet(&outPacket);
             outPacket.data = NULL;
             outPacket.size = 0;
             ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
             if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
-            avcodec_send_frame(outputVideoCodecContext, scaledFrame);
 
-            avcodec_receive_packet(outputVideoCodecContext, pkt);
+            ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
+            if(ret < 0)
+            {
+                qDebug() << "Error with send frame " << ret <<"\n";
+
+                exit(1);
+            }
+            av_packet_unref(pkt);
+            pkt = av_packet_alloc();
+            pkt->size = 0;
+            pkt->data = NULL;
+
+            if(pkt == NULL)
+            {
+                qDebug() << "pkt = null\n";
+                exit(1);
+            }
+
+            ret = avcodec_receive_packet(outputVideoCodecContext, pkt);
+            if(ret < 0)
+            {
+                qDebug() << "Error with receive packet " << ret <<"\n";
+
+                exit(1);
+            }
+        }
+        else
+        {
+            qDebug() << "Inne i Audio greier\n";
+            AVStream *in_stream, *out_stream;
+            in_stream  = ifmt_ctx->streams[pkt->stream_index];
+            out_stream = ofmt_ctx->streams[pkt->stream_index];
+
+
+
+            /* copy packet */
+
+            pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+            pkt->pos = -1;
         }
 
-        //qDebug() << "Etter hele videoIf greier\n";
-
-        //AVStream *in_stream, *out_stream;
-        //in_stream  = ifmt_ctx->streams[pkt->stream_index];
-        //out_stream = ofmt_ctx->streams[pkt->stream_index];
-
-
-
-        /* copy packet */
-
-        //pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        //pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        //pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
-        //pkt->pos = -1;
-
+        qDebug() << "Før Write Frame\n";
         int ret = av_write_frame(ofmt_ctx, pkt);
+        qDebug() << "Etter Write Frame\n";
         //int ret = av_write_frame(ofmt_ctx, pkt);
         if (ret < 0) {
-        qDebug() << "Error muxing packet";
-        //break;
+            qDebug() << "Error muxing packet";
+            //break;
         }
-        av_free_packet(pkt);
+        av_packet_unref(pkt);
 
         if(done) break;
     }
