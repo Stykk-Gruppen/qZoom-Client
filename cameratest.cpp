@@ -274,17 +274,14 @@ void CameraTest::grabFrames() {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }
-            int num_bytes = avpicture_get_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
-            uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
-            avpicture_fill((AVPicture*)scaledFrame, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
 
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
-                int num_bytes = avpicture_get_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
+                int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
-                avpicture_fill((AVPicture*)scaledFrame, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height);
+                av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
 
                 ret = sws_scale(img_convert_ctx, videoFrame->data,

@@ -33,8 +33,11 @@ extern "C" {
 #include "libavutil/fifo.h"
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
-
 #include "libswresample/swresample.h"
+#include "libavutil/common.h"
+#include "libavutil/pixdesc.h"
+#include "libavutil/imgutils.h"
+
 }
 #include <stdlib.h>
 #include <stdio.h>
