@@ -38,92 +38,117 @@ void CameraTest::toggleDone() {
 
 int CameraTest::init() {
 
+
+    //Registrer div ting
     av_register_all();
     avcodec_register_all();
     avdevice_register_all();
-
     ofmt = NULL;
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
+    int ret, i;
 
+    //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
-
     if(videoInputFormat == NULL)
     {
         qDebug() << "Not found videoFormat\n";
         return -1;
     }
 
+    //Find Audio Input formats
     AVInputFormat* audioInputFormat = av_find_input_format("alsa");
-
     if(!(audioInputFormat != NULL))
     {
         qDebug() << "Not found audioFormat\n";
         return -1;
     }
 
-    int ret, i;
-
-
+    //Open VideoInput
     if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
        fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
        return -1;
     }
 
+    //Open AudioInput
     if(avformat_open_input(&ifmt_ctx, aDeviceName.toUtf8().data(), audioInputFormat, NULL) < 0)
     {
         fprintf(stderr, "Could not open audio input file '%s'", aDeviceName.toUtf8().data());
         return -1;
     }
-
+    //Get stream information
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
        fprintf(stderr, "Failed to retrieve input stream information");
        return -1;
     }
+    //Print stream information
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
+    //Allocate outputStreamFormatContext
     avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
        fprintf(stderr, "Could not create output context\n");
        ret = AVERROR_UNKNOWN;
        return -1;
     }
+    //Set OutputFormat
     ofmt = ofmt_ctx->oformat;
-
+    //Guess format based on filename;
     ofmt = av_guess_format(NULL, filename, NULL);
 
-
+    //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt->video_codec);
     outputAudioCodec = avcodec_find_encoder(ofmt->audio_codec);
 
+    //Allocate CodecContext for outputstreams
     outputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
-    video_st.enc = outputVideoCodecContext;
-    video_st.enc->pix_fmt = AV_PIX_FMT_YUV420P;
     outputAudioCodecContext = avcodec_alloc_context3(outputAudioCodec);
-    audio_st.enc = outputAudioCodecContext;
 
-    for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++) {
+    //Tror ikke disse er nødvendige
+    //video_st.enc = outputVideoCodecContext;
+    //video_st.enc->pix_fmt = AV_PIX_FMT_YUV420P;
+    //audio_st.enc = outputAudioCodecContext;
+
+    //Loop gjennom inputstreams
+    for (i = 0; (unsigned int)i < ifmt_ctx->nb_streams; i++)
+    {
        AVStream *in_stream = ifmt_ctx->streams[i];
-       AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
+       AVStream *out_stream;
 
-       if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-
-           inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
-           inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
-
-           videoStream = i;
-           outputVideoCodecContext->bit_rate = 400000;
-           outputVideoCodecContext->width = in_stream->codecpar->width;
-           outputVideoCodecContext->height = in_stream->codecpar->height;
-           outputVideoCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
-           avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
-           qDebug() << "Fant en videoStream\n";
-           qDebug() << in_stream->codec->pix_fmt;
-           qDebug() << cv->width;
-           qDebug() << cv->pix_fmt;
+       //Hvis instream er Video
+        if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
+            inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
+            inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
 
 
-           img_convert_ctx = sws_getContext(
+            /*Bare her for å løse errors lenger nede, må finne ordentlig løsning på dette*/
+            inputVideoCodecContext->pix_fmt = AV_PIX_FMT_YUYV422;
+            inputVideoCodecContext->width = 1280;
+            inputVideoCodecContext->height = 720;
+            /*********************************''*****************************************/
+
+
+            //Lager ny outputStream
+            //Tidligere ble denne laget basert på inputvideocodec, vet ikke hva som er best.
+            out_stream = avformat_new_stream(ofmt_ctx, outputVideoCodec);
+            //Denne trenger vi senere.
+            videoStream = i;
+            //Setter div parametere. Kanskje vi må sette fler?
+            outputVideoCodecContext->bit_rate = 400000;
+            outputVideoCodecContext->width = in_stream->codecpar->width;
+            outputVideoCodecContext->height = in_stream->codecpar->height;
+            outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
+            //Kopierer parametere inn i out_stream
+            avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
+
+            qDebug() << "Fant en videoStream\n";
+            qDebug() << in_stream->codec->pix_fmt;
+            qDebug() << outputVideoCodecContext->width;
+            qDebug() << outputVideoCodecContext->pix_fmt;
+
+            //Sett convert context som brukes ved frame conversion senere.
+            img_convert_ctx = sws_getContext(
                         in_stream->codecpar->width,
                        in_stream->codecpar->height,
                        in_stream->codec->pix_fmt,
@@ -132,66 +157,57 @@ int CameraTest::init() {
                        outputVideoCodecContext->pix_fmt,
                        SWS_BICUBIC,
                        NULL, NULL, NULL);
-       }
-       else if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-           inputAudioCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
-           inputAudioCodecContext = avcodec_alloc_context3(inputAudioCodec);
+        }
+        //Hvis inputstream er audio
+        else /*if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) */{
+            //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
+            inputAudioCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
+            inputAudioCodecContext = avcodec_alloc_context3(inputAudioCodec);
+            //Lager ny outstream basert på outputCodec vi gjettet tidligere
+            out_stream = avformat_new_stream(ofmt_ctx, outputAudioCodec);
+            //Trenger denne senere.
+            audioStream = i;
+            //Setter parametere
+            outputAudioCodecContext->sample_rate = 48000;
+            outputAudioCodecContext->bit_rate = 96000;
+            outputAudioCodecContext->channels = 2;
+            outputAudioCodecContext->channel_layout = av_get_default_channel_layout(2);
+            outputAudioCodecContext->frame_size = in_stream->codecpar->frame_size;
+            /* Set the sample rate for the container. */
+            out_stream->time_base.den = 48000;
+            out_stream->time_base.num = 1;
+            //Kopierer parametere inn i out_stream
+            avcodec_parameters_from_context(out_stream->codecpar, outputAudioCodecContext);
+            //avcodec_parameters_copy(out_stream->codecpar,in_stream->codecpar);
+            qDebug() << "Fant en audioStream\n";
+        }
 
+        if (!out_stream) {
+            fprintf(stderr, "Failed allocating output stream\n");
+            ret = AVERROR_UNKNOWN;
+            return -1;
+        }
 
-           audioStream = i;
+        out_stream->codecpar->codec_tag = 0;
+        if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
+            out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-           outputAudioCodecContext->sample_rate = 48000;
-           outputAudioCodecContext->bit_rate = 96000;
-           outputAudioCodecContext->channels = 2;
-           outputAudioCodecContext->channel_layout = av_get_default_channel_layout(2);
-           outputAudioCodecContext->frame_size = in_stream->codecpar->frame_size;
-
-           /* Set the sample rate for the container. */
-           out_stream->time_base.den = 48000;
-           out_stream->time_base.num = 1;
-
-           avcodec_parameters_from_context(out_stream->codecpar, outputAudioCodecContext);
-           //avcodec_parameters_copy(out_stream->codecpar,in_stream->codecpar);
-           qDebug() << "Fant en audioStream\n";
-       }
-
-       if (!out_stream) {
-           fprintf(stderr, "Failed allocating output stream\n");
-           ret = AVERROR_UNKNOWN;
-           return -1;
-       }
-
-       //ret = copy_stream_props(out_stream,in_stream);
-       //ret = avcodec_copy_context(out_stream->codecpar, in_stream->codecpar);
-       /*if (ret < 0) {
-           fprintf(stderr, "Failed to copy context from input to output stream codec context\n");
-           return -1;
-       }
-       */
-
-       out_stream->codec->codec_tag = 0;
-       if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
-           out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
+    if (!(ofmt->flags & AVFMT_NOFILE))
+    {
+        ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
 
-    av_dump_format(ofmt_ctx, 0, filename, 1);
-    if (!(ofmt->flags & AVFMT_NOFILE)) {
-       ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
-       if (ret < 0) {
-           fprintf(stderr, "Could not open output file '%s'", filename);
-           return -1;
-       }
+        if (ret < 0) {
+            fprintf(stderr, "Could not open output file '%s'", filename);
+            return -1;
+        }
     }
-
-    //ofmt_ctx->streams[videoStream]->codec->pix_fmt = AV_PIX_FMT_YUV420P;
-
-
     av_dump_format(ofmt_ctx, 0, filename, 1);
 
     ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0) {
-       fprintf(stderr, "Error occurred when opening output file\n");
-       return -1;
+    fprintf(stderr, "Error occurred when opening output file\n");
+    return -1;
     }
 
     QtConcurrent::run(this, &CameraTest::grabFrames);
@@ -201,6 +217,9 @@ int CameraTest::init() {
 
 void CameraTest::grabFrames() {
     AVPacket* pkt = av_packet_alloc();
+    pkt->size = 0;
+    pkt->data = NULL;
+    //av_grow_packet(pkt, 5000);
     if(pkt == NULL)
     {
         qDebug() << "pkt = null\n";
@@ -208,42 +227,62 @@ void CameraTest::grabFrames() {
     }
     videoFrame = av_frame_alloc();
     videoFrame->data[0] = NULL;
-    videoFrame->width = ifmt_ctx->streams[videoStream]->codec->width;
-    videoFrame->height = ifmt_ctx->streams[videoStream]->codec->height;
-    videoFrame->format = ifmt_ctx->streams[videoStream]->codec->pix_fmt;
 
+    videoFrame->width = inputVideoCodecContext->width;
+    videoFrame->height = inputVideoCodecContext->height;
+    videoFrame->format = inputVideoCodecContext->pix_fmt;
+
+    scaledFrame = av_frame_alloc();
+    scaledFrame->data[0] = NULL;
+    scaledFrame->width = outputVideoCodecContext->width;
+    scaledFrame->height = outputVideoCodecContext->height;
+    scaledFrame->format = outputVideoCodecContext->pix_fmt;
     int ret;
     while (av_read_frame(ifmt_ctx, pkt) >= 0)
     {
 
-        /*if(pkt->stream_index == videoStream)
+        if(pkt->stream_index == videoStream)
         {
-            scaledFrame = av_frame_alloc();
             qDebug() << "kommer inn i videoStreamgreiene\n";
+            videoFrame->pkt_size = pkt->size;
+            ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
+            if(ret < 0)
+            {
+                qDebug() << "Input Avcodec open failed: " << ret << "\n";
+                exit(1);
+            }
+            qDebug() << "Forbi avodec_open\n";
 
+            ret = avcodec_send_packet(inputVideoCodecContext, pkt);
+            if(ret < 0)
+            {
+                qDebug() << "Send packet error";
+                exit(1);
+            }
+            qDebug() << "Forbi send packet\n";
 
-            avcodec_open2(inputVideoCodecContext, inputVideoCodec, &opt);
-
-            ret = avcodec_send_packet(ifmt_ctx->streams[videoStream]->codec, pkt);
-            if(ret < 0) qDebug() << "Send packet error";
-            ret = avcodec_receive_frame(ifmt_ctx->streams[videoStream]->codec, videoFrame);
-            if(ret < 0) qDebug() << "Recieve frame error";
+            ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
+            if(ret < 0)
+            {
+                qDebug() << "Recieve frame error";
+                exit(1);
+            }
 
 
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
-            qDebug() << "Etter decode video\n";
-            if (ifmt_ctx->streams[videoStream]->codec->pix_fmt != AV_PIX_FMT_YUV420P)
+            qDebug() << "Etter recieve frame\n";
+            if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
-                videoFrame->linesize, 0,
-                ifmt_ctx->streams[videoStream]->codec->height,
-                scaledFrame->data, scaledFrame->linesize);
+                    videoFrame->linesize, 0,
+                    inputVideoCodecContext->height,
+                    scaledFrame->data, scaledFrame->linesize);
                 qDebug() << "Etter swsScale\n";
 
                 if(ret < 0)
                 {
-                 qDebug() << "Error with scale " << ret <<"\n";
-                 exit(1);
+                    qDebug() << "Error with scale " << ret <<"\n";
+                    exit(1);
                 }
             }
 
@@ -251,11 +290,12 @@ void CameraTest::grabFrames() {
             av_init_packet(&outPacket);
             outPacket.data = NULL;
             outPacket.size = 0;
-
+            ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
+            if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
             avcodec_send_frame(outputVideoCodecContext, scaledFrame);
 
             avcodec_receive_packet(outputVideoCodecContext, pkt);
-        }*/
+        }
 
         //qDebug() << "Etter hele videoIf greier\n";
 
@@ -275,8 +315,8 @@ void CameraTest::grabFrames() {
         int ret = av_write_frame(ofmt_ctx, pkt);
         //int ret = av_write_frame(ofmt_ctx, pkt);
         if (ret < 0) {
-           qDebug() << "Error muxing packet";
-           //break;
+        qDebug() << "Error muxing packet";
+        //break;
         }
         av_free_packet(pkt);
 
@@ -291,11 +331,11 @@ void CameraTest::grabFrames() {
     avformat_close_input(&ifmt_ctx);
     /* close output */
     if (ofmt_ctx && !(ofmt->flags & AVFMT_NOFILE))
-       avio_close(ofmt_ctx->pb);
+    avio_close(ofmt_ctx->pb);
     avformat_free_context(ofmt_ctx);
     if (ret < 0 && ret != AVERROR_EOF) {
-        //return -1;
-       //fprintf(stderr, "Error occurred: %s\n", av_err2str(ret));
+    //return -1;
+    //fprintf(stderr, "Error occurred: %s\n", av_err2str(ret));
     }
 
     qDebug() << "Ferdig med grabFrames!!!\n";
