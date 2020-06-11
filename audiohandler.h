@@ -53,8 +53,31 @@ extern "C" {
 class AudioHandler
 {
 public:
-    AudioHandler();
+    AudioHandler(AVFormatContext*,char*);
     int main();
+private:
+    void cleanup();
+    int openInputFile();
+    char* filename;
+    int openOutputFile();
+    void initPacket(AVPacket *packet);
+    int loadEncodeAndWrite();
+    int encodeAudioFrame(AVFrame*,int*);
+    int initOutputFrame(AVFrame **,int);
+    int readDecodeConvertAndStore(int *);
+    int convertSamples(const uint8_t **,uint8_t **, const int);
+    int addSamplesToFifo(uint8_t **,const int );
+    int initConvertedSamples(uint8_t ***,int);
+    int decodeAudioFrame(AVFrame *,int *, int *);
+    int writeOutputFileHeader();
+    int initFifo();
+    int initResampler();
+    AVFormatContext *inputFormatContext;
+    AVFormatContext *outputFormatContext;
+    AVCodecContext *inputCodecContext;
+    AVCodecContext *outputCodecContext;
+    SwrContext *resampleContext;
+    AVAudioFifo *fifo;
 };
 
 #endif // AUDIOHANDLER_H

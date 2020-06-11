@@ -54,10 +54,7 @@ static int output_video_frame(AVFrame *frame)
                   pix_fmt, width, height);
 
     /* write to rawvideo file */
-    printf("about to fwrite\n");
     fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
-    printf("after fwrite\n");
-    printf("about to return\n");
     return 0;
 }
 
@@ -108,23 +105,19 @@ static int decode_packet(AVCodecContext *dec, const AVPacket *pkt)
         // write the frame data to output file
         if (dec->codec->type == AVMEDIA_TYPE_VIDEO){
             ret = output_video_frame(frame);
-            printf("return from video frame");
         }
         else{
             ret = output_audio_frame(frame);
-            printf("return from audio frame");
         }
 
         av_frame_unref(frame);
         if (ret < 0)
-            printf("return decode_packet");
             return ret;
     }
-    printf("return decode_packet");
     return 0;
 }
 
-static int open_codec_context(int *stream_idx,
+static int openCodedContext(int *stream_idx,
                               AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type)
 {
     int ret, stream_index;
@@ -208,6 +201,7 @@ static int get_format_from_sample_fmt(const char **fmt,
 int filetest::main()
 {
     int testCount = 0;
+
     int ret = 0;
     av_register_all();
     avcodec_register_all();
@@ -228,13 +222,13 @@ int filetest::main()
         return -1;
     }
     //Open VideoInput
-    if (avformat_open_input(&fmt_ctx, "video=/dev/video0", videoInputFormat, NULL) < 0) {
+    if (avformat_open_input(&fmt_ctx, "/dev/video0", videoInputFormat, NULL) < 0) {
        fprintf(stderr, "Could not open input file '%s'", "/dev/video0");
        return -1;
     }
 
     //Find Audio Input formats
-    /*AVInputFormat* audioInputFormat = av_find_input_format("alsa");
+   /* AVInputFormat* audioInputFormat = av_find_input_format("alsa");
     if(!(audioInputFormat != NULL))
     {
         fprintf(stderr,"Not found audioFormat\n");
@@ -260,8 +254,9 @@ int filetest::main()
         exit(1);
     }
 
-    if (open_codec_context(&video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
+    if (openCodedContext(&video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
         video_stream = fmt_ctx->streams[video_stream_idx];
+       // qDebug() << "Opened video codec context";
 
         video_dst_file = fopen(video_dst_filename, "wb");
         if (!video_dst_file) {
@@ -283,8 +278,9 @@ int filetest::main()
         video_dst_bufsize = ret;
     }
 
-    if (open_codec_context(&audio_stream_idx, &audio_dec_ctx, fmt_ctx, AVMEDIA_TYPE_AUDIO) >= 0) {
+    if (openCodedContext(&audio_stream_idx, &audio_dec_ctx, fmt_ctx, AVMEDIA_TYPE_AUDIO) >= 0) {
         audio_stream = fmt_ctx->streams[audio_stream_idx];
+        //qDebug() << "Opened audio codec context";
         audio_dst_file = fopen(audio_dst_filename, "wb");
         if (!audio_dst_file) {
             fprintf(stderr, "Could not open destination file %s\n", audio_dst_filename);
@@ -295,6 +291,7 @@ int filetest::main()
 
     /* dump input information to stderr */
     av_dump_format(fmt_ctx, 0, src_filename, 0);
+    //exit(1);
 
     if (!audio_stream && !video_stream) {
         fprintf(stderr, "Could not find audio or video stream in the input, aborting\n");
@@ -320,19 +317,22 @@ int filetest::main()
         printf("Demuxing audio from file '%s' into '%s'\n", src_filename, audio_dst_filename);
 
     /* read frames from the file */
-
-    while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < 1000 ) {
+   while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < 100) {
         // check if the packet belongs to a stream we are interested in, otherwise
         // skip it
-        testCount++;
-        if (pkt.stream_index == video_stream_idx)
+        if (pkt.stream_index == video_stream_idx){
             ret = decode_packet(video_dec_ctx, &pkt);
-        else if (pkt.stream_index == audio_stream_idx)
+        }
+        else if (pkt.stream_index == audio_stream_idx){
             ret = decode_packet(audio_dec_ctx, &pkt);
+        }
+        testCount++;
         av_packet_unref(&pkt);
         if (ret < 0)
             break;
     }
+
+
 
     /* flush the decoders */
     if (video_dec_ctx)

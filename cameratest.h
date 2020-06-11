@@ -63,7 +63,7 @@ class CameraTest : public QObject
             float t, tincr, tincr2;
 
             struct SwsContext *sws_ctx;
-            struct SwrContext *swr_ctx;
+
         } OutputStream;
 
 public:
@@ -99,6 +99,7 @@ public:
     bool done;
     const char* filename = "nyTest.mp4";
     struct SwsContext* img_convert_ctx;
+    struct SwrContext* audioConvertContext;
     Q_INVOKABLE QVariantList getAudioInputDevices();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
 
