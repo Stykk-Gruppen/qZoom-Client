@@ -85,7 +85,8 @@ public:
     AVCodecContext* outputAudioCodecContext;
     AVCodec* inputVideoCodec;
     AVCodec* inputAudioCodec;
-
+    int skipped_frames = 0;
+    int64_t previous_pts = 0;
     AVCodec* outputVideoCodec;
     AVCodec* outputAudioCodec;
 

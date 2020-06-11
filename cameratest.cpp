@@ -140,9 +140,10 @@ int CameraTest::init() {
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
 
-            outputVideoCodecContext->time_base = (AVRational){1, 25};
-            outputVideoCodecContext->framerate = (AVRational){25, 1};
-            outputVideoCodecContext->gop_size = 10;
+            outputVideoCodecContext->time_base = (AVRational){1, 60};
+            outputVideoCodecContext->framerate = (AVRational){60, 1};
+            outputVideoCodecContext->gop_size = 30;
+            outputVideoCodecContext->max_b_frames = 1;
 
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
@@ -275,6 +276,9 @@ void CameraTest::grabFrames() {
                 exit(1);
             }
 
+            videoFrame->pts = previous_pts + 1 + skipped_frames;
+            previous_pts = videoFrame->pts;
+
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
@@ -283,7 +287,7 @@ void CameraTest::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
-
+                scaledFrame->pts = videoFrame->best_effort_timestamp;
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
                     videoFrame->linesize, 0,
                     inputVideoCodecContext->height,
@@ -297,23 +301,15 @@ void CameraTest::grabFrames() {
                 }
             }
 
-            AVStream *in_stream, *out_stream;
-            in_stream  = ifmt_ctx->streams[pkt->stream_index];
-            out_stream = ofmt_ctx->streams[pkt->stream_index];
 
 
 
-            /* copy packet */
 
-            pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
-            pkt->pos = -1;
 
-            AVPacket outPacket;
-            av_init_packet(&outPacket);
-            outPacket.data = NULL;
-            outPacket.size = 0;
+            AVPacket* outPacket = av_packet_alloc();
+
+            outPacket->data = NULL;
+            outPacket->size = 0;
             ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
             if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
 
@@ -324,7 +320,7 @@ void CameraTest::grabFrames() {
 
                 exit(1);
             }
-            av_packet_unref(pkt);
+            /*av_packet_unref(pkt);
             pkt = av_packet_alloc();
             pkt->size = 0;
             pkt->data = NULL;
@@ -334,13 +330,52 @@ void CameraTest::grabFrames() {
                 qDebug() << "pkt = null\n";
                 exit(1);
             }
-
-            ret = avcodec_receive_packet(outputVideoCodecContext, pkt);
+            */
+            ret = avcodec_receive_packet(outputVideoCodecContext, outPacket);
             if(ret < 0)
             {
                 qDebug() << "Error with receive packet " << ret <<"\n";
+                skipped_frames++;
+                continue;
+            }
+            else
+            {
+                skipped_frames--;
 
-                exit(1);
+                AVStream *in_stream, *out_stream;
+                in_stream  = ifmt_ctx->streams[pkt->stream_index];
+                out_stream = ofmt_ctx->streams[pkt->stream_index];
+                out_stream->avg_frame_rate = (AVRational){60, 1};
+                out_stream->time_base = (AVRational){1, 60};
+
+                out_stream->codec->gop_size = 30;
+                out_stream->codec->max_b_frames = 1;
+
+
+                AVRational encoderTimebase{1, 60};
+                AVRational muxerTimebase{1, 1000};
+
+
+
+                /* copy packet */
+
+                pkt->pts = av_rescale_q_rnd(pkt->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                pkt->dts = av_rescale_q_rnd(pkt->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                pkt->duration = av_rescale_q(pkt->duration, encoderTimebase, muxerTimebase);
+                pkt->pos = -1;
+
+                qDebug() << "Før Write Frame\n";
+                int ret = av_write_frame(ofmt_ctx, outPacket);
+                qDebug() << "Etter Write Frame\n";
+                //int ret = av_write_frame(ofmt_ctx, pkt);
+                if (ret < 0) {
+                    qDebug() << "Error muxing packet";
+                    //break;
+                }
+                av_packet_unref(pkt);
+                av_packet_unref(outPacket);
+                //av_packet_free(&pkt);
+                //av_packet_free(&outPacket);
             }
         }
         else
@@ -350,6 +385,11 @@ void CameraTest::grabFrames() {
             in_stream  = ifmt_ctx->streams[pkt->stream_index];
             out_stream = ofmt_ctx->streams[pkt->stream_index];
 
+            out_stream->avg_frame_rate = (AVRational){60, 1};
+            out_stream->time_base = (AVRational){1, 60};
+
+            out_stream->codec->gop_size = 30;
+            out_stream->codec->max_b_frames = 1;
 
 
             /* copy packet */
@@ -358,19 +398,23 @@ void CameraTest::grabFrames() {
             pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
             pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
             pkt->pos = -1;
+
+            qDebug() << "Før Write Frame\n";
+            int ret = av_write_frame(ofmt_ctx, pkt);
+            qDebug() << "Etter Write Frame\n";
+            //int ret = av_write_frame(ofmt_ctx, pkt);
+            if (ret < 0) {
+                qDebug() << "Error muxing packet";
+                //break;
+            }
+            av_packet_unref(pkt);
         }
 
-        qDebug() << "Før Write Frame\n";
-        int ret = av_write_frame(ofmt_ctx, pkt);
-        qDebug() << "Etter Write Frame\n";
-        //int ret = av_write_frame(ofmt_ctx, pkt);
-        if (ret < 0) {
-            qDebug() << "Error muxing packet";
-            //break;
-        }
-        av_packet_unref(pkt);
 
-        if(done) break;
+        //if(done) break;
+        static int count = 0;
+        if(count > 300) break;
+        count++;
     }
 
 
