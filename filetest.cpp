@@ -7,179 +7,58 @@ filetest::filetest()
 {
 
 }
-AVStream *out_stream;
+static AVStream *out_stream;
 static AVFormatContext *fmt_ctx = NULL;
 static AVFormatContext *ofmt_ctx = NULL;
-static AVOutputFormat *ofmt = NULL;
-static AVCodecContext *video_dec_ctx = NULL, *audio_dec_ctx;
-static int width, height;
-static enum AVPixelFormat pix_fmt;
+static AVCodecContext *video_dec_ctx = NULL;
 static AVStream *in_stream = NULL;
 static const char *src_filename = NULL;
 static const char *dst_filename = "final.mp4";
 
-static uint8_t *video_dst_data[4] = {NULL};
-static int      video_dst_linesize[4];
-static int video_dst_bufsize;
 
 static int video_stream_idx = -1;
 static AVFrame *frame = NULL;
 static AVPacket pkt;
-static int video_frame_count = 0;
-static int output_video_frame(AVFrame *frame)
-{
-    if (frame->width != width || frame->height != height ||
-            frame->format != pix_fmt) {
-        /* To handle this change, one could call av_image_alloc again and
-         * decode the following frames into another rawvideo file. */
-        fprintf(stderr, "Error: Width, height and pixel format have to be "
-                        "constant in a rawvideo file, but the width, height or "
-                        "pixel format of the input video changed:\n"
-                        "old: width = %d, height = %d, format = %s\n"
-                        "new: width = %d, height = %d, format = %s\n",
-                width, height, av_get_pix_fmt_name(pix_fmt),
-                frame->width, frame->height,
-                av_get_pix_fmt_name((AVPixelFormat)frame->format));
-        return -1;
-    }
-
-    printf("video_frame n:%d coded_n:%d\n",
-           video_frame_count++, frame->coded_picture_number);
-
-    /* copy decoded frame to destination buffer:
-     * this is required since rawvideo expects non aligned data */
-    av_image_copy(video_dst_data, video_dst_linesize,
-                  (const uint8_t **)(frame->data), frame->linesize,
-                  pix_fmt, width, height);
-
-    /* write to rawvideo file */
-    //fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
-    return 0;
-}
 
 
-static int decode_packet(AVCodecContext *dec, AVPacket *pkt)
+
+static int rescaleAndWrite(AVPacket *pkt)
 {
     int ret = 0;
 
-    // submit the packet to the decoder
-    ret = avcodec_send_packet(dec, pkt);
-    if (ret < 0) {
-        fprintf(stderr, "Error submitting a packet for decoding");
+
+    /*
+     *
+     *
+     * Plass til noe sws_scale kanskje?
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
+
+
+    pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+    pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+    pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
+    pkt->pos = -1;
+
+    ret = av_interleaved_write_frame(ofmt_ctx, pkt);
+
+    if (ret < 0){
         return ret;
-    }
-
-    // get all the available frames from the decoder
-    while (ret >= 0) {
-        ret = avcodec_receive_frame(dec, frame);
-        if (ret < 0) {
-            // those two return values are special and mean there is no output
-            // frame available, but there were no errors during decoding
-            if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN))
-                return 0;
-
-            fprintf(stderr, "Error during decoding");
-            return ret;
-        }
-
-        // write the frame data to output file
-        // ret = output_video_frame(frame);
-        /* copy packet */
-        pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-        pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
-        pkt->pos = -1;
-      //  log_packet(ofmt_ctx, &pkt, "out");
-
-        ret = av_interleaved_write_frame(ofmt_ctx, pkt);
-
-        av_frame_unref(frame);
-        if (ret < 0)
-            return ret;
     }
     return 0;
 }
 
-static int openCodedContext(int *stream_idx,
-                            AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type)
-{
-    int ret, stream_index;
-    AVStream *st;
-    AVCodec *dec = NULL;
-    AVDictionary *opts = NULL;
 
-    ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
-    if (ret < 0) {
-        fprintf(stderr, "Could not find %s stream in input file '%s'\n",
-                av_get_media_type_string(type), src_filename);
-        return ret;
-    } else {
-        stream_index = ret;
-        st = fmt_ctx->streams[stream_index];
 
-        /* find decoder for the stream */
-        dec = avcodec_find_decoder(st->codecpar->codec_id);
-        if (!dec) {
-            fprintf(stderr, "Failed to find %s codec\n",
-                    av_get_media_type_string(type));
-            return AVERROR(EINVAL);
-        }
 
-        /* Allocate a codec context for the decoder */
-        *dec_ctx = avcodec_alloc_context3(dec);
-        if (!*dec_ctx) {
-            fprintf(stderr, "Failed to allocate the %s codec context\n",
-                    av_get_media_type_string(type));
-            return AVERROR(ENOMEM);
-        }
 
-        /* Copy codec parameters from input stream to output codec context */
-        if ((ret = avcodec_parameters_to_context(*dec_ctx, st->codecpar)) < 0) {
-            fprintf(stderr, "Failed to copy %s codec parameters to decoder context\n",
-                    av_get_media_type_string(type));
-            return ret;
-        }
 
-        /* Init the decoders */
-        if ((ret = avcodec_open2(*dec_ctx, dec, &opts)) < 0) {
-            fprintf(stderr, "Failed to open %s codec\n",
-                    av_get_media_type_string(type));
-            return ret;
-        }
-        *stream_idx = stream_index;
-    }
-
-    return 0;
-}
-
-static int get_format_from_sample_fmt(const char **fmt,
-                                      enum AVSampleFormat sample_fmt)
-{
-    int i;
-    struct sample_fmt_entry {
-        enum AVSampleFormat sample_fmt; const char *fmt_be, *fmt_le;
-    } sample_fmt_entries[] = {
-    { AV_SAMPLE_FMT_U8,  "u8",    "u8"    },
-    { AV_SAMPLE_FMT_S16, "s16be", "s16le" },
-    { AV_SAMPLE_FMT_S32, "s32be", "s32le" },
-    { AV_SAMPLE_FMT_FLT, "f32be", "f32le" },
-    { AV_SAMPLE_FMT_DBL, "f64be", "f64le" },
-};
-    *fmt = NULL;
-
-    for (i = 0; i < FF_ARRAY_ELEMS(sample_fmt_entries); i++) {
-        struct sample_fmt_entry *entry = &sample_fmt_entries[i];
-        if (sample_fmt == entry->sample_fmt) {
-            *fmt = AV_NE(entry->fmt_be, entry->fmt_le);
-            return 0;
-        }
-    }
-
-    fprintf(stderr,
-            "sample format %s is not supported as output format\n",
-            av_get_sample_fmt_name(sample_fmt));
-    return -1;
-}
 
 int filetest::main()
 {
@@ -217,26 +96,77 @@ int filetest::main()
         ret = AVERROR_UNKNOWN;
         goto end;
     }
-    if (openCodedContext(&video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) >= 0) {
-        in_stream = fmt_ctx->streams[video_stream_idx];
-        // qDebug() << "Opened video codec context";
-        out_stream = avformat_new_stream(ofmt_ctx, NULL);
-        ret = avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
-        ret = avio_open(&ofmt_ctx->pb, dst_filename, AVIO_FLAG_WRITE);
-        ret = avformat_write_header(ofmt_ctx, NULL);
 
-        /* allocate image where the decoded image will be put */
-        width = video_dec_ctx->width;
-        height = video_dec_ctx->height;
-        pix_fmt = video_dec_ctx->pix_fmt;
-        ret = av_image_alloc(video_dst_data, video_dst_linesize,
-                             width, height, pix_fmt, 1);
-        if (ret < 0) {
-            fprintf(stderr, "Could not allocate raw video buffer\n");
-            goto end;
+    ret = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    if (ret < 0) {
+        fprintf(stderr, "Could not find %s stream in input file '%s'\n",
+                av_get_media_type_string(AVMEDIA_TYPE_VIDEO), src_filename);
+        return ret;
+    } else {
+        AVCodec *dec = NULL;
+        int stream_index = ret;
+        AVStream *st = fmt_ctx->streams[stream_index];
+
+        /* find decoder for the stream */
+        dec = avcodec_find_decoder(st->codecpar->codec_id);
+        if (!dec) {
+            fprintf(stderr, "Failed to find %s codec\n",
+                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+            return AVERROR(EINVAL);
         }
-        video_dst_bufsize = ret;
+
+        /* Allocate a codec context for the decoder */
+        video_dec_ctx = avcodec_alloc_context3(dec);
+        if (!video_dec_ctx) {
+            fprintf(stderr, "Failed to allocate the %s codec context\n",
+                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+            return AVERROR(ENOMEM);
+        }
+
+        /* Copy codec parameters from input stream to output codec context */
+        if ((ret = avcodec_parameters_to_context(video_dec_ctx, st->codecpar)) < 0) {
+            fprintf(stderr, "Failed to copy %s codec parameters to decoder context\n",
+                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+            return ret;
+        }
+
+        /* Init the decoders */
+        if ((ret = avcodec_open2(video_dec_ctx, dec, NULL)) < 0) {
+            fprintf(stderr, "Failed to open %s codec\n",
+                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+            return ret;
+        }
+        video_stream_idx = stream_index;
     }
+
+
+    in_stream = fmt_ctx->streams[video_stream_idx];
+    // qDebug() << "Opened video codec context";
+
+    //Kopiert fra remuxing.c
+    out_stream = avformat_new_stream(ofmt_ctx, NULL);
+    if (!out_stream) {
+        fprintf(stderr, "Failed allocating output stream\n");
+        exit(1);
+    }
+    ret = avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
+    if (ret < 0) {
+        fprintf(stderr, "Failed to copy codec parameters\n");
+        exit(1);
+    }
+    ret = avio_open(&ofmt_ctx->pb, dst_filename, AVIO_FLAG_WRITE);
+    if (ret < 0) {
+        fprintf(stderr, "Could not open output file '%s'", dst_filename);
+        exit(1);
+    }
+    ret = avformat_write_header(ofmt_ctx, NULL);
+    if (ret < 0) {
+        fprintf(stderr, "Error occurred when opening output file\n");
+        exit(1);
+    }
+
+
+
 
     /* dump input information to stderr */
     av_dump_format(fmt_ctx, 0, src_filename, 0);
@@ -265,35 +195,18 @@ int filetest::main()
         // check if the packet belongs to a stream we are interested in, otherwise
         // skip it
         if (pkt.stream_index == video_stream_idx){
-            ret = decode_packet(video_dec_ctx, &pkt);
+            ret = rescaleAndWrite(&pkt);
         }
         testCount++;
         av_packet_unref(&pkt);
         if (ret < 0)
             break;
     }
-
-
     av_write_trailer(ofmt_ctx);
-    /* flush the decoders */
-    if (video_dec_ctx){
-        decode_packet(video_dec_ctx, NULL);
-    }
-    printf("Demuxing succeeded.\n");
-
-    if (in_stream) {
-        printf("Play the output video file with the command:\n"
-               "ffplay -f rawvideo -pix_fmt %s -video_size %dx%d %s\n",
-               av_get_pix_fmt_name(pix_fmt), width, height,
-               dst_filename);
-    }
-
 end:
     avcodec_free_context(&video_dec_ctx);
-    avcodec_free_context(&audio_dec_ctx);
     avformat_close_input(&fmt_ctx);
     av_frame_free(&frame);
-    av_free(video_dst_data[0]);
 
     return ret < 0;
 }
