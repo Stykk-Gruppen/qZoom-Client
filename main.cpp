@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
     pureAudio->main();*/
     QScopedPointer<filetest> fil(new filetest);
     fil->main();
-    //fil->re();
     //cameraTest->init();
 
     return app.exec();

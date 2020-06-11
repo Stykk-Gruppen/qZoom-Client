@@ -53,7 +53,6 @@ class filetest
 public:
     filetest();
     int main();
-    int re();
 };
 
 #endif // FILETEST_H
