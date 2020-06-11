@@ -22,42 +22,6 @@ static AVPacket pkt;
 
 
 
-static int rescaleAndWrite(AVPacket *pkt)
-{
-    int ret = 0;
-
-
-    /*
-     *
-     *
-     * Plass til noe sws_scale kanskje?
-     *
-     *
-     *
-     *
-     *
-     *
-     */
-
-
-
-    pkt->pts = av_rescale_q_rnd(pkt->pts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-    pkt->dts = av_rescale_q_rnd(pkt->dts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-    pkt->duration = av_rescale_q(pkt->duration, in_stream->time_base, out_stream->time_base);
-    pkt->pos = -1;
-
-    ret = av_interleaved_write_frame(ofmt_ctx, pkt);
-
-    if (ret < 0){
-        return ret;
-    }
-    return 0;
-}
-
-
-
-
-
 
 
 int filetest::main()
@@ -190,14 +154,22 @@ int filetest::main()
     pkt.data = NULL;
     pkt.size = 0;
 
-    /* read frames from the file */
+    /* read x frames from the stream */
     while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < 100) {
         // check if the packet belongs to a stream we are interested in, otherwise
         // skip it
         if (pkt.stream_index == video_stream_idx){
-            ret = rescaleAndWrite(&pkt);
+            testCount++;
+            pkt.pts = av_rescale_q_rnd(pkt.pts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt.dts = av_rescale_q_rnd(pkt.dts, in_stream->time_base, out_stream->time_base, (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            pkt.duration = av_rescale_q(pkt.duration, in_stream->time_base, out_stream->time_base);
+            pkt.pos = -1;
+            ret = av_interleaved_write_frame(ofmt_ctx, &pkt);
+            if (ret < 0) {
+                fprintf(stderr, "Error muxing packet\n");
+                exit(1);
+            }
         }
-        testCount++;
         av_packet_unref(&pkt);
         if (ret < 0)
             break;
