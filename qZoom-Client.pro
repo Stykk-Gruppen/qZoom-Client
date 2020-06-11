@@ -17,6 +17,7 @@ SOURCES += \
         audiohandler.cpp \
         camerahandler.cpp \
         cameratest.cpp \
+        filetest.cpp \
         main.cpp \
         videohandler.cpp
 
@@ -41,4 +42,5 @@ HEADERS += \
     audiohandler.h \
     camerahandler.h \
     cameratest.h \
+    filetest.h \
     videohandler.h

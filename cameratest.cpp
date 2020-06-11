@@ -49,12 +49,12 @@ int CameraTest::init() {
     int ret, i;
 
     //Find input video formats
-    AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
+    /*AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
     if(videoInputFormat == NULL)
     {
         qDebug() << "Not found videoFormat\n";
         return -1;
-    }
+    }*/
 
     //Find Audio Input formats
     AVInputFormat* audioInputFormat = av_find_input_format("alsa");
@@ -65,10 +65,10 @@ int CameraTest::init() {
     }
 
     //Open VideoInput
-    if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
+    /*if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
        fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
        return -1;
-    }
+    }*/
 
     //Open AudioInput
     if(avformat_open_input(&ifmt_ctx, aDeviceName.toUtf8().data(), audioInputFormat, NULL) < 0)
@@ -250,9 +250,9 @@ void CameraTest::grabFrames() {
         qDebug() << "Av_read_frame: " << ret << "\n";
         if(pkt->stream_index == videoStream)
         {
-            av_grow_packet(pkt, 1842688);
+            //av_grow_packet(pkt, 1842688);
             qDebug() << "kommer inn i videoStreamgreiene\n";
-            videoFrame->pkt_size = pkt->size;
+            //videoFrame->pkt_size = pkt->size;
             ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
             if(ret < 0)
             {
@@ -281,7 +281,7 @@ void CameraTest::grabFrames() {
 
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
-            if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
+            if (1)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
