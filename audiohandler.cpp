@@ -811,21 +811,3 @@ int AudioHandler::main()
     return 0;
 
 }
-
-QVariantList AudioHandler::getAudioInputDevices()
-{
-    QList<QVariant> q;
-    QList<QAudioDeviceInfo> x = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-    for (auto i: x)
-    {
-        q.append(i.deviceName());
-        //todo sjekk om den faktisk er gyldig før den legges til i listen.
-    }
-    return q;
-}
-
-void AudioHandler::changeAudioInputDevice(QString deviceName)
-{
-    qDebug() << deviceName;
-    //todo. må vel kanskje kjøre init på nytt?
-}

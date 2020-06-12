@@ -47,7 +47,7 @@ int CameraTest::init() {
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
     int ret, i;
-    bool writeToFile = true;
+    bool writeToFile = false;
 
     //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
@@ -423,7 +423,7 @@ void CameraTest::grabFrames() {
 
 
 
-int* CameraTest::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
+int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
 
 }
