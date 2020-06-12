@@ -102,6 +102,7 @@ public:
     struct SwrContext* audioConvertContext;
     Q_INVOKABLE QVariantList getAudioInputDevices();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
+    int* custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;

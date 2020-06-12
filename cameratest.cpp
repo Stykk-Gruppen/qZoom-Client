@@ -47,6 +47,7 @@ int CameraTest::init() {
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
     int ret, i;
+    bool writeToFile = true;
 
     //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
@@ -85,16 +86,28 @@ int CameraTest::init() {
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
     //Allocate outputStreamFormatContext
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
-    if (!ofmt_ctx) {
-        fprintf(stderr, "Could not create output context\n");
-        ret = AVERROR_UNKNOWN;
-        return -1;
+    if (writeToFile)
+    {
+        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        if (!ofmt_ctx) {
+            fprintf(stderr, "Could not create output context\n");
+            ret = AVERROR_UNKNOWN;
+            return -1;
+        }
+    }
+    else
+    {
+        ofmt_ctx = avformat_alloc_context();
     }
     //Set OutputFormat
     //ofmt = ofmt_ctx->oformat;
     //Guess format based on filename;
     ofmt = av_guess_format(NULL, filename, NULL);
+
+    ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
+    ofmt_ctx->oformat->video_codec = AV_CODEC_ID_H264;
+    ofmt_ctx->oformat->audio_codec = AV_CODEC_ID_OPUS;
+
 
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt->video_codec);
@@ -238,23 +251,54 @@ int CameraTest::init() {
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
     }
-    if (!(ofmt->flags & AVFMT_NOFILE))
+
+
+
+    if (writeToFile)
     {
-        ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
+        if (!(ofmt->flags & AVFMT_NOFILE))
+        {
+            ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
+
+            if (ret < 0) {
+                fprintf(stderr, "Could not open output file '%s'", filename);
+                return -1;
+            }
+        }
+        av_dump_format(ofmt_ctx, 0, filename, 1);
+
+        ret = avformat_write_header(ofmt_ctx, NULL);
 
         if (ret < 0) {
-            fprintf(stderr, "Could not open output file '%s'", filename);
+            fprintf(stderr, "Error occurred when opening output file\n");
             return -1;
         }
     }
-    av_dump_format(ofmt_ctx, 0, filename, 1);
+    else
+    {
 
-    ret = avformat_write_header(ofmt_ctx, NULL);
+        int avio_buffer_size = 4 * 1000;
+        void* avio_buffer = av_malloc(avio_buffer_size);
 
-    if (ret < 0) {
-        fprintf(stderr, "Error occurred when opening output file\n");
-        return -1;
+        AVIOContext* custom_io = avio_alloc_context (
+            (unsigned char*)avio_buffer, avio_buffer_size,
+            1,
+            (void*) 42,
+            NULL, &custom_io_write, NULL);
+
+        ofmt_ctx->pb = custom_io;
+
+        AVDictionary *options = NULL;
+        av_dict_set(&options, "live", "1", 0);
+        int t = avformat_write_header(ofmt_ctx, &options);
+        qDebug() << t;
     }
+
+
+
+
+
+
 
     QtConcurrent::run(this, &CameraTest::grabFrames);
     QTimer::singleShot(3000, this, SLOT(toggleDone()));
@@ -477,22 +521,11 @@ void CameraTest::grabFrames() {
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
 
-QVariantList CameraTest::getAudioInputDevices()
-{
-    QList<QVariant> q;
-    QList<QAudioDeviceInfo> x = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
-    for (auto i: x)
-    {
-        q.append(i.deviceName());
-        //todo sjekk om den faktisk er gyldig før den legges til i listen.
-    }
-    return q;
-}
 
-void CameraTest::changeAudioInputDevice(QString deviceName)
+
+int* CameraTest::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    qDebug() << deviceName;
-    //todo. må vel kanskje kjøre init på nytt?
+
 }
 
 
