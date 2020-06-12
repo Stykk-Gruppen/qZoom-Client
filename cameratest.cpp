@@ -40,6 +40,8 @@ void CameraTest::toggleDone() {
 int CameraTest::init() {
 
 
+    encodedFrames = 0;
+
     socket->bind(*host, 1337);
     socket->connectToHost(*host, 1337);
 
@@ -51,7 +53,7 @@ int CameraTest::init() {
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
     int ret, i;
-    bool writeToFile = false;
+    bool writeToFile = true;
 
     //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
@@ -114,13 +116,14 @@ int CameraTest::init() {
 
         //Hvis instream er Video
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            //in_stream->time_base = (AVRational){1, 30};
             //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
             inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
             inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
 
 
             //in_stream->codec->framerate = (AVRational){60, 1};
-            //in_stream->time_base = (AVRational){1, 60};
+
             avcodec_parameters_to_context(inputVideoCodecContext, in_stream->codecpar);
             ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
             //inputVideoCodecContext->time_base = AVRational{1, };
@@ -129,9 +132,10 @@ int CameraTest::init() {
             //in_stream->time_base = (AVRational){1, 60};
             //framerate = (AVRational){60, 1};
 
+            //in_stream->avg_frame_rate = AVRational{30,1};
+            //in_stream->codec->time_base = in_stream->time_base;
+            //inputVideoCodecContext->framerate = in_stream-in_stream->codec->framerate;
             inputVideoCodecContext->time_base = in_stream->time_base;
-            inputVideoCodecContext->framerate = in_stream->codec->framerate;
-
             /*Bare her for å løse errors lenger nede, må finne ordentlig løsning på dette*/
             /*inputVideoCodecContext->pix_fmt = (AVPixelFormat)in_stream->codecpar->format;
             inputVideoCodecContext->width = in_stream->codecpar->width;
@@ -149,26 +153,21 @@ int CameraTest::init() {
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
-
+            //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
-            outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-            outputVideoCodecContext->gop_size = 30;
-            outputVideoCodecContext->max_b_frames = 1;
+
+            //outputVideoCodecContext->gop_size = 30;
+            //outputVideoCodecContext->max_b_frames = 1;
 
             //out_stream->time_base = in_stream->time_base;
-            //out_stream->codec->framerate;
+
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
             ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
 
-            out_stream->time_base = outputVideoCodecContext->time_base;
-
-
-
-            qDebug() << "Fant en videoStream\n";
-            qDebug() << in_stream->codec->pix_fmt;
-            qDebug() << outputVideoCodecContext->width;
-            qDebug() << outputVideoCodecContext->pix_fmt;
+           // out_stream->time_base = outputVideoCodecContext->time_base;
+            out_stream->time_base = in_stream->time_base;
+            //out_stream->avg_frame_rate = in_stream->avg_frame_rate;
 
             //Sett convert context som brukes ved frame conversion senere.
             img_convert_ctx = sws_getContext(
@@ -193,10 +192,10 @@ int CameraTest::init() {
             return -1;
         }
 
-        /*out_stream->codecpar->codec_tag = 0;
+        out_stream->codecpar->codec_tag = 0;
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-*/
+
     }
 
 
@@ -215,6 +214,8 @@ int CameraTest::init() {
         av_dump_format(ofmt_ctx, 0, filename, 1);
 
         ret = avformat_write_header(ofmt_ctx, NULL);
+        av_dump_format(ofmt_ctx, 0, filename, 1);
+
         if (ret < 0) {
             fprintf(stderr, "Error occurred when opening output file\n");
             return -1;
@@ -233,7 +234,7 @@ int CameraTest::init() {
             NULL, &custom_io_write, NULL);
 
         ofmt_ctx->pb = custom_io;
-
+        av_dump_format(ofmt_ctx, 0, filename, 1);
         AVDictionary *options = NULL;
         av_dict_set(&options, "live", "1", 0);
         qDebug() << "About to write header\n";
@@ -248,6 +249,11 @@ int CameraTest::init() {
     qDebug() << "in_stream: " << ifmt_ctx->streams[0]->time_base.num << "/" << ifmt_ctx->streams[0]->time_base.den << "\n";
     qDebug() << "OutCodecContext: " << outputVideoCodecContext->time_base.num << "/" << outputVideoCodecContext->time_base.den << "\n";
     qDebug() << "out_stream: " << ofmt_ctx->streams[0]->time_base.num << "/" << ofmt_ctx->streams[0]->time_base.den << "\n";
+
+    qDebug() << "InputCodecContextFrameRate: " << inputVideoCodecContext->framerate.num << "\n";
+    //qDebug() << "in_stream Framerate: " << ifmt_ctx->streams[0]->codec->framerate.num << "\n";
+    qDebug() << "OutCodecContext Framerate: " << outputVideoCodecContext->framerate.num  << "\n";
+    //qDebug() << "out_stream Framerate: " << ofmt_ctx->streams[0]->codec->framerate.num << "\n";
 
     QtConcurrent::run(this, &CameraTest::grabFrames);
     QTimer::singleShot(3000, this, SLOT(toggleDone()));
@@ -279,39 +285,34 @@ void CameraTest::grabFrames() {
 
     int ret;
 
+
     while ((ret = av_read_frame(ifmt_ctx, pkt)) >= 0)
     {
         if(inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
         {
-            //av_grow_packet(pkt, 1842688);
             qDebug() << "kommer inn i videoStreamgreiene\n";
-            //videoFrame->pkt_size = pkt->size;
             if(ret < 0)
             {
                 qDebug() << "Input Avcodec open failed: " << ret << "\n";
                 exit(1);
             }
             qDebug() << "Forbi avodec_open\n";
-
             ret = avcodec_send_packet(inputVideoCodecContext, pkt);
             if(ret < 0)
             {
                 qDebug() << "Send packet error";
                 exit(1);
             }
-            qDebug() << "Forbi send packet\n";
 
+            qDebug() << "Forbi send packet\n";
             ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
             if(ret < 0)
             {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }
+            static auto previous_pts = videoFrame->pts;
 
-            //videoFrame->pts = previous_pts + 1 + skipped_frames;
-            //previous_pts = videoFrame->pts;
-
-            //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
             if (1)
             {
@@ -319,13 +320,20 @@ void CameraTest::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
+                //static auto previous_pts = 0;
                 scaledFrame->pts = videoFrame->best_effort_timestamp;
+
+
+                //scaledFrame->pts = previous_pts + 1 + skipped_frames;
+                //previous_pts = scaledFrame->pts;
+                //scaledFrame->pts = encodedFrames;
+                encodedFrames++;
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
                                 videoFrame->linesize, 0,
                                 inputVideoCodecContext->height,
                                 scaledFrame->data, scaledFrame->linesize);
                 qDebug() << "Etter swsScale\n";
-
+                //scaledFrame->pts = encodedFrames;
                 if(ret < 0)
                 {
                     qDebug() << "Error with scale " << ret <<"\n";
@@ -356,6 +364,7 @@ void CameraTest::grabFrames() {
             if(ret < 0)
             {
                 qDebug() << "Error with receive packet " << ret <<"\n";
+                //av_packet_unref(pkt);
                 skipped_frames++;
                 continue;
             }
@@ -372,23 +381,31 @@ void CameraTest::grabFrames() {
                 //out_stream->codec->gop_size = 30;
                 //out_stream->codec->max_b_frames = 1;
 
+                //out_stream->codec->framerate = AVRational{30,1};
+                //out_stream->time_base = AVRational{1, 30};
+                AVRational encoderTimebase = outputVideoCodecContext->time_base;//{1, 30};
+                AVRational muxerTimebase = out_stream->time_base;
 
-                AVRational encoderTimebase = inputVideoCodecContext->time_base;//{1, 30};
-                AVRational muxerTimebase = outputVideoCodecContext->time_base;
 
                 qDebug() << "InputCodecContext: " << inputVideoCodecContext->time_base.num << "/" << inputVideoCodecContext->time_base.den << "\n";
                 qDebug() << "in_stream: " << in_stream->time_base.num << "/" << in_stream->time_base.den << "\n";
                 qDebug() << "OutCodecContext: " << outputVideoCodecContext->time_base.num << "/" << outputVideoCodecContext->time_base.den << "\n";
                 qDebug() << "out_stream: " << out_stream->time_base.num << "/" << out_stream->time_base.den << "\n";
 
-
+                qDebug() << "InputCodecContextFrameRate: " << inputVideoCodecContext->framerate.num << "\n";
+                //qDebug() << "in_stream Framerate: " << ifmt_ctx->streams[0]->codec->framerate.num << "\n";
+                qDebug() << "OutCodecContext Framerate: " << outputVideoCodecContext->framerate.num  << "\n";
+                //qDebug() << "out_stream Framerate: " << ofmt_ctx->streams[0]->codec->framerate.num << "\n";
 
                 /* copy packet */
 
-                pkt->pts = av_rescale_q_rnd(pkt->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-                pkt->dts = av_rescale_q_rnd(pkt->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-                pkt->duration = av_rescale_q(pkt->duration, encoderTimebase, muxerTimebase);
-                pkt->pos = -1;
+                outPacket->pts = av_rescale_q_rnd(outPacket->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                outPacket->dts = av_rescale_q_rnd(outPacket->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                outPacket->duration = av_rescale_q(outPacket->duration, encoderTimebase, muxerTimebase);
+                outPacket->pos = -1;
+                //av_packet_rescale_ts(&pkt, d.stream->time_base, e.stream->time_base);
+
+                //av_packet_rescale_ts
 
                 qDebug() << "Før Write Frame\n";
                 int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);

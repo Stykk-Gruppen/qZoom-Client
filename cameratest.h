@@ -102,7 +102,7 @@ public:
     const char* filename = "nyTest.ismv";
     struct SwsContext* img_convert_ctx;
     struct SwrContext* audioConvertContext;
-
+    int encodedFrames;
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;
