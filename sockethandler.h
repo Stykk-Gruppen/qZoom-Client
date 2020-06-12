@@ -13,7 +13,9 @@ public:
     void initSocket();
     void readPendingDatagrams();
     QUdpSocket* udpSocket;
-
+    int sendDatagram(QByteArray arr);
+    QHostAddress address;
+    int port;
 signals:
 
 };
