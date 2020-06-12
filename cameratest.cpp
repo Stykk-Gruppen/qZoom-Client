@@ -57,12 +57,12 @@ int CameraTest::init() {
     }
 
     //Find Audio Input formats
-    AVInputFormat* audioInputFormat = av_find_input_format("alsa");
+    /*AVInputFormat* audioInputFormat = av_find_input_format("alsa");
     if(!(audioInputFormat != NULL))
     {
         qDebug() << "Not found audioFormat\n";
         return -1;
-    }
+    }*/
 
     //Open VideoInput
     if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
@@ -71,11 +71,11 @@ int CameraTest::init() {
     }
 
     //Open AudioInput
-    if(avformat_open_input(&ifmt_ctx, aDeviceName.toUtf8().data(), audioInputFormat, NULL) < 0)
+    /*if(avformat_open_input(&ifmt_ctx, aDeviceName.toUtf8().data(), audioInputFormat, NULL) < 0)
     {
         fprintf(stderr, "Could not open audio input file '%s'", aDeviceName.toUtf8().data());
         return -1;
-    }
+    }*/
     //Get stream information
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
         fprintf(stderr, "Failed to retrieve input stream information");
@@ -92,17 +92,17 @@ int CameraTest::init() {
         return -1;
     }
     //Set OutputFormat
-    ofmt = ofmt_ctx->oformat;
+    //ofmt = ofmt_ctx->oformat;
     //Guess format based on filename;
     ofmt = av_guess_format(NULL, filename, NULL);
 
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt->video_codec);
-    outputAudioCodec = avcodec_find_encoder(ofmt->audio_codec);
+    //outputAudioCodec = avcodec_find_encoder(ofmt->audio_codec);
 
     //Allocate CodecContext for outputstreams
     outputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
-    outputAudioCodecContext = avcodec_alloc_context3(outputAudioCodec);
+    //outputAudioCodecContext = avcodec_alloc_context3(outputAudioCodec);
 
     //Tror ikke disse er nødvendige
     //video_st.enc = outputVideoCodecContext;
@@ -120,12 +120,20 @@ int CameraTest::init() {
             //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
             inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
             inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
+            //in_stream->codec->framerate = (AVRational){60, 1};
+            //in_stream->time_base = (AVRational){1, 60};
+            avcodec_parameters_to_context(inputVideoCodecContext, in_stream->codecpar);
 
+            //in_stream->time_base = (AVRational){1, 60};
+            //framerate = (AVRational){60, 1};
+
+            inputVideoCodecContext->time_base = in_stream->time_base;
+            inputVideoCodecContext->framerate = in_stream->codec->framerate;
 
             /*Bare her for å løse errors lenger nede, må finne ordentlig løsning på dette*/
-            inputVideoCodecContext->pix_fmt = (AVPixelFormat)in_stream->codecpar->format;
+            /*inputVideoCodecContext->pix_fmt = (AVPixelFormat)in_stream->codecpar->format;
             inputVideoCodecContext->width = in_stream->codecpar->width;
-            inputVideoCodecContext->height = in_stream->codecpar->height;
+            inputVideoCodecContext->height = in_stream->codecpar->height;*/
             /*********************************''*****************************************/
 
 
@@ -135,16 +143,17 @@ int CameraTest::init() {
             //Denne trenger vi senere.
             videoStream = i;
             //Setter div parametere. Kanskje vi må sette fler?
-            outputVideoCodecContext->bit_rate = 400000;
+            outputVideoCodecContext->bit_rate = in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
 
-            outputVideoCodecContext->time_base = (AVRational){1, 60};
-            outputVideoCodecContext->framerate = (AVRational){60, 1};
-            outputVideoCodecContext->gop_size = 30;
+            outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
+            outputVideoCodecContext->framerate = inputCodecContext.framerate;
+            outputVideoCodecContext->gop_size = 12;
             outputVideoCodecContext->max_b_frames = 1;
-
+            out_stream->time_base = inputCodecContext.time_base;
+            out_stream->codec->framerate;
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
 
@@ -163,6 +172,11 @@ int CameraTest::init() {
                         outputVideoCodecContext->pix_fmt,
                         SWS_BICUBIC,
                         NULL, NULL, NULL);
+            //previous_pts = in_stream->start_time;
+
+            ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
+            ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
+
         }
         //Hvis inputstream er audio
         else /*if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) */{
@@ -211,6 +225,8 @@ int CameraTest::init() {
             }
         }
 
+        av_dump_format(ifmt_ctx, 0, NULL, 0);
+
         if (!out_stream) {
             fprintf(stderr, "Failed allocating output stream\n");
             ret = AVERROR_UNKNOWN;
@@ -256,13 +272,14 @@ void CameraTest::grabFrames() {
         qDebug() << "pkt = null\n";
         exit(1);
     }
-    AVFrame* audioFrame;
+    /*AVFrame* audioFrame;
     audioFrame = av_frame_alloc();
     audioFrame->data[0] = NULL;
     audioFrame->width = inputAudioCodecContext->width;
     audioFrame->height = inputAudioCodecContext->height;
     audioFrame->format = inputAudioCodecContext->pix_fmt;
-      videoFrame = av_frame_alloc();
+    */
+    videoFrame = av_frame_alloc();
     videoFrame->data[0] = NULL;
     videoFrame->width = inputVideoCodecContext->width;
     videoFrame->height = inputVideoCodecContext->height;
@@ -278,14 +295,11 @@ void CameraTest::grabFrames() {
 
     while ((ret = av_read_frame(ifmt_ctx, pkt)) >= 0)
     {
-
-
-        if(0)
+        if(inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
         {
             //av_grow_packet(pkt, 1842688);
             qDebug() << "kommer inn i videoStreamgreiene\n";
             //videoFrame->pkt_size = pkt->size;
-            ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
             if(ret < 0)
             {
                 qDebug() << "Input Avcodec open failed: " << ret << "\n";
@@ -308,8 +322,8 @@ void CameraTest::grabFrames() {
                 exit(1);
             }
 
-            videoFrame->pts = previous_pts + 1 + skipped_frames;
-            previous_pts = videoFrame->pts;
+            //videoFrame->pts = previous_pts + 1 + skipped_frames;
+            //previous_pts = videoFrame->pts;
 
             //ret = avcodec_decode_video2(ifmt_ctx->streams[videoStream]->codec, videoFrame, &frameFinished, pkt);
             qDebug() << "Etter recieve frame\n";
@@ -342,7 +356,7 @@ void CameraTest::grabFrames() {
 
             outPacket->data = NULL;
             outPacket->size = 0;
-            ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
+            //ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
             if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
 
             ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
@@ -372,7 +386,7 @@ void CameraTest::grabFrames() {
             }
             else
             {
-                skipped_frames--;
+                skipped_frames = 0;
 
                 AVStream *in_stream, *out_stream;
                 in_stream  = ifmt_ctx->streams[pkt->stream_index];
@@ -410,7 +424,7 @@ void CameraTest::grabFrames() {
                 //av_packet_free(&outPacket);
             }
         }
-        else
+        /*else
         {
             ret = avcodec_open2(inputAudioCodecContext, inputAudioCodec, NULL);
             if(ret < 0)
@@ -436,12 +450,12 @@ void CameraTest::grabFrames() {
             }
 
 
-        }
+        }*/
 
 
         //if(done) break;
         static int count = 0;
-        if(count > 300) break;
+        if(count > 150) break;
         count++;
     }
 
