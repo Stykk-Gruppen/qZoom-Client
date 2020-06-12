@@ -99,7 +99,7 @@ public:
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
     bool done;
-    const char* filename = "nyTest.ismv";
+    const char* filename = "nyTest.mp4";
     struct SwsContext* img_convert_ctx;
     struct SwrContext* audioConvertContext;
 
@@ -113,6 +113,7 @@ public slots:
 };
 
 int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
-
+int write_to_socket(uint8_t* buffer, int buffer_size);
+int write_to_file(uint8_t* buffer, int buffer_size);
 
 #endif // CAMERATEST_H

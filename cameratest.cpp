@@ -51,7 +51,7 @@ int CameraTest::init() {
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
     int ret, i;
-    bool writeToFile = false;
+    bool writeToFile = true;
 
     //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
@@ -430,29 +430,29 @@ void CameraTest::grabFrames() {
 }
 int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    qDebug() << "Inne i custom write************************************************************************************************\n";
-    qDebug() << buffer_size;
-    qDebug() << sizeof(buffer);
-    unsigned char *c = static_cast<unsigned char *>(buffer);
+    //write_to_socket(buffer, buffer_size);
+    write_to_file(buffer, buffer_size);
 
-    auto host  = new QHostAddress("127.0.0.1");
+}
 
-    outfile << buffer;
+int write_to_file(uint8_t* buffer, int buffer_size)
+{
+    outfile.write((char*)buffer, buffer_size);
+}
 
-    /*QUdpSocket* socket = new QUdpSocket;
-    socket->bind(*host, 1337);
-    socket->connectToHost(*host, 1337);
+int write_to_socket(uint8_t* buffer, int buffer_size)
+{
+    char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
-    QByteArray send;
+     auto host  = new QHostAddress("127.0.0.1");
+     QUdpSocket* socket = new QUdpSocket;
+     socket->bind(*host, 1337);
+     socket->connectToHost(*host, 1337);
 
-    send = QByteArray(reinterpret_cast<char*>(c), sizeof(c));
-    for(auto c : send)
-    {
-        qDebug() << c;
-    }
-    //socket->write(send);
+     QByteArray send;
 
-    socket->writeDatagram(send, send.size(), *host, 1337);*/
+     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
+     socket->writeDatagram(send, send.size(), *host, 1337);
 }
 
 
