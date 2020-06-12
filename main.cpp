@@ -51,14 +51,15 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("cameraTest", cameraTest.data());
     engine.load(url);
 
-    cameraTest->init();
+    //cameraTest->init();
     //Denne klassen klarer å lagre audio stream til fil
     //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
     //pureAudio->main();
 
     //Denne klassen klarer å lagre video stream til fil
     QScopedPointer<filetest> fil(new filetest);
-    //fil->main();
+    fil->main();
+    exit(1337);
 
     //cameraTest->init();
 

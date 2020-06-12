@@ -2,16 +2,16 @@
 
 SocketHandler::SocketHandler(QObject *parent) : QObject(parent)
 {
-
+    address = QHostAddress::LocalHost;
+    port = 1337;
 }
 
 void SocketHandler::initSocket()
 {
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::LocalHost, 7755);
+    //udpSocket->bind(address, port);
 
-    connect(udpSocket, &QUdpSocket::readyRead,
-            this, &SocketHandler::readPendingDatagrams);
+    //connect(udpSocket, &QUdpSocket::readyRead,this, &SocketHandler::readPendingDatagrams);
 }
 
 void SocketHandler::readPendingDatagrams()
@@ -23,7 +23,11 @@ void SocketHandler::readPendingDatagrams()
     }
 }
 
-/*void SocketHandler::processTheDatagram(QNetworkDatagram datagram)
+int SocketHandler::sendDatagram(QByteArray arr)
 {
-    //do something
-}*/
+    int ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
+    if(ret<0){
+        qDebug() << udpSocket->error();
+    }
+    return ret;
+}

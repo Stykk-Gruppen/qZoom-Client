@@ -42,7 +42,7 @@ ApplicationWindow {
             id: photoPreview
         } */
 
-        ComboBox {
+        /*ComboBox {
                 width: 200
                 model: ListModel {
                     id: t
@@ -56,11 +56,11 @@ ApplicationWindow {
                 }
                 onActivated: {
                     //console.log("switched Audio Input Device to: " + currentValue)
-                    cameraTest.changeAudioInputDevice(currentValue);
+                    //cameraTest.changeAudioInputDevice(currentValue);
                 }
             }
 
-            Component.onCompleted: t.getAudioTypes()
+            Component.onCompleted: t.getAudioTypes()*/
 
 
     }

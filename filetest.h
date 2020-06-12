@@ -12,6 +12,8 @@
 #include <QCameraImageCapture>
 #include <QAudioDeviceInfo>
 #include <QAudio>
+#include <QUdpSocket>
+#include "sockethandler.h"
 extern "C"{
 #include <libavutil/imgutils.h>
 #include <libavutil/samplefmt.h>
@@ -53,6 +55,9 @@ class filetest
 public:
     filetest();
     int main();
+private:
+    SocketHandler *socketHandler;
+    static int customWriteFunction(void* opaque, uint8_t *buffer, int buffer_size);
 };
 
 #endif // FILETEST_H
