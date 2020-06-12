@@ -46,6 +46,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <QAudioDeviceInfo>
 
 
 
@@ -78,6 +79,8 @@ private:
     AVCodecContext *outputCodecContext;
     SwrContext *resampleContext;
     AVAudioFifo *fifo;
+    QVariantList getAudioInputDevices();
+    void changeAudioInputDevice(QString deviceName);
 };
 
 #endif // AUDIOHANDLER_H
