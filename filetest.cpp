@@ -13,15 +13,11 @@ static AVFormatContext *ofmt_ctx = NULL;
 static AVCodecContext *video_dec_ctx = NULL;
 static AVStream *in_stream = NULL;
 static const char *src_filename = NULL;
-static const char *dst_filename = "final.mp4";
-
-
+//static const char *dst_filename = "final.mp4";
+static const char *dst_filename = "final.wav";
 static int video_stream_idx = -1;
 static AVFrame *frame = NULL;
 static AVPacket pkt;
-
-
-
 
 
 int filetest::main()
@@ -38,15 +34,17 @@ int filetest::main()
 
 
     //Find input video formats
-    AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
+    AVInputFormat* videoInputFormat = av_find_input_format("alsa");
+    //AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
     if(videoInputFormat == NULL)
     {
         fprintf(stderr,"Not found videoFormat\n");
         return -1;
     }
     //Open VideoInput
-    if (avformat_open_input(&fmt_ctx, "/dev/video0", videoInputFormat, NULL) < 0) {
-        fprintf(stderr, "Could not open input file '%s'", "/dev/video0");
+    //if (avformat_open_input(&fmt_ctx, "/dev/video0", videoInputFormat, NULL) < 0) {
+    if (avformat_open_input(&fmt_ctx, "default", videoInputFormat, NULL) < 0) {
+        fprintf(stderr, "Could not open input stream");
         return -1;
     }
 
@@ -61,10 +59,10 @@ int filetest::main()
         goto end;
     }
 
-    ret = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    ret = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
     if (ret < 0) {
         fprintf(stderr, "Could not find %s stream in input file '%s'\n",
-                av_get_media_type_string(AVMEDIA_TYPE_VIDEO), src_filename);
+                av_get_media_type_string(AVMEDIA_TYPE_AUDIO), src_filename);
         return ret;
     } else {
         AVCodec *dec = NULL;
@@ -75,7 +73,7 @@ int filetest::main()
         dec = avcodec_find_decoder(st->codecpar->codec_id);
         if (!dec) {
             fprintf(stderr, "Failed to find %s codec\n",
-                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+                    av_get_media_type_string(AVMEDIA_TYPE_AUDIO));
             return AVERROR(EINVAL);
         }
 
@@ -83,21 +81,21 @@ int filetest::main()
         video_dec_ctx = avcodec_alloc_context3(dec);
         if (!video_dec_ctx) {
             fprintf(stderr, "Failed to allocate the %s codec context\n",
-                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+                    av_get_media_type_string(AVMEDIA_TYPE_AUDIO));
             return AVERROR(ENOMEM);
         }
 
         /* Copy codec parameters from input stream to output codec context */
         if ((ret = avcodec_parameters_to_context(video_dec_ctx, st->codecpar)) < 0) {
             fprintf(stderr, "Failed to copy %s codec parameters to decoder context\n",
-                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+                    av_get_media_type_string(AVMEDIA_TYPE_AUDIO));
             return ret;
         }
 
         /* Init the decoders */
         if ((ret = avcodec_open2(video_dec_ctx, dec, NULL)) < 0) {
             fprintf(stderr, "Failed to open %s codec\n",
-                    av_get_media_type_string(AVMEDIA_TYPE_VIDEO));
+                    av_get_media_type_string(AVMEDIA_TYPE_AUDIO));
             return ret;
         }
         video_stream_idx = stream_index;
@@ -155,7 +153,7 @@ int filetest::main()
     pkt.size = 0;
 
     /* read x frames from the stream */
-    while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < 100) {
+    while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < 10000) {
         // check if the packet belongs to a stream we are interested in, otherwise
         // skip it
         if (pkt.stream_index == video_stream_idx){
