@@ -100,8 +100,6 @@ public:
     const char* filename = "nyTest.mp4";
     struct SwsContext* img_convert_ctx;
     struct SwrContext* audioConvertContext;
-    Q_INVOKABLE QVariantList getAudioInputDevices();
-    Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;
