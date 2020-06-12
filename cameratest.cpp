@@ -4,7 +4,6 @@
 
 
 
-
 #include "videohandler.h"
 //#define STREAM_DURATION   5.0
 #define STREAM_FRAME_RATE 10 /* 25 images/s */
@@ -20,9 +19,9 @@
 
 
 
-
 std::ofstream outfile("video.ismv", std::ostream::binary);
-
+QUdpSocket* socket = new QUdpSocket();
+auto host  = new QHostAddress("127.0.0.1");
 
 
 CameraTest::CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent): QObject(parent)
@@ -41,7 +40,8 @@ void CameraTest::toggleDone() {
 int CameraTest::init() {
 
 
-    udpSocket = new QUdpSocket(this);
+    socket->bind(*host, 1337);
+    socket->connectToHost(*host, 1337);
 
     //Registrer div ting
     av_register_all();
@@ -51,7 +51,7 @@ int CameraTest::init() {
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
     int ret, i;
-    bool writeToFile = true;
+    bool writeToFile = false;
 
     //Find input video formats
     AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
@@ -430,8 +430,8 @@ void CameraTest::grabFrames() {
 }
 int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    //write_to_socket(buffer, buffer_size);
-    write_to_file(buffer, buffer_size);
+    write_to_socket(buffer, buffer_size);
+    //write_to_file(buffer, buffer_size);
 
 }
 
@@ -444,10 +444,6 @@ int write_to_socket(uint8_t* buffer, int buffer_size)
 {
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
-     auto host  = new QHostAddress("127.0.0.1");
-     QUdpSocket* socket = new QUdpSocket;
-     socket->bind(*host, 1337);
-     socket->connectToHost(*host, 1337);
 
      QByteArray send;
 

@@ -99,11 +99,10 @@ public:
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
     bool done;
-    const char* filename = "nyTest.mp4";
+    const char* filename = "nyTest.ismv";
     struct SwsContext* img_convert_ctx;
     struct SwrContext* audioConvertContext;
 
-    QUdpSocket* udpSocket;
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;
