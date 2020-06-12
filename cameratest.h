@@ -7,11 +7,13 @@
 #include <QVideoProbe>
 #include <QMediaPlayer>
 #include <QMediaRecorder>
+#include <QUdpSocket>
 #include <QObject>
 #include <QVideoFrame>
 #include <QCameraImageCapture>
 #include <QAudioDeviceInfo>
 #include <QAudio>
+#include <iostream>
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -97,11 +99,11 @@ public:
     AVDictionary *opt = NULL;
     int audioStream, videoStream;
     bool done;
-    const char* filename = "nyTest.mp4";
+    const char* filename = "nyTest.ismv";
     struct SwsContext* img_convert_ctx;
     struct SwrContext* audioConvertContext;
 
-
+    QUdpSocket* udpSocket;
 
     AVFrame* videoFrame;
     AVFrame* scaledFrame;

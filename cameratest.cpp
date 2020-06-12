@@ -12,6 +12,8 @@
 #define SCALE_FLAGS SWS_BICUBIC
 #define QFRAMES_PER_MOVIE 100
 
+#include <unistd.h>
+#include <fstream>
 
 
 
@@ -19,7 +21,7 @@
 
 
 
-
+std::ofstream outfile("video.ismv", std::ostream::binary);
 
 
 
@@ -38,6 +40,8 @@ void CameraTest::toggleDone() {
 
 int CameraTest::init() {
 
+
+    udpSocket = new QUdpSocket(this);
 
     //Registrer div ting
     av_register_all();
@@ -91,8 +95,8 @@ int CameraTest::init() {
     ofmt = av_guess_format(NULL, filename, NULL);
 
     ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
-    ofmt_ctx->oformat->video_codec = AV_CODEC_ID_H264;
-    ofmt_ctx->oformat->audio_codec = AV_CODEC_ID_OPUS;
+
+
 
 
     //Set Output codecs from guess
@@ -189,10 +193,10 @@ int CameraTest::init() {
             return -1;
         }
 
-        out_stream->codecpar->codec_tag = 0;
+        /*out_stream->codecpar->codec_tag = 0;
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-
+*/
     }
 
 
@@ -211,7 +215,6 @@ int CameraTest::init() {
         av_dump_format(ofmt_ctx, 0, filename, 1);
 
         ret = avformat_write_header(ofmt_ctx, NULL);
-
         if (ret < 0) {
             fprintf(stderr, "Error occurred when opening output file\n");
             return -1;
@@ -220,21 +223,24 @@ int CameraTest::init() {
     else
     {
 
-        int avio_buffer_size = 4 * 1000;
+        int avio_buffer_size = 4 * 1024;
         void* avio_buffer = av_malloc(avio_buffer_size);
 
         AVIOContext* custom_io = avio_alloc_context (
             (unsigned char*)avio_buffer, avio_buffer_size,
             1,
-            (void*) 42,
+            (void*) this,
             NULL, &custom_io_write, NULL);
 
         ofmt_ctx->pb = custom_io;
 
         AVDictionary *options = NULL;
         av_dict_set(&options, "live", "1", 0);
+        qDebug() << "About to write header\n";
         int t = avformat_write_header(ofmt_ctx, &options);
-        qDebug() << t;
+        qDebug() << "T ER LIK: " << t;
+
+        av_dump_format(ofmt_ctx, 0, filename, 1);
     }
 
 
@@ -385,7 +391,9 @@ void CameraTest::grabFrames() {
                 pkt->pos = -1;
 
                 qDebug() << "Før Write Frame\n";
-                int ret = av_write_frame(ofmt_ctx, outPacket);
+                int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
+
+                //int ret = av_write_frame(ofmt_ctx, outPacket);
                 qDebug() << "Etter Write Frame\n";
                 //int ret = av_write_frame(ofmt_ctx, pkt);
                 if (ret < 0) {
@@ -399,7 +407,7 @@ void CameraTest::grabFrames() {
             }
         }
         static int count = 0;
-        if(count > 100) break;
+        if(count > 300) break;
         count++;
     }
 
@@ -407,7 +415,7 @@ void CameraTest::grabFrames() {
 
     av_write_trailer(ofmt_ctx);
 
-
+    outfile.close();
     avformat_close_input(&ifmt_ctx);
     /* close output */
     if (ofmt_ctx && !(ofmt->flags & AVFMT_NOFILE))
@@ -420,13 +428,33 @@ void CameraTest::grabFrames() {
 
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
-
-
-
 int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
+    qDebug() << "Inne i custom write************************************************************************************************\n";
+    qDebug() << buffer_size;
+    qDebug() << sizeof(buffer);
+    unsigned char *c = static_cast<unsigned char *>(buffer);
 
+    auto host  = new QHostAddress("127.0.0.1");
+
+    outfile << buffer;
+
+    /*QUdpSocket* socket = new QUdpSocket;
+    socket->bind(*host, 1337);
+    socket->connectToHost(*host, 1337);
+
+    QByteArray send;
+
+    send = QByteArray(reinterpret_cast<char*>(c), sizeof(c));
+    for(auto c : send)
+    {
+        qDebug() << c;
+    }
+    //socket->write(send);
+
+    socket->writeDatagram(send, send.size(), *host, 1337);*/
 }
+
 
 
 

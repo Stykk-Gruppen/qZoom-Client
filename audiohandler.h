@@ -7,6 +7,7 @@
 #include <QVideoProbe>
 #include <QMediaPlayer>
 #include <QMediaRecorder>
+#include <QAudioDeviceInfo>
 #include <QObject>
 #include <QVideoFrame>
 #include <QCameraImageCapture>
@@ -78,6 +79,8 @@ private:
     AVCodecContext *outputCodecContext;
     SwrContext *resampleContext;
     AVAudioFifo *fifo;
+    void changeAudioInputDevice(QString deviceName);
+    QVariantList getAudioInputDevices();
 };
 
 #endif // AUDIOHANDLER_H

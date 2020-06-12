@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
     cameraTest->init();
     //Denne klassen klarer å lagre audio stream til fil
-   // QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.mp4"));
+    //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
     //pureAudio->main();
 
     //Denne klassen klarer å lagre video stream til fil
