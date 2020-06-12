@@ -1,19 +1,17 @@
 #ifndef CAMERATEST_H
 #define CAMERATEST_H
 
-#include <QObject>
-#include <QCamera>
-#include <QCameraInfo>
-#include <QVideoProbe>
-#include <QMediaPlayer>
-#include <QMediaRecorder>
 #include <QUdpSocket>
 #include <QObject>
 #include <QVideoFrame>
-#include <QCameraImageCapture>
-#include <QAudioDeviceInfo>
-#include <QAudio>
+#include <QtConcurrent/QtConcurrent>
 #include <iostream>
+#include <fstream>
+#include "sockethandler.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -39,80 +37,35 @@ extern "C" {
 #include "libavutil/common.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/imgutils.h"
-
 }
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-
 
 class CameraTest : public QObject
 {
     Q_OBJECT
-
-    typedef struct OutputStream {
-            AVStream *st;
-            AVCodecContext *enc;
-
-            /* pts of the next frame that will be generated */
-            int64_t next_pts;
-            int samples_count;
-
-            AVFrame *frame;
-            AVFrame *tmp_frame;
-
-            float t, tincr, tincr2;
-
-            struct SwsContext *sws_ctx;
-
-        } OutputStream;
-
 public:
     CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent = 0);
     int init();
-
-    void add_stream(OutputStream *ost, AVFormatContext *oc,
-                                  AVCodec **codec,
-                                  enum AVCodecID codec_id);
-    OutputStream video_st = {};
-    OutputStream audio_st = {};
     void grabFrames();
-    AVOutputFormat *ofmt;
-    AVCodecContext inputCodecContext;
-    AVFormatContext *ifmt_ctx, *ofmt_ctx, *fmt;
-    AVCodecContext* c;
-    QString cDeviceName;
-    AVCodecContext* outputVideoCodecContext;
-    AVCodecContext* outputAudioCodecContext;
-    AVCodec* inputVideoCodec;
-    AVCodec* inputAudioCodec;
-    int skipped_frames = 0;
-    int64_t previous_pts = 0;
-    AVCodec* outputVideoCodec;
-    AVCodec* outputAudioCodec;
-
-    AVCodecContext* inputVideoCodecContext;
-    AVCodecContext* inputAudioCodecContext;
-
-    QString aDeviceName;
-    AVDictionary *opt = NULL;
-    int audioStream, videoStream;
-    bool done;
+    bool writeToFile = true;
+    int numberOfFrames = 250;
     const char* filename = "nyTest.ismv";
-    struct SwsContext* img_convert_ctx;
-    struct SwrContext* audioConvertContext;
-    int encodedFrames;
+    QString aDeviceName;
+    QString cDeviceName;
 
+    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+
+private:
+    int skipped_frames = 0;
+    std::ofstream outfile;
+    AVCodecContext* inputVideoCodecContext;
+    AVCodecContext* outputVideoCodecContext;
     AVFrame* videoFrame;
     AVFrame* scaledFrame;
-
-public slots:
-    void toggleDone();
+    AVFormatContext *ifmt_ctx, *ofmt_ctx;
+    AVCodec* inputVideoCodec;
+    AVCodec* outputVideoCodec;
+    int videoStream;
+    SocketHandler *socketHandler;
+    struct SwsContext* img_convert_ctx;
 };
-
-int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
-int write_to_socket(uint8_t* buffer, int buffer_size);
-int write_to_file(uint8_t* buffer, int buffer_size);
-
 #endif // CAMERATEST_H

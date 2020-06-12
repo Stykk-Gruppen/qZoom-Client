@@ -10,9 +10,6 @@ CameraHandler::CameraHandler(QObject* parent): QObject(parent)
         camera = new QCamera(cameras[0]);
         capture = new QCameraImageCapture(camera);
     }
-
-
-
 }
 
 CameraHandler::~CameraHandler(){}
