@@ -47,6 +47,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <QAudioDeviceInfo>
 
 
 
@@ -81,6 +82,7 @@ private:
     AVAudioFifo *fifo;
     void changeAudioInputDevice(QString deviceName);
     QVariantList getAudioInputDevices();
+
 };
 
 #endif // AUDIOHANDLER_H
