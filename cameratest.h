@@ -46,8 +46,8 @@ public:
     CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent = 0);
     int init();
     void grabFrames();
-    bool writeToFile = true;
-    int numberOfFrames = 250;
+    bool writeToFile = false;
+    int numberOfFrames = 2500;
     const char* filename = "nyTest.ismv";
     QString aDeviceName;
     QString cDeviceName;

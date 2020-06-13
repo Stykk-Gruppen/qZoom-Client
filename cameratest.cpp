@@ -13,6 +13,8 @@ CameraTest::CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent
 int CameraTest::init()
 {
     //Registrer div ting
+    av_register_all();
+    avcodec_register_all();
     avdevice_register_all();
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
@@ -186,7 +188,7 @@ void CameraTest::grabFrames() {
     int ret;
     while ((ret = av_read_frame(ifmt_ctx, pkt)) >= 0)
     {
-        if(inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
+        if(1)
         {
             qDebug() << "kommer inn i videoStreamgreiene\n";
             if(ret < 0)
