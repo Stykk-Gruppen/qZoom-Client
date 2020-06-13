@@ -45,6 +45,12 @@ extern "C"{
 #include "libavutil/imgutils.h"
 #include <libavutil/timestamp.h>
 #include <libavformat/avformat.h>
+#include "libavutil/pixfmt.h"
+#include "libavutil/rational.h"
+#include "libswresample/swresample.h"
+#include "libavutil/common.h"
+#include "libavutil/pixdesc.h"
+#include "libavutil/imgutils.h"
 }
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,7 +62,10 @@ public:
     filetest();
     int main();
 private:
+    int setVideoScaleContext();
+    int setAudioSampleContext();
     SocketHandler *socketHandler;
+    int rescaleVideo();
     static int customWriteFunction(void* opaque, uint8_t *buffer, int buffer_size);
 };
 

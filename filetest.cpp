@@ -12,13 +12,55 @@ static AVStream *out_stream;
 static AVFormatContext *fmt_ctx = NULL;
 static AVFormatContext *ofmt_ctx = NULL;
 static AVCodecContext *video_dec_ctx = NULL;
+static AVCodecContext *video_enc_ctx = NULL;
 static AVStream *in_stream = NULL;
 static const char *src_filename = NULL;
-
+struct SwsContext* img_convert_ctx;
 static int video_stream_idx = -1;
 static AVFrame *frame = NULL;
 static AVPacket pkt;
+int filetest::setVideoScaleContext()
+{
 
+}
+
+int filetest::setAudioSampleContext()
+{
+
+}
+int filetest::rescaleVideo()
+{
+    int ret = avcodec_send_packet(video_dec_ctx, &pkt);
+    if(ret < 0)
+    {
+        qDebug() << "Send packet error";
+        exit(1);
+    }
+    qDebug() << "Forbi send packet\n";
+
+    ret = avcodec_receive_frame(video_dec_ctx, frame);
+    if(ret < 0)
+    {
+        qDebug() << "Recieve frame error";
+        exit(1);
+    }
+    int num_bytes = av_image_get_buffer_size(video_enc_ctx->pix_fmt,video_enc_ctx->width,video_enc_ctx->height, 1);
+    uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
+    av_image_fill_arrays(frame->data,frame->linesize, frame2_buffer, video_enc_ctx->pix_fmt, video_enc_ctx->width, video_enc_ctx->height,1);
+
+    frame->pts = frame->best_effort_timestamp;
+    ret = sws_scale(img_convert_ctx, frame->data,
+                    frame->linesize, 0,
+                    video_dec_ctx->height,
+                    frame->data, frame->linesize);
+    qDebug() << "Etter swsScale\n";
+
+    if(ret < 0)
+    {
+        qDebug() << "Error with scale " << ret <<"\n";
+        exit(1);
+    }
+}
 int filetest::customWriteFunction(void* opaque, uint8_t *buffer, int buffer_size)
 {
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
@@ -32,8 +74,8 @@ int filetest::main()
 {
     char *dst_filename;
     int testCount = 0;
-    bool writeToFile = false;
-    bool video = true;
+    bool writeToFile = true;
+    bool video = false;
     AVMediaType type;
     int maxFramesRead;
     if(video){
@@ -43,7 +85,7 @@ int filetest::main()
     }else{
         maxFramesRead = 2000;
         type = AVMEDIA_TYPE_AUDIO;
-        dst_filename = "final.wav";
+        dst_filename = "final.mp4";
     }
     int ret = 0;
     av_register_all();
@@ -83,25 +125,22 @@ int filetest::main()
         exit(1);
     }
 
-    //Allocate outputStreamFormatContext
-    if (writeToFile)
-    {
-        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, dst_filename);
-        if (!ofmt_ctx) {
-            fprintf(stderr, "Could not create output context\n");
-            ret = AVERROR_UNKNOWN;
-            exit(1);
-        }
+
+
+   // avformat_alloc_output_context2(&ofmt_ctx, NULL, "smoothstreaming", NULL);
+   // avformat_alloc_output_context2(&ofmt_ctx, NULL, "webm_dash_manifest", NULL);
+   avformat_alloc_output_context2(&ofmt_ctx, NULL, "mp4", NULL);
+    if (!ofmt_ctx) {
+        fprintf(stderr, "Could not create output context\n");
+        ret = AVERROR_UNKNOWN;
+        exit(1);
     }
-    else
-    {
-        maxFramesRead = 99999999;
-        avformat_alloc_output_context2(&ofmt_ctx, NULL, "ismv", NULL);
-        if (!ofmt_ctx) {
-            fprintf(stderr, "Could not create output context\n");
-            ret = AVERROR_UNKNOWN;
-            exit(1);
-        }
+
+    video_enc_ctx = avcodec_alloc_context3(avcodec_find_encoder(ofmt_ctx->oformat->video_codec));
+    if (!video_enc_ctx) {
+        fprintf(stderr, "Failed to allocate the %s codec context\n",
+                av_get_media_type_string(type));
+        return AVERROR(ENOMEM);
     }
 
     ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
@@ -148,7 +187,15 @@ int filetest::main()
 
 
     in_stream = fmt_ctx->streams[video_stream_idx];
-    // qDebug() << "Opened video codec context";
+    /*img_convert_ctx = sws_getContext(
+                in_stream->codecpar->width,
+                in_stream->codecpar->height,
+                AV_PIX_FMT_YUV420P,
+                video_enc_ctx->width,
+                video_enc_ctx->height,
+                video_enc_ctx->pix_fmt,
+                SWS_BICUBIC,
+                NULL, NULL, NULL);*/
 
     //Kopiert fra remuxing.c
     out_stream = avformat_new_stream(ofmt_ctx, NULL);
@@ -162,7 +209,8 @@ int filetest::main()
         exit(1);
     }
 
-
+    AVDictionary *options = NULL;
+    av_dict_set(&options, "movflags", "faststart", 0);
 
     if (writeToFile)
     {
@@ -171,7 +219,7 @@ int filetest::main()
             fprintf(stderr, "Could not open output file '%s'", dst_filename);
             exit(1);
         }
-        ret = avformat_write_header(ofmt_ctx, NULL);
+        ret = avformat_write_header(ofmt_ctx, &options);
         if (ret < 0) {
             fprintf(stderr, "Error occurred when opening output file\n");
             exit(1);
@@ -191,10 +239,9 @@ int filetest::main()
 
         ofmt_ctx->pb = custom_io;
 
-        AVDictionary *options = NULL;
-        av_dict_set(&options, "live", "1", 0);
+
         //qDebug() << "About to write header\n";
-        ret = avformat_write_header(ofmt_ctx, NULL);
+        //ret = avformat_write_header(ofmt_ctx, NULL);
         if (ret < 0) {
             fprintf(stderr, "Error occurred when opening output file\n");
             exit(1);
@@ -216,20 +263,13 @@ int filetest::main()
         exit(1);
     }
 
-    frame = av_frame_alloc();
-    if (!frame) {
-        fprintf(stderr, "Could not allocate frame\n");
-        ret = AVERROR(ENOMEM);
-        exit(1);
-    }
-
     /* initialize packet, set data to NULL, let the demuxer fill it */
     av_init_packet(&pkt);
     pkt.data = NULL;
     pkt.size = 0;
 
     /* read x frames from the stream */
-    while (av_read_frame(fmt_ctx, &pkt) >= 0 && testCount < maxFramesRead) {
+    while (av_read_frame(fmt_ctx, &pkt) >= 0 /*&& testCount < maxFramesRead*/) {
         // check if the packet belongs to a stream we are interested in, otherwise
         // skip it
         if (pkt.stream_index == video_stream_idx){
