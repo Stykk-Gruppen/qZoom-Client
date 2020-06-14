@@ -29,8 +29,8 @@ int CameraTest::init()
     }
     //Open VideoInput
     if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0) {
-       fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
-       return -1;
+        fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
+        return -1;
     }
     //Get stream information
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
@@ -144,10 +144,10 @@ int CameraTest::init()
         int avio_buffer_size = 4 * 1024;
         void* avio_buffer = av_malloc(avio_buffer_size);
         AVIOContext* custom_io = avio_alloc_context (
-            (unsigned char*)avio_buffer, avio_buffer_size,
-            1,
-            (void*) socketHandler,
-            NULL, &custom_io_write, NULL);
+                    (unsigned char*)avio_buffer, avio_buffer_size,
+                    1,
+                    (void*) socketHandler,
+                    NULL, &custom_io_write, NULL);
         ofmt_ctx->pb = custom_io;
         av_dump_format(ofmt_ctx, 0, filename, 1);
         AVDictionary *options = NULL;
@@ -212,7 +212,7 @@ void CameraTest::grabFrames() {
                 exit(1);
             }
             qDebug() << "Etter recieve frame\n";
-            if (1)
+            if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
@@ -230,19 +230,26 @@ void CameraTest::grabFrames() {
                     qDebug() << "Error with scale " << ret <<"\n";
                     exit(1);
                 }
+                ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
+                if(ret < 0)
+                {
+                    qDebug() << "Error with send frame " << ret <<"\n";
+
+                    exit(1);
+                }
+            } else {
+                ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
+                if(ret < 0)
+                {
+                    qDebug() << "Error with send frame " << ret <<"\n";
+
+                    exit(1);
+                }
             }
             AVPacket* outPacket = av_packet_alloc();
             outPacket->data = NULL;
             outPacket->size = 0;
             if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
-
-            ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
-            if(ret < 0)
-            {
-                qDebug() << "Error with send frame " << ret <<"\n";
-
-                exit(1);
-            }
 
             ret = avcodec_receive_packet(outputVideoCodecContext, outPacket);
             if(ret < 0)

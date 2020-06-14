@@ -51,21 +51,21 @@ extern "C"{
 #include "libavutil/common.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/imgutils.h"
-}
+#include "libavfilter/buffersrc.h"
+#include "libavfilter/buffersink.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+}
+
 class filetest
 {
 public:
     filetest();
     int main();
 private:
-    int setVideoScaleContext();
-    int setAudioSampleContext();
     SocketHandler *socketHandler;
-    int rescaleVideo();
     static int customWriteFunction(void* opaque, uint8_t *buffer, int buffer_size);
 };
 
