@@ -81,7 +81,7 @@ int VideoHandler::init()
             inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
             avcodec_parameters_to_context(inputVideoCodecContext, in_stream->codecpar);
             ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
-
+            inputVideoCodecContext->framerate = in_stream->r_frame_rate;
             inputVideoCodecContext->time_base = in_stream->time_base;
 
             //Lager ny outputStream
@@ -89,11 +89,14 @@ int VideoHandler::init()
             //Denne trenger vi egentlig ikke lenger
             videoStream = i;
             //Setter div parametere.
-            outputVideoCodecContext->bit_rate = in_stream->codecpar->bit_rate;
+            outputVideoCodecContext->bit_rate = 10000000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
+            outputVideoCodecContext->max_b_frames = 2;
+            outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
+            //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
 
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
@@ -216,7 +219,13 @@ void VideoHandler::grabFrames() {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }
-            qDebug() << "Etter recieve frame\n";
+            /*ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
+            if(ret < 0)
+            {
+                qDebug() << "Recieve frame error";
+                exit(1);
+            }*/
+            qDebug() << "Etter recieve frame: " << ret;
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);

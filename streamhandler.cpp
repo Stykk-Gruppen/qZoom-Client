@@ -52,7 +52,7 @@ StreamHandler::StreamHandler()
     videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
     audioHandler = new AudioHandler(ofmt_ctx, "fil.imsv");
     videoHandler->init();
-
+    av_dump_format(ofmt_ctx, 0, filename, 1);
     ret = avformat_write_header(ofmt_ctx, &options);
 }
 
