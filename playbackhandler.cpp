@@ -22,12 +22,19 @@ void PlaybackHandler::playFromFile(const QString &strFile)
     QMediaPlayer::setMedia(QUrl::fromLocalFile(strFile));
     //QMediaPlayer::setVideoOutput(m_surface);
     QMediaPlayer::play();
-    qDebug() << "Tried to play";
+    qDebug() << "Tried to play from file";
 }
 
 void PlaybackHandler::getStream()
 {
 
+}
+
+void PlaybackHandler::playFromStream(const QString &str)
+{
+    QMediaPlayer::setMedia(QUrl(str));
+    QMediaPlayer::play();
+    qDebug() << "Tried to play from stream";
 }
 
 /*

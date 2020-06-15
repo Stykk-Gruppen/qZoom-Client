@@ -43,14 +43,15 @@ class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, QObject* parent = 0);
     int init();
     void grabFrames();
-    bool writeToFile = false;
-    int numberOfFrames = 200;
+    bool writeToFile = true;
+    int numberOfFrames;
     const char* filename = "nyTest.ismv";
     QString aDeviceName;
     QString cDeviceName;
+    std::mutex* writeLock;
 
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 

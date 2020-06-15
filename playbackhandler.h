@@ -41,6 +41,7 @@ public:
     void setVideoSurface(QAbstractVideoSurface* surface);
     QAbstractVideoSurface* getVideoSurface();
     void playFromFile(const QString& strFile);
+    void playFromStream(const QString& str);
     void getStream();
     int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();

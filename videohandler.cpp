@@ -1,15 +1,17 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, QObject* parent): QObject(parent)
 {
+    writeToFile = _writeToFile;
+    numberOfFrames = _numberOfFrames;
     std::ofstream outfile("video.ismv", std::ostream::binary);
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
-    //this->aDeviceName = aDeviceName;
-
-    ofmt_ctx = (_ofmt_ctx);
+    this->aDeviceName = aDeviceName;
+    writeLock = _writeLock;
+    ofmt_ctx = _ofmt_ctx;
 }
 
 int VideoHandler::init()
@@ -49,13 +51,13 @@ int VideoHandler::init()
     }
     else
     {
-        ofmt_ctx = avformat_alloc_context();
+        //ofmt_ctx = avformat_alloc_context();
     }
-    if (!ofmt_ctx) {
+    /*if (!ofmt_ctx) {
         fprintf(stderr, "Could not create output context\n");
         ret = AVERROR_UNKNOWN;
         return -1;
-    }
+    }*/
     //Set OutputFormat
     ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
 
@@ -124,11 +126,11 @@ int VideoHandler::init()
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    if (writeToFile)
+    /*if (writeToFile)
     {
         if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         {
-            ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
+            ret = avio_open(&ofmt_ctx->pb, ofmt_ctx->filename, AVIO_FLAG_WRITE);
 
             if (ret < 0) {
                 fprintf(stderr, "Could not open output file '%s'", filename);
@@ -158,10 +160,12 @@ int VideoHandler::init()
         int t = avformat_write_header(ofmt_ctx, &options);
         qDebug() << "T ER LIK: " << t;
         av_dump_format(ofmt_ctx, 0, filename, 1);
-    }
+    }*/
 
-    QtConcurrent::run(this, &VideoHandler::grabFrames);
-    return 0;
+
+    //QtConcurrent::run(this, &VideoHandler::grabFrames);
+    //return 0;
+    qDebug() << "Kom til slutten av init";
 }
 
 void VideoHandler::grabFrames() {
@@ -284,8 +288,9 @@ void VideoHandler::grabFrames() {
                 outPacket->duration = av_rescale_q(outPacket->duration, encoderTimebase, muxerTimebase);
                 outPacket->pos = -1;
 
+                writeLock->lock();
                 int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
-
+                writeLock->unlock();
                 //int ret = av_write_frame(ofmt_ctx, outPacket);
 
                 //int ret = av_write_frame(ofmt_ctx, pkt);

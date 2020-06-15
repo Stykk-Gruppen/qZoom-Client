@@ -2,6 +2,8 @@
 #define STREAMHANDLER_H
 #include "videohandler.h"
 #include "audiohandler.h"
+#include "sockethandler.h"
+
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -39,6 +41,13 @@ public:
     AVFormatContext* ofmt_ctx;
     const char* filename = "video.ismv";
     void record();
+    bool writeToFile = false;
+    std::mutex writeLock;
+    SocketHandler* socketHandler;
+    int numberOfFrames = 5000;
+
+    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+
 };
 
 #endif // STREAMHANDLER_H

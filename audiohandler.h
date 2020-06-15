@@ -57,6 +57,7 @@ class AudioHandler
 public:
     AudioHandler(AVFormatContext*,char*);
     int main();
+    int init();
 private:
     void cleanup();
     int openInputFile();
