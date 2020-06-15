@@ -2,8 +2,8 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
-import QtQuick 2.0
-import VLCQt 1.1
+//import QtQuick 2.0
+import VLCQt 1.0
 
 ApplicationWindow {
     id: window
@@ -22,8 +22,8 @@ ApplicationWindow {
     {
         id: vidwidget
         anchors.fill: parent
-        url: "udp://@:1337"
-        //url: "http://www.spacese.spacegrant.org/myvideoplayer_files/Gentry_Lee_2005.flv"
+        //url: "udp://@:1337"
+        url: "http://www.spacese.spacegrant.org/myvideoplayer_files/Gentry_Lee_2005.flv"
             }
     }
 }

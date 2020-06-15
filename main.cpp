@@ -33,10 +33,18 @@ extern "C"
 #include <libavutil/imgutils.h>
 #include <libavdevice/avdevice.h>
 }
+
+#include <QtCore/QCoreApplication>
+#include <QtGui/QGuiApplication>
+#include <QtQuick/QQuickView>
+
+#include <VLCQtCore/Common.h>
+#include <VLCQtQml/QmlVideoPlayer.h>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
+    QCoreApplication::setAttribute(Qt::AA_X11InitThreads);
     QGuiApplication app(argc, argv);
 
 
