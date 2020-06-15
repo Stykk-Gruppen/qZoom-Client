@@ -12,7 +12,6 @@ ApplicationWindow {
     height: 800
     title: qsTr("qZoom")
 
-
     Rectangle {
         width: 640
         height: 480
