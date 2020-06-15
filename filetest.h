@@ -50,6 +50,11 @@ extern "C"{
 #include "libswresample/swresample.h"
 #include "libavutil/common.h"
 #include "libavutil/pixdesc.h"
+#include <libavcodec/avcodec.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/common.h>
+#include <libavutil/frame.h>
+#include <libavutil/samplefmt.h>
 #include "libavutil/imgutils.h"
 #include "libavfilter/buffersrc.h"
 #include "libavfilter/buffersink.h"
