@@ -18,6 +18,7 @@ SOURCES += \
         camerahandler.cpp \
         filetest.cpp \
         main.cpp \
+        playbackhandler.cpp \
         sockethandler.cpp \
         streamhandler.cpp \
         videohandler.cpp
@@ -43,6 +44,7 @@ HEADERS += \
     audiohandler.h \
     camerahandler.h \
     filetest.h \
+    playbackhandler.h \
     sockethandler.h \
     streamhandler.h \
     videohandler.h
