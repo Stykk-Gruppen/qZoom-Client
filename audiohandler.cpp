@@ -104,23 +104,23 @@ int AudioHandler::openOutputFile()
     AVIOContext *output_io_context = NULL;
     AVStream *stream               = NULL;
     AVCodec *output_codec          = NULL;
-    int error;
+    int error = 0;
 
     /* Open the output file to write to it. */
-    if ((error = avio_open(&output_io_context, filename,
+    /*if ((error = avio_open(&output_io_context, filename,
                            AVIO_FLAG_WRITE)) < 0) {
         fprintf(stderr, "Could not open output file");
         return error;
-    }
+    }*/
 
     /* Create a new format context for the output container format. */
-    if (!(outputFormatContext = avformat_alloc_context())) {
+    /*if (!(outputFormatContext = avformat_alloc_context())) {
         fprintf(stderr, "Could not allocate output format context\n");
         return AVERROR(ENOMEM);
-    }
+    }*/
 
     /* Associate the output file (pointer) with the container format context. */
-    (outputFormatContext)->pb = output_io_context;
+    //(outputFormatContext)->pb = output_io_context;
 
     /* Guess the desired container format based on the file extension. */
     if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
@@ -705,10 +705,8 @@ void AudioHandler::cleanup()
         avformat_close_input(&inputFormatContext);
     exit(0);
 }
-int AudioHandler::main()
+int AudioHandler::init()
 {
-
-    int count = 0;
     int ret = AVERROR_EXIT;
 
     /* Open the input file for reading. */
@@ -736,14 +734,18 @@ int AudioHandler::main()
     }
     qDebug() << "Fifo init";
     /* Write the header of the output file container. */
-    if (writeOutputFileHeader())
+    /*if (writeOutputFileHeader())
     {
         cleanup();
     }
-    qDebug() << "Header written";
+    qDebug() << "Header written";*/
     /* Loop as long as we have input samples to read or output samples
      * to write; abort as soon as we have neither. */
     // int looping = 0;
+}
+int AudioHandler::main()
+    {
+    int count = 0;
     while (count < 300) {
         qDebug() << count;
         count++;
