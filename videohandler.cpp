@@ -199,13 +199,13 @@ void VideoHandler::grabFrames() {
     {
         if(1)
         {
-            qDebug() << "kommer inn i videoStreamgreiene\n";
+            //qDebug() << "kommer inn i videoStreamgreiene\n";
             if(ret < 0)
             {
                 qDebug() << "Input Avcodec open failed: " << ret << "\n";
                 exit(1);
             }
-            qDebug() << "Forbi avodec_open\n";
+            //qDebug() << "Forbi avodec_open\n";
             ret = avcodec_send_packet(inputVideoCodecContext, pkt);
             if(ret < 0)
             {
@@ -213,7 +213,7 @@ void VideoHandler::grabFrames() {
                 exit(1);
             }
 
-            qDebug() << "Forbi send packet\n";
+            //qDebug() << "Forbi send packet\n";
             ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
             if(ret < 0)
             {
@@ -226,7 +226,7 @@ void VideoHandler::grabFrames() {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }*/
-            qDebug() << "Etter recieve frame: " << ret;
+            //qDebug() << "Etter recieve frame: " << ret;
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
@@ -239,7 +239,7 @@ void VideoHandler::grabFrames() {
                                 videoFrame->linesize, 0,
                                 inputVideoCodecContext->height,
                                 scaledFrame->data, scaledFrame->linesize);
-                qDebug() << "Etter swsScale\n";
+                //qDebug() << "Etter swsScale\n";
                 if(ret < 0)
                 {
                     qDebug() << "Error with scale " << ret <<"\n";
@@ -264,16 +264,20 @@ void VideoHandler::grabFrames() {
             AVPacket* outPacket = av_packet_alloc();
             outPacket->data = NULL;
             outPacket->size = 0;
-            if(ret < 0) qDebug() << "Output Avcodec open failed: " << ret << "\n";
+            if(ret < 0){
+                qDebug() << "Output Avcodec open failed: " << ret << "\n";
+            }
 
             ret = avcodec_receive_packet(outputVideoCodecContext, outPacket);
-            if(ret < 0)
-            {
-                qDebug() << "Error with receive packet " << ret <<"\n";
-                //av_packet_unref(pkt);
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
                 skipped_frames++;
                 continue;
             }
+            else if (ret < 0) {
+                fprintf(stderr, "Error with receive packet\n");
+                exit(1);
+            }
+
             else
             {
                 skipped_frames = 0;
