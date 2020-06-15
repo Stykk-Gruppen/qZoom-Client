@@ -48,17 +48,23 @@ extern "C" {
 #include <string.h>
 #include <math.h>
 #include <QAudioDeviceInfo>
+#include <QtConcurrent/QtConcurrent>
 
 
 
-
-class AudioHandler
+class AudioHandler //: public QObject
 {
+    //Q_OBJECT
 public:
-    AudioHandler(AVFormatContext*,char*);
-    int main();
+    AudioHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames/*, QObject* parent = 0*/);
+    int grabFrames();
     int init();
 private:
+    bool writeToFile;
+    int numberOfFrames;
+    QString aDeviceName;
+    QString cDeviceName;
+    std::mutex* writeLock;
     void cleanup();
     int openInputFile();
     char* filename;

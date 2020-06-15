@@ -2,10 +2,13 @@
 #define OUTPUT_BIT_RATE 96000
 /* The number of output channels */
 #define OUTPUT_CHANNELS 2
-AudioHandler::AudioHandler(AVFormatContext *_outputFormatContext, char* _filename)
+AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames)/*, QObject* parent): QObject(parent)*/
 {
-    filename = _filename;
-    outputFormatContext = _outputFormatContext;
+    writeToFile = _writeToFile;
+    numberOfFrames = _numberOfFrames;
+    cDeviceName = _cDeviceName;
+    writeLock = _writeLock;
+    outputFormatContext = _ofmt_ctx;
     inputFormatContext = NULL;
     inputCodecContext = NULL;
     outputCodecContext = NULL;
@@ -29,16 +32,16 @@ int AudioHandler::openInputFile()
         return -1;
     }
     /* Open the input file to read from it. */
-    if ((error = avformat_open_input(&inputFormatContext, "default", audioInputFormat,
+    if ((error = avformat_open_input(&inputFormatContext, cDeviceName.toUtf8().data(), audioInputFormat,
                                      NULL)) < 0) {
-        fprintf(stderr, "Could not open input file");
+        fprintf(stderr, "Could not open audio input context");
         inputFormatContext = NULL;
         return error;
     }
 
     /* Get information on the input file (number of streams etc.). */
     if ((error = avformat_find_stream_info(inputFormatContext, NULL)) < 0) {
-        fprintf(stderr, "Could not open find stream info ");
+        fprintf(stderr, "Could not find audio stream info ");
         avformat_close_input(&inputFormatContext);
         return error;
     }
@@ -53,7 +56,7 @@ int AudioHandler::openInputFile()
 
     /* Find a decoder for the audio stream. */
     if (!(input_codec = avcodec_find_decoder((inputFormatContext)->streams[0]->codecpar->codec_id))) {
-        fprintf(stderr, "Could not find input codec\n");
+        fprintf(stderr, "Could not find audio input codec\n");
         avformat_close_input(&inputFormatContext);
         return AVERROR_EXIT;
     }
@@ -61,7 +64,7 @@ int AudioHandler::openInputFile()
     /* Allocate a new decoding context. */
     avctx = avcodec_alloc_context3(input_codec);
     if (!avctx) {
-        fprintf(stderr, "Could not allocate a decoding context\n");
+        fprintf(stderr, "Could not allocate a audio decoding context\n");
         avformat_close_input(&inputFormatContext);
         return AVERROR(ENOMEM);
     }
@@ -76,7 +79,7 @@ int AudioHandler::openInputFile()
 
     /* Open the decoder for the audio stream to use it later. */
     if ((error = avcodec_open2(avctx, input_codec, NULL)) < 0) {
-        fprintf(stderr, "Could not open input codec");
+        fprintf(stderr, "Could not open audio input codec");
         avcodec_free_context(&avctx);
         avformat_close_input(&inputFormatContext);
         return error;
@@ -123,11 +126,11 @@ int AudioHandler::openOutputFile()
     //(outputFormatContext)->pb = output_io_context;
 
     /* Guess the desired container format based on the file extension. */
-    if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
+    /* if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
                                                            NULL))) {
         fprintf(stderr, "Could not find output file format\n");
         goto cleanup;
-    }
+    }*/
 
 
 
@@ -139,14 +142,14 @@ int AudioHandler::openOutputFile()
 
     /* Create a new audio stream in the output file container. */
     if (!(stream = avformat_new_stream(outputFormatContext, NULL))) {
-        fprintf(stderr, "Could not create new stream\n");
+        fprintf(stderr, "Could not create new audio stream\n");
         error = AVERROR(ENOMEM);
         goto cleanup;
     }
 
     avctx = avcodec_alloc_context3(output_codec);
     if (!avctx) {
-        fprintf(stderr, "Could not allocate an encoding context\n");
+        fprintf(stderr, "Could not allocate an audio encoding context\n");
         error = AVERROR(ENOMEM);
         goto cleanup;
     }
@@ -173,13 +176,13 @@ int AudioHandler::openOutputFile()
 
     /* Open the encoder for the audio stream to use it later. */
     if ((error = avcodec_open2(avctx, output_codec, NULL)) < 0) {
-        fprintf(stderr, "Could not open output codec");
+        fprintf(stderr, "Could not open audio output codec");
         goto cleanup;
     }
 
     error = avcodec_parameters_from_context(stream->codecpar, avctx);
     if (error < 0) {
-        fprintf(stderr, "Could not initialize stream parameters\n");
+        fprintf(stderr, "Could not initialize audio stream parameters\n");
         goto cleanup;
     }
 
@@ -231,15 +234,15 @@ int AudioHandler::initResampler()
          * properly by the demuxer and/or decoder).
          */
     resampleContext = swr_alloc_set_opts(NULL,
-                                          av_get_default_channel_layout(outputCodecContext->channels),
-                                          outputCodecContext->sample_fmt,
-                                          outputCodecContext->sample_rate,
-                                          av_get_default_channel_layout(inputCodecContext->channels),
-                                          inputCodecContext->sample_fmt,
-                                          inputCodecContext->sample_rate,
-                                          0, NULL);
+                                         av_get_default_channel_layout(outputCodecContext->channels),
+                                         outputCodecContext->sample_fmt,
+                                         outputCodecContext->sample_rate,
+                                         av_get_default_channel_layout(inputCodecContext->channels),
+                                         inputCodecContext->sample_fmt,
+                                         inputCodecContext->sample_rate,
+                                         0, NULL);
     if (!resampleContext) {
-        fprintf(stderr, "Could not allocate resample context\n");
+        fprintf(stderr, "Could not allocate audio resample context\n");
         return AVERROR(ENOMEM);
     }
     /*
@@ -251,7 +254,7 @@ int AudioHandler::initResampler()
 
     /* Open the resampler with the specified parameters. */
     if ((error = swr_init(resampleContext)) < 0) {
-        fprintf(stderr, "Could not open resample context\n");
+        fprintf(stderr, "Could not open audio resample context\n");
         swr_free(&resampleContext);
         return error;
     }
@@ -268,8 +271,8 @@ int AudioHandler::initFifo()
 {
     /* Create the FIFO buffer based on the specified output sample format. */
     if (!(fifo = av_audio_fifo_alloc(outputCodecContext->sample_fmt,
-                                      outputCodecContext->channels, 1))) {
-        fprintf(stderr, "Could not allocate FIFO\n");
+                                     outputCodecContext->channels, 1))) {
+        fprintf(stderr, "Could not allocate audio FIFO\n");
         return AVERROR(ENOMEM);
     }
     return 0;
@@ -280,7 +283,7 @@ int AudioHandler::initFifo()
  * @param outputFormatContext Format context of the output file
  * @return Error code (0 if successful)
  */
-int AudioHandler::writeOutputFileHeader()
+/*int AudioHandler::writeOutputFileHeader()
 {
     int error;
     if ((error = avformat_write_header(outputFormatContext, NULL)) < 0) {
@@ -288,7 +291,7 @@ int AudioHandler::writeOutputFileHeader()
         return error;
     }
     return 0;
-}
+}*/
 
 /**
  * Decode one audio frame from the input file.
@@ -317,7 +320,7 @@ int AudioHandler::decodeAudioFrame(AVFrame *frame,int *data_present, int *finish
         if (error == AVERROR_EOF)
             *finished = 1;
         else {
-            fprintf(stderr, "Could not read frame");
+            fprintf(stderr, "Could not read audio frame");
             return error;
         }
     }
@@ -325,7 +328,7 @@ int AudioHandler::decodeAudioFrame(AVFrame *frame,int *data_present, int *finish
     /* Send the audio frame stored in the temporary packet to the decoder.
      * The input audio stream decoder is used to do this. */
     if ((error = avcodec_send_packet(inputCodecContext, &input_packet)) < 0) {
-        fprintf(stderr, "Could not send packet for decoding ");
+        fprintf(stderr, "Could not send audio packet for decoding ");
         return error;
     }
 
@@ -342,7 +345,7 @@ int AudioHandler::decodeAudioFrame(AVFrame *frame,int *data_present, int *finish
         error = 0;
         goto cleanup;
     } else if (error < 0) {
-        fprintf(stderr, "Could not decode frame");
+        fprintf(stderr, "Could not decode audio frame");
         goto cleanup;
         /* Default case: Return decoded data. */
     } else {
@@ -440,14 +443,14 @@ int AudioHandler::addSamplesToFifo(uint8_t **converted_input_samples,
     /* Make the FIFO as large as it needs to be to hold both,
      * the old and the new samples. */
     if ((error = av_audio_fifo_realloc(fifo, av_audio_fifo_size(fifo) + frame_size)) < 0) {
-        fprintf(stderr, "Could not reallocate FIFO\n");
+        fprintf(stderr, "Could not reallocate audio FIFO\n");
         return error;
     }
 
     /* Store the new samples in the FIFO buffer. */
     if (av_audio_fifo_write(fifo, (void **)converted_input_samples,
                             frame_size) < frame_size) {
-        fprintf(stderr, "Could not write data to FIFO\n");
+        fprintf(stderr, "Could not write data to audio FIFO\n");
         return AVERROR_EXIT;
     }
     return 0;
@@ -486,7 +489,7 @@ int AudioHandler::readDecodeConvertAndStore(int *finished)
      */
     /* Initialize temporary storage for one input frame. */
     if (!(input_frame = av_frame_alloc())) {
-        fprintf(stderr, "Could not allocate input frame\n");
+        fprintf(stderr, "Could not allocate audio input frame\n");
         goto cleanup;
     }
     //if (initInputFrame(&input_frame))
@@ -549,7 +552,7 @@ int AudioHandler::initOutputFrame(AVFrame **frame,int frame_size)
 
     /* Create a new frame to store the audio samples. */
     if (!(*frame = av_frame_alloc())) {
-        fprintf(stderr, "Could not allocate output frame\n");
+        fprintf(stderr, "Could not allocate audio output frame\n");
         return AVERROR_EXIT;
     }
 
@@ -566,7 +569,7 @@ int AudioHandler::initOutputFrame(AVFrame **frame,int frame_size)
     /* Allocate the samples of the created frame. This call will make
      * sure that the audio frame can hold as many samples as specified. */
     if ((error = av_frame_get_buffer(*frame, 0)) < 0) {
-        fprintf(stderr, "Could not allocate output frame samples");
+        fprintf(stderr, "Could not allocate output audio frame samples");
         av_frame_free(frame);
         return error;
     }
@@ -588,7 +591,7 @@ static int64_t pts = 0;
  */
 int AudioHandler::encodeAudioFrame(AVFrame *frame,
                                    /*AVFormatContext *outputFormatContext,
-                                   AVCodecContext *outputCodecContext,*/
+                                                                      AVCodecContext *outputCodecContext,*/
                                    int *data_present)
 {
     /* Packet used for temporary storage. */
@@ -610,7 +613,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
         error = 0;
         goto cleanup;
     } else if (error < 0) {
-        fprintf(stderr, "Could not send packet for encoding");
+        fprintf(stderr, "Could not send packet audio for encoding");
         return error;
     }
 
@@ -626,7 +629,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
         error = 0;
         goto cleanup;
     } else if (error < 0) {
-        fprintf(stderr, "Could not encode frame");
+        fprintf(stderr, "Could not encode audio frame");
         goto cleanup;
         /* Default case: Return encoded data. */
     } else {
@@ -634,11 +637,13 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
     }
 
     /* Write one audio frame from the temporary packet to the output file. */
+    writeLock->lock();
     if (*data_present &&
-            (error = av_write_frame(outputFormatContext, &output_packet)) < 0) {
-        fprintf(stderr, "Could not write frame");
+            (error = av_interleaved_write_frame(outputFormatContext, &output_packet)) < 0) {
+        fprintf(stderr, "Could not write audio frame");
         goto cleanup;
     }
+    writeLock->unlock();
 
 cleanup:
     av_packet_unref(&output_packet);
@@ -654,8 +659,8 @@ cleanup:
  * @return Error code (0 if successful)
  */
 int AudioHandler::loadEncodeAndWrite(/*AVAudioFifo *fifo,
-                                     AVFormatContext *outputFormatContext,
-                                     AVCodecContext *outputCodecContext*/)
+                                                                          AVFormatContext *outputFormatContext,
+                                                                          AVCodecContext *outputCodecContext*/)
 {
     /* Temporary storage of the output samples of the frame written to the file. */
     AVFrame *output_frame;
@@ -673,7 +678,7 @@ int AudioHandler::loadEncodeAndWrite(/*AVAudioFifo *fifo,
     /* Read as many samples from the FIFO buffer as required to fill the frame.
      * The samples are stored in the frame temporarily. */
     if (av_audio_fifo_read(fifo, (void **)output_frame->data, frame_size) < frame_size) {
-        fprintf(stderr, "Could not read data from FIFO\n");
+        fprintf(stderr, "Could not read audio data from FIFO\n");
         av_frame_free(&output_frame);
         return AVERROR_EXIT;
     }
@@ -712,27 +717,27 @@ int AudioHandler::init()
     /* Open the input file for reading. */
     if (openInputFile())
     {
-        cleanup();
+        return ret;
     }
-    qDebug() << "Stream opened";
+    //qDebug() << "Stream opened";
     /* Open the output file for writing. */
     if (openOutputFile())
     {
-        cleanup();
+        return ret;
     }
-    qDebug() << "Output File opened";
+    //qDebug() << "Output File opened";
     /* Initialize the resampler to be able to convert audio sample formats. */
     if (initResampler())
     {
-        cleanup();
+        return ret;
     }
-    qDebug() << "Sampler init";
+    //qDebug() << "Sampler init";
     /* Initialize the FIFO buffer to store audio samples to be encoded. */
     if (initFifo())
     {
-        cleanup();
+        return ret;
     }
-    qDebug() << "Fifo init";
+    //qDebug() << "Fifo init";
     /* Write the header of the output file container. */
     /*if (writeOutputFileHeader())
     {
@@ -742,13 +747,14 @@ int AudioHandler::init()
     /* Loop as long as we have input samples to read or output samples
      * to write; abort as soon as we have neither. */
     // int looping = 0;
+    return 0;
 }
-int AudioHandler::main()
-    {
+int AudioHandler::grabFrames()
+{
     int count = 0;
-    while (count < 300) {
-        qDebug() << count;
+    while (count < numberOfFrames) {
         count++;
+        //qDebug() << count;
         /* Use the encoder's desired frame size for processing. */
         const int output_frame_size = outputCodecContext->frame_size;
         int finished                = 0;
@@ -805,10 +811,11 @@ int AudioHandler::main()
      * @param outputFormatContext Format context of the output file
      * @return Error code (0 if successful)
      */
-
-    if ((av_write_trailer(outputFormatContext)) < 0) {
-        fprintf(stderr, "Could not write output file trailer");
-        cleanup();
+    if(writeToFile){
+        if ((av_write_trailer(outputFormatContext)) < 0) {
+            fprintf(stderr, "Could not write output file trailer");
+            cleanup();
+        }
     }
     return 0;
 

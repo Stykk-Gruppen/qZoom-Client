@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler());
     streamHandler->record();
+    //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     PlaybackHandler* player = new PlaybackHandler();
     QQuickView view;

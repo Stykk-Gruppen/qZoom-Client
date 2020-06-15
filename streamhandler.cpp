@@ -9,10 +9,16 @@ StreamHandler::StreamHandler()
 
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
-
+    writeToFile = false;
+    filename = "streamFile.isma";
+    numberOfFrames = 20000;
     if(writeToFile)
     {
-        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        if (ret < 0) {
+            fprintf(stderr, "Could not alloc output context with file '%s'", filename);
+            exit(1);
+        }
 
     }
     else
@@ -45,14 +51,18 @@ StreamHandler::StreamHandler()
                     (void*) socketHandler,
                     NULL, &custom_io_write, NULL);
         ofmt_ctx->pb = custom_io;
-        av_dump_format(ofmt_ctx, 0, filename, 1);
         av_dict_set(&options, "live", "1", 0);
     }
     videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
-    //audioHandler = new AudioHandler(ofmt_ctx, "fil.imsv");
+    audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
     ret = videoHandler->init();
     if(ret<0){
         fprintf(stderr, "Could not init videohandler");
+        exit(1);
+    }
+    ret = audioHandler->init();
+    if(ret<0){
+        fprintf(stderr, "Could not init audiohandler");
         exit(1);
     }
     av_dump_format(ofmt_ctx, 0, filename, 1);
@@ -66,7 +76,7 @@ StreamHandler::StreamHandler()
 void StreamHandler::record()
 {
     QtConcurrent::run(videoHandler, &VideoHandler::grabFrames);
-
+    QtConcurrent::run(audioHandler, &AudioHandler::grabFrames);
 }
 
 int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
