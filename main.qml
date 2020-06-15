@@ -2,7 +2,8 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
-
+import QtQuick 2.0
+import VLCQt 1.1
 
 ApplicationWindow {
     id: window
@@ -11,12 +12,30 @@ ApplicationWindow {
     height: 800
     title: qsTr("qZoom")
 
-    VideoOutput {
+
+    Rectangle {
+        width: 640
+        height: 480
+        color: "black"
+
+    VlcVideoPlayer
+    {
+        id: vidwidget
+        anchors.fill: parent
+        url: "udp://@:1337"
+        //url: "http://www.spacese.spacegrant.org/myvideoplayer_files/Gentry_Lee_2005.flv"
+            }
+    }
+}
+
+    /*VideoOutput {
         id: test
         width: 1920
         height: 1080
         source: mediaplayer
     }
+
+
 
     ComboBox {
         width: 200
@@ -93,5 +112,6 @@ ApplicationWindow {
             Component.onCompleted: t.getAudioTypes()*/
 
 
-    }
+/*    }
 
+*/
