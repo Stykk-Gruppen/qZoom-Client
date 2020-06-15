@@ -7,7 +7,7 @@ VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObj
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
-    this->aDeviceName = aDeviceName;
+    //this->aDeviceName = aDeviceName;
 
     ofmt_ctx = (_ofmt_ctx);
 }
@@ -45,7 +45,7 @@ int VideoHandler::init()
     //Allocate outputStreamFormatContext
     if (writeToFile)
     {
-        //avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     }
     else
     {
@@ -57,7 +57,7 @@ int VideoHandler::init()
         return -1;
     }
     //Set OutputFormat
-    //ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
+    ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
 
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
@@ -160,7 +160,7 @@ int VideoHandler::init()
         av_dump_format(ofmt_ctx, 0, filename, 1);
     }
 
-    //QtConcurrent::run(this, &VideoHandler::grabFrames);
+    QtConcurrent::run(this, &VideoHandler::grabFrames);
     return 0;
 }
 
@@ -317,6 +317,7 @@ void VideoHandler::grabFrames() {
     }
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
+
 int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);

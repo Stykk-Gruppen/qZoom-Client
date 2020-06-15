@@ -46,7 +46,7 @@ public:
     VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent = 0);
     int init();
     void grabFrames();
-    bool writeToFile = true;
+    bool writeToFile = false;
     int numberOfFrames = 200;
     const char* filename = "nyTest.ismv";
     QString aDeviceName;

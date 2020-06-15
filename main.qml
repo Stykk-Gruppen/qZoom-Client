@@ -10,6 +10,35 @@ ApplicationWindow {
     height: 800
     title: qsTr("qZoom")
 
+    VideoOutput {
+        id: test
+        width: 1920
+        height: 1080
+        source: mediaplayer
+    }
+
+    ComboBox {
+        width: 200
+        model: ListModel {
+            id: t
+            function getAudioTypes() {
+                var inputList = audioHandler.getAudioInputDevices()
+                clear()
+                for (var title in inputList) {
+                    append({text: inputList[title]})
+                }
+            }
+        }
+        onActivated: {
+            //console.log("switched Audio Input Device to: " + currentValue)
+            audioHandler.changeAudioInputDevice(currentValue);
+        }
+    }
+
+    Component.onCompleted: {
+        t.getAudioTypes()
+
+    }
 
 
 /*
