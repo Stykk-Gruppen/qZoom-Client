@@ -23,6 +23,7 @@
 #include <QFile>
 #include "videohandler.h"
 #include <QTimer>
+#include "streamhandler.h"
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -47,11 +48,14 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", "default"));
-    engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler());
+    streamHandler->record();
+
+    //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", "default"));
+    //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
 
-    videoHandler->init();
+    //videoHandler->init();
     //Denne klassen klarer å lagre audio stream til fil
     //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
     //pureAudio->main();

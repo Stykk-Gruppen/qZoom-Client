@@ -43,11 +43,11 @@ class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, QString aDeviceName, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent = 0);
     int init();
     void grabFrames();
-    bool writeToFile = false;
-    int numberOfFrames = 2500;
+    bool writeToFile = true;
+    int numberOfFrames = 200;
     const char* filename = "nyTest.ismv";
     QString aDeviceName;
     QString cDeviceName;

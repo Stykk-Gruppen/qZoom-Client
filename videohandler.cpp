@@ -1,13 +1,15 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, QString aDeviceName, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent): QObject(parent)
 {
     std::ofstream outfile("video.ismv", std::ostream::binary);
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
     this->aDeviceName = aDeviceName;
+
+    ofmt_ctx = (_ofmt_ctx);
 }
 
 int VideoHandler::init()
@@ -17,7 +19,7 @@ int VideoHandler::init()
     avcodec_register_all();
     avdevice_register_all();
     ifmt_ctx = NULL;
-    ofmt_ctx = NULL;
+    //ofmt_ctx = NULL;
     int ret;
 
     //Find input video formats
@@ -43,7 +45,7 @@ int VideoHandler::init()
     //Allocate outputStreamFormatContext
     if (writeToFile)
     {
-        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        //avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     }
     else
     {
@@ -55,7 +57,7 @@ int VideoHandler::init()
         return -1;
     }
     //Set OutputFormat
-    ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
+    //ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
 
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
@@ -158,7 +160,7 @@ int VideoHandler::init()
         av_dump_format(ofmt_ctx, 0, filename, 1);
     }
 
-    QtConcurrent::run(this, &VideoHandler::grabFrames);
+    //QtConcurrent::run(this, &VideoHandler::grabFrames);
     return 0;
 }
 
