@@ -3,7 +3,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 //import QtQuick 2.0
-import VLCQt 1.0
+import VLCQt 1.1
 
 ApplicationWindow {
     id: window
