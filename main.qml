@@ -17,13 +17,13 @@ ApplicationWindow {
         height: 480
         color: "black"
 
-    VlcVideoPlayer
+   /* VlcVideoPlayer
     {
         id: vidwidget
         anchors.fill: parent
         //url: "udp://@:1337"
         url: "http://www.spacese.spacegrant.org/myvideoplayer_files/Gentry_Lee_2005.flv"
-            }
+            }*/
     }
 }
 

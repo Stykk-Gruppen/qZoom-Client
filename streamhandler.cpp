@@ -48,12 +48,19 @@ StreamHandler::StreamHandler()
         av_dump_format(ofmt_ctx, 0, filename, 1);
         av_dict_set(&options, "live", "1", 0);
     }
-    qDebug() << "Kom hit!";
     videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
     //audioHandler = new AudioHandler(ofmt_ctx, "fil.imsv");
-    videoHandler->init();
+    ret = videoHandler->init();
+    if(ret<0){
+        fprintf(stderr, "Could not init videohandler");
+        exit(1);
+    }
     av_dump_format(ofmt_ctx, 0, filename, 1);
     ret = avformat_write_header(ofmt_ctx, &options);
+    if(ret<0){
+        fprintf(stderr, "Could not open write header");
+        exit(1);
+    }
 }
 
 void StreamHandler::record()

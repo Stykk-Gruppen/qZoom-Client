@@ -168,7 +168,7 @@ int VideoHandler::init()
 
     //QtConcurrent::run(this, &VideoHandler::grabFrames);
     //return 0;
-    qDebug() << "Kom til slutten av init";
+    //qDebug() << "Kom til slutten av init";
 }
 
 void VideoHandler::grabFrames() {

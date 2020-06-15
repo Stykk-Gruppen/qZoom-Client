@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("mediaplayer", player);
     //engine.rootContext()->setContextProperty("audioHandler", audioHandler.data());
     //player->playFromFile("/home/stian/Videos/The.Usual.Suspects.1995.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv");
-    player->playFromStream("udp://localhost:1337");
+    //player->playFromStream("udp://localhost:1337");
 
     //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
     //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
