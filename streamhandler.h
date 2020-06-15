@@ -39,6 +39,8 @@ public:
     AVFormatContext* ofmt_ctx;
     const char* filename = "video.ismv";
     void record();
+
+    std::mutex writeLock;
 };
 
 #endif // STREAMHANDLER_H

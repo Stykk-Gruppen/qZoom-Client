@@ -1,15 +1,15 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, std::mutex* _writeLock, QObject* parent): QObject(parent)
 {
     std::ofstream outfile("video.ismv", std::ostream::binary);
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
     this->aDeviceName = aDeviceName;
-
-    ofmt_ctx = (_ofmt_ctx);
+    writeLock = _writeLock;
+    ofmt_ctx = _ofmt_ctx;
 }
 
 int VideoHandler::init()
@@ -128,7 +128,7 @@ int VideoHandler::init()
     {
         if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         {
-            ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
+            ret = avio_open(&ofmt_ctx->pb, ofmt_ctx->filename, AVIO_FLAG_WRITE);
 
             if (ret < 0) {
                 fprintf(stderr, "Could not open output file '%s'", filename);
@@ -284,8 +284,9 @@ void VideoHandler::grabFrames() {
                 outPacket->duration = av_rescale_q(outPacket->duration, encoderTimebase, muxerTimebase);
                 outPacket->pos = -1;
 
+                writeLock.lock();
                 int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
-
+                writeLock.unlock();
                 //int ret = av_write_frame(ofmt_ctx, outPacket);
 
                 //int ret = av_write_frame(ofmt_ctx, pkt);
