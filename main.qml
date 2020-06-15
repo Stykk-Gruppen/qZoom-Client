@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 
+
 ApplicationWindow {
     id: window
     visible: true

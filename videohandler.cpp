@@ -47,7 +47,7 @@ int VideoHandler::init()
     //Allocate outputStreamFormatContext
     if (writeToFile)
     {
-        avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+        //avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     }
     else
     {
@@ -59,7 +59,7 @@ int VideoHandler::init()
         return -1;
     }*/
     //Set OutputFormat
-    ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
+    //ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
 
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
