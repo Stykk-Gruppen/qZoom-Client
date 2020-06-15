@@ -16,10 +16,10 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 SOURCES += \
         audiohandler.cpp \
         camerahandler.cpp \
-        cameratest.cpp \
         filetest.cpp \
         main.cpp \
-        sockethandler.cpp
+        sockethandler.cpp \
+        videohandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -41,6 +41,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     audiohandler.h \
     camerahandler.h \
-    cameratest.h \
     filetest.h \
-    sockethandler.h
+    sockethandler.h \
+    videohandler.h

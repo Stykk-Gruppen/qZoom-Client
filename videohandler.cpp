@@ -1,7 +1,7 @@
-#include "cameratest.h"
+#include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-CameraTest::CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, QString aDeviceName, QObject* parent): QObject(parent)
 {
     std::ofstream outfile("video.ismv", std::ostream::binary);
     socketHandler = new SocketHandler();
@@ -10,7 +10,7 @@ CameraTest::CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent
     this->aDeviceName = aDeviceName;
 }
 
-int CameraTest::init()
+int VideoHandler::init()
 {
     //Registrer div ting
     av_register_all();
@@ -158,11 +158,11 @@ int CameraTest::init()
         av_dump_format(ofmt_ctx, 0, filename, 1);
     }
 
-    QtConcurrent::run(this, &CameraTest::grabFrames);
+    QtConcurrent::run(this, &VideoHandler::grabFrames);
     return 0;
 }
 
-void CameraTest::grabFrames() {
+void VideoHandler::grabFrames() {
 
     AVPacket* pkt = av_packet_alloc();
     pkt->size = 0;
@@ -315,7 +315,7 @@ void CameraTest::grabFrames() {
     }
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
-int CameraTest::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
+int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
 

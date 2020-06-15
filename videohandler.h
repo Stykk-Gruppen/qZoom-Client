@@ -1,5 +1,5 @@
-#ifndef CAMERATEST_H
-#define CAMERATEST_H
+#ifndef VIDEOHANDLER_H
+#define VIDEOHANDLER_H
 
 #include <QUdpSocket>
 #include <QObject>
@@ -39,11 +39,11 @@ extern "C" {
 #include "libavutil/imgutils.h"
 }
 
-class CameraTest : public QObject
+class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    CameraTest(QString cDeviceName, QString aDeviceName, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, QString aDeviceName, QObject* parent = 0);
     int init();
     void grabFrames();
     bool writeToFile = false;
@@ -68,4 +68,4 @@ private:
     SocketHandler *socketHandler;
     struct SwsContext* img_convert_ctx;
 };
-#endif // CAMERATEST_H
+#endif // VideoHandler_H
