@@ -13,7 +13,6 @@
 #include <QBuffer>
 #include "camerahandler.h"
 #include "videohandler.h"
-#include "cameratest.h"
 #include "filetest.h"
 #include "audiohandler.h"
 #include <QCameraViewfinder>
@@ -22,7 +21,9 @@
 #include <libavformat/avformat.h>
 #include <QAudioInput>
 #include <QFile>
+#include "videohandler.h"
 #include <QTimer>
+#include "streamhandler.h"
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -47,11 +48,14 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    QScopedPointer<CameraTest> cameraTest(new CameraTest("/dev/video0", "default"));
-    engine.rootContext()->setContextProperty("cameraTest", cameraTest.data());
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler());
+    streamHandler->record();
+
+    //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", "default"));
+    //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
 
-    cameraTest->init();
+    //videoHandler->init();
     //Denne klassen klarer å lagre audio stream til fil
     //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
     //pureAudio->main();
@@ -61,7 +65,7 @@ int main(int argc, char *argv[])
     //fil->main();
     //exit(1337);
 
-    //cameraTest->init();
+    //VideoHandler->init();
 
     return app.exec();
 }

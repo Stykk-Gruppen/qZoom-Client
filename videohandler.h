@@ -1,15 +1,17 @@
 #ifndef VIDEOHANDLER_H
 #define VIDEOHANDLER_H
 
-#include <QObject>
-#include <QCamera>
-#include <QCameraInfo>
-#include <QVideoProbe>
-#include <QMediaPlayer>
-#include <QMediaRecorder>
+#include <QUdpSocket>
 #include <QObject>
 #include <QVideoFrame>
-#include <QCameraImageCapture>
+#include <QtConcurrent/QtConcurrent>
+#include <iostream>
+#include <fstream>
+#include "sockethandler.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -24,7 +26,6 @@ extern "C" {
 #include "libavformat/avio.h"
 #include "libavutil/frame.h"
 #include "libavcodec/avcodec.h"
-
 #include "libavfilter/avfilter.h"
 #include "libavutil/avutil.h"
 #include "libavutil/dict.h"
@@ -32,28 +33,39 @@ extern "C" {
 #include "libavutil/fifo.h"
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
-
 #include "libswresample/swresample.h"
+#include "libavutil/common.h"
+#include "libavutil/pixdesc.h"
+#include "libavutil/imgutils.h"
 }
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-
 
 class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QObject* parent = 0);
-    QVideoProbe* videoProbe;
-    QCamera* camera;
-    void setup(QObject* qmlCamera);
-    QMediaRecorder* recorder;
-    QVector<uchar*> frames;
+    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, QObject* parent = 0);
+    int init();
+    void grabFrames();
+    bool writeToFile = true;
+    int numberOfFrames = 200;
+    const char* filename = "nyTest.ismv";
+    QString aDeviceName;
+    QString cDeviceName;
 
-public slots:
-    void handleFrame(QVideoFrame);
+    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+
+private:
+    int skipped_frames = 0;
+    std::ofstream outfile;
+    AVCodecContext* inputVideoCodecContext;
+    AVCodecContext* outputVideoCodecContext;
+    AVFrame* videoFrame;
+    AVFrame* scaledFrame;
+    AVFormatContext *ifmt_ctx, *ofmt_ctx;
+    AVCodec* inputVideoCodec;
+    AVCodec* outputVideoCodec;
+    int videoStream;
+    SocketHandler *socketHandler;
+    struct SwsContext* img_convert_ctx;
 };
-
-#endif // VIDEOHANDLER_H
+#endif // VideoHandler_H
