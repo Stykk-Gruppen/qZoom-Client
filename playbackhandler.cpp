@@ -62,6 +62,7 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
         return buf_size;
 }
 
+
 int PlaybackHandler::start()
 {
     QtConcurrent::run([this]()
@@ -80,7 +81,7 @@ int PlaybackHandler::start()
 
         avio_ctx_buffer = reinterpret_cast<uint8_t*>(av_malloc(avio_ctx_buffer_size));
         Q_ASSERT(avio_ctx_buffer);
-        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, /*&bdudpSocket, read_packet(), nullptr, nullptr);
+        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, &bdudpSocket, read_packet(), nullptr, nullptr);
         Q_ASSERT(avio_ctx);
 
         fmt_ctx->pb = avio_ctx;

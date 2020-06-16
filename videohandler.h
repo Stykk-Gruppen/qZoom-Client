@@ -40,11 +40,13 @@ extern "C" {
 #include "libavutil/imgutils.h"
 }
 
+#include "imagehandler.h"
+
 class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent = 0);
     int init();
     void grabFrames();
     bool writeToFile = true;
@@ -71,5 +73,6 @@ private:
     int videoStream;
     SocketHandler *socketHandler;
     struct SwsContext* img_convert_ctx;
+    ImageHandler* imageHandler;
 };
 #endif // VideoHandler_H

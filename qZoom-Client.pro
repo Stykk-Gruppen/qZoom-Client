@@ -14,13 +14,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcodec -lavfilter -I/usr/include
 
-LIBS += -L/usr/local/lib -lVLCQtCore -lVLCQtWidgets -lVLCQtQml -I/usr/local/include
-
 
 SOURCES += \
         audiohandler.cpp \
         camerahandler.cpp \
         filetest.cpp \
+        imagehandler.cpp \
         main.cpp \
         playbackhandler.cpp \
         sockethandler.cpp \
@@ -48,6 +47,7 @@ HEADERS += \
     audiohandler.h \
     camerahandler.h \
     filetest.h \
+    imagehandler.h \
     playbackhandler.h \
     sockethandler.h \
     streamhandler.h \

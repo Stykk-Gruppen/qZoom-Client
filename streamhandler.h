@@ -30,11 +30,12 @@ extern "C" {
 #include "libavutil/pixdesc.h"
 #include "libavutil/imgutils.h"
 }
+#include "imagehandler.h"
 
 class StreamHandler
 {
 public:
-    StreamHandler();
+    StreamHandler(ImageHandler* imageHandler);
 
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;

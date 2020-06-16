@@ -1,7 +1,7 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent): QObject(parent)
 {
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames;
@@ -10,6 +10,7 @@ VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
     this->aDeviceName = aDeviceName;
+    this->imageHandler = imageHandler;
     writeLock = _writeLock;
     ofmt_ctx = _ofmt_ctx;
 }
@@ -284,6 +285,7 @@ void VideoHandler::grabFrames() {
                     scaledFrame->pts = pts;
                    pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
                 }
+                //imageHandler->readLocalImage(NULL, outputVideoCodecContext, scaledFrame);
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
                 if(ret < 0)
                 {

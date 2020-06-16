@@ -25,6 +25,7 @@
 #include <QTimer>
 #include "streamhandler.h"
 #include "playbackhandler.h"
+#include "imagehandler.h"
 #include <QQuickView>
 extern "C"
 {
@@ -38,15 +39,15 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
-#include <VLCQtCore/Common.h>
-#include <VLCQtQml/QmlVideoPlayer.h>
+//#include <VLCQtCore/Common.h>
+//#include <VLCQtQml/QmlVideoPlayer.h>
+//#include <VLCQtQml/QmlPlayer.h>
+//#include <QtPlugin>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
-
-
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -57,16 +58,18 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler());
+    ImageHandler* t = new ImageHandler();
+    QScopedPointer<ImageHandler> imageHandler(t);
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t));
+
     streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
-    PlaybackHandler* player = new PlaybackHandler();
-    QQuickView view;
-    engine.rootContext()->setContextProperty("mediaplayer", player);
-    //engine.rootContext()->setContextProperty("audioHandler", audioHandler.data());
-    //player->playFromFile("/home/stian/Videos/The.Usual.Suspects.1995.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv");
-    //player->playFromStream("udp://localhost:1337");
+    //PlaybackHandler* player = new PlaybackHandler();
+    //QQuickView view;
+    //engine.rootContext()->setContextProperty("mediaplayer", player);
+    engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
+    engine.addImageProvider("live", imageHandler.data());
 
     //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
     //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
@@ -83,6 +86,10 @@ int main(int argc, char *argv[])
     //exit(1337);
 
     //VideoHandler->init();
+    //imageHandler->veryFunStianLoop();
+
+
+
 
     return app.exec();
 }

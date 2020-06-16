@@ -1,6 +1,6 @@
 #include "streamhandler.h"
 
-StreamHandler::StreamHandler()
+StreamHandler::StreamHandler(ImageHandler* imageHandler)
 {
     avcodec_register_all();
     av_register_all();
@@ -50,7 +50,7 @@ StreamHandler::StreamHandler()
         ofmt_ctx->pb = custom_io;
         av_dict_set(&options, "live", "1", 0);
     }
-    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
+    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames, imageHandler);
     audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
     ret = videoHandler->init();
     if(ret<0){
