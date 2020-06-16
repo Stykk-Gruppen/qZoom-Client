@@ -1,8 +1,9 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent): QObject(parent)
 {
+    time = _time;
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames;
     //std::ofstream outfile("video.ismv", std::ostream::binary);
@@ -250,7 +251,7 @@ void VideoHandler::grabFrames() {
             }
 
             qDebug() << "Etter recieve frame: " << ret;
-            if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
+            if (inputVideoCodecContext->pix_fmt == STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
@@ -295,7 +296,7 @@ void VideoHandler::grabFrames() {
                 }
             } else {
                 if(firstPacket){
-                        pts = av_gettime();
+                        pts = time;
                         firstPacket = false;
                     }
 

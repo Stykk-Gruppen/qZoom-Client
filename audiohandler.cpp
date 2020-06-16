@@ -2,8 +2,9 @@
 #define OUTPUT_BIT_RATE 96000
 /* The number of output channels */
 #define OUTPUT_CHANNELS 2
-AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames)/*, QObject* parent): QObject(parent)*/
 {
+    time = _time;
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames * 10;
     cDeviceName = _cDeviceName;
@@ -602,7 +603,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
 
     /* Set a timestamp based on the sample rate for the container. */
     if(first){
-            pts = av_gettime()*10;
+            pts = time*10;
             first = false;
         }
 

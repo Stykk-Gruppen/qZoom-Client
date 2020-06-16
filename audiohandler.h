@@ -57,10 +57,11 @@ class AudioHandler //: public QObject
 {
     //Q_OBJECT
 public:
-    AudioHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames/*, QObject* parent = 0*/);
+    AudioHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t time ,int _numberOfFrames/*, QObject* parent = 0*/);
     int grabFrames();
     int init();
 private:
+    int64_t time;
     bool writeToFile;
     int numberOfFrames;
     QString aDeviceName;

@@ -50,8 +50,9 @@ StreamHandler::StreamHandler(ImageHandler* imageHandler)
         ofmt_ctx->pb = custom_io;
         av_dict_set(&options, "live", "1", 0);
     }
-    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, numberOfFrames, imageHandler);
-    audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock, numberOfFrames);
+    int64_t time = av_gettime();
+    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, time,numberOfFrames, imageHandler);
+    audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock,time, numberOfFrames);
     ret = videoHandler->init();
     if(ret<0){
         fprintf(stderr, "Could not init videohandler");

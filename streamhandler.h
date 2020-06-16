@@ -29,6 +29,7 @@ extern "C" {
 #include "libavutil/common.h"
 #include "libavutil/pixdesc.h"
 #include "libavutil/imgutils.h"
+#include "libavutil/time.h"
 }
 #include "imagehandler.h"
 
