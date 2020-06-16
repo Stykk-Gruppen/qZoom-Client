@@ -255,13 +255,14 @@ void VideoHandler::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
-                scaledFrame->pts = videoFrame->best_effort_timestamp;
+                //scaledFrame->pts = videoFrame->best_effort_timestamp;
                 //static int encodedFrames = 0;
                 //static int prev = videoFrame->pts;
                 //scaledFrame->pts = encodedFrames;
                 //encodedFrames++;
                 //prev += scaledFrame->pts;
                 //pts += scaledFrame->pkt_duration;
+
 
 
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
@@ -282,6 +283,15 @@ void VideoHandler::grabFrames() {
                     exit(1);
                 }
             } else {
+                if(firstPacket){
+                        pts = av_gettime();
+                        firstPacket = false;
+                    }
+
+                if (videoFrame) {
+                    videoFrame->pts = pts;
+                    pts += (int)inputVideoCodecContext->time_base.den/30;
+                }
                 ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
                 if(ret < 0)
                 {
@@ -346,6 +356,7 @@ void VideoHandler::grabFrames() {
                 qDebug() << "**********VIDEO*****************";
                 qDebug() << "Outpacket pts: " << outPacket->pts;
                 qDebug() << "Outpacket dts: " << outPacket->dts;
+                qDebug() << outPacket->stream_index;
 
                 outPacket->pts = av_rescale_q_rnd(outPacket->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
                 outPacket->dts = av_rescale_q_rnd(outPacket->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
