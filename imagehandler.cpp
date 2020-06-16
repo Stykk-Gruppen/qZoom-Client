@@ -76,39 +76,35 @@ void ImageHandler::veryFunStianLoop()
     });
 }
 
-void ImageHandler::readLocalImage(AVCodec* codec, AVCodecContext* codecContext, AVFrame* frame)
+void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
 {
-    const int width = 400;
-    const int height = 400;
-    //QImage img( width, height, QImage::Format_RGB888 );
+    QImage img( frame->width, frame->height, QImage::Format_RGB888 );
 
     AVFrame	*frameRGB = av_frame_alloc();
+    frameRGB->format = AV_PIX_FMT_RGB24;
+    frameRGB->width = frame->width;
+    frameRGB->height = frame->height;
+
     SwsContext *imgConvertCtx = nullptr;
 
-    avpicture_alloc( ( AVPicture *) frameRGB, AV_PIX_FMT_RGB24, width, height);
+    qDebug() << frame->height << frame->width << codecContext->pix_fmt;
+
+    avpicture_alloc( ( AVPicture *) frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
     imgConvertCtx = sws_getContext( codecContext->width, codecContext->height,
-                                     codecContext->pix_fmt, width, height, AV_PIX_FMT_RGB24,
+                                     codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
                                      SWS_BICUBIC, NULL, NULL, NULL);
     if( 1 == mFramesFinished && nullptr != imgConvertCtx )
     {
     //conversion frame to frameRGB
     sws_scale(imgConvertCtx, frame->data, frame->linesize, 0, codecContext->height, frameRGB->data, frameRGB->linesize);
     //setting QImage from frameRGB
-    /*
-    for( int y = 0; y < height; ++y )
+
+    for( int y = 0; y < frame->height; ++y )
        memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0] );
-    } */
-    qDebug() << frame->data;
-    qDebug() << frameRGB->data;
-
-    QImage image(frameRGB->data[0],
-            frameRGB->width,
-            frameRGB->height,
-            frameRGB->linesize[0],
-            QImage::Format_RGB888);
-
-    emit updateImage(image);
     }
+
+    emit updateImage(img);
+
 }
 
 /*
