@@ -39,12 +39,12 @@ public:
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;
     AVFormatContext* ofmt_ctx;
-    const char* filename = "video.ismv";
+    const char* filename = "video.isma";
     void record();
-    bool writeToFile = false;
+    bool writeToFile = true;
     std::mutex writeLock;
     SocketHandler* socketHandler;
-    int numberOfFrames = 5000;
+    int numberOfFrames = 200;
 
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 

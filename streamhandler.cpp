@@ -9,9 +9,6 @@ StreamHandler::StreamHandler()
 
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
-    writeToFile = false;
-    filename = "streamFile.isma";
-    numberOfFrames = 20000;
     if(writeToFile)
     {
         ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
@@ -71,10 +68,13 @@ StreamHandler::StreamHandler()
         fprintf(stderr, "Could not open write header");
         exit(1);
     }
+
+
 }
 
 void StreamHandler::record()
 {
+    qDebug() << "Kommet til record";
     QtConcurrent::run(videoHandler, &VideoHandler::grabFrames);
     QtConcurrent::run(audioHandler, &AudioHandler::grabFrames);
 }

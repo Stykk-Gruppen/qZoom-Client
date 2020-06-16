@@ -5,7 +5,7 @@ VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool
 {
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames;
-    std::ofstream outfile("video.ismv", std::ostream::binary);
+    //std::ofstream outfile("video.ismv", std::ostream::binary);
     socketHandler = new SocketHandler();
     socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
@@ -76,6 +76,11 @@ int VideoHandler::init()
         //Hvis instream er Video
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 
+            qDebug() << "Input stream framerate: " << in_stream->r_frame_rate.num;
+            qDebug() << "Input stream timebase: " << in_stream->time_base.num << "/" << in_stream->time_base.den;
+
+
+
             //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
             inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
             inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
@@ -118,7 +123,6 @@ int VideoHandler::init()
 
 
         }
-        av_dump_format(ifmt_ctx, 0, NULL, 0);
         if (!out_stream) {
             fprintf(stderr, "Failed allocating output stream\n");
             ret = AVERROR_UNKNOWN;
@@ -171,6 +175,10 @@ int VideoHandler::init()
     //qDebug() << "Kom til slutten av init";
 }
 
+static int64_t pts = 0;
+
+
+
 void VideoHandler::grabFrames() {
 
     AVPacket* pkt = av_packet_alloc();
@@ -199,13 +207,32 @@ void VideoHandler::grabFrames() {
     {
         if(1)
         {
-            //qDebug() << "kommer inn i videoStreamgreiene\n";
+            //qDebug() << "Input codec framerate: " << inputVideoCodecContext->framerate.num;
+            //qDebug() << "Input codec timebase: " << inputVideoCodecContext->time_base.num << "/" << inputVideoCodecContext->time_base.den;
+            //pkt->pts = av_gettime();
+
+
+            /*if(firstPacket)
+            {
+                start_pts = pkt->pts;
+                start_dts = pkt->dts;
+                firstPacket = false;
+            }*/
+
+            //pkt->pts = pkt->pts - start_pts;
+            //int64_t dts = av_gettime();
+            //dts = dts * inputVideoCodecContext->framerate.num;
+            //pkt->dts = pkt->dts - dts - start_dts;
+
+
+
+            qDebug() << "kommer inn i videoStreamgreiene\n";
             if(ret < 0)
             {
                 qDebug() << "Input Avcodec open failed: " << ret << "\n";
                 exit(1);
             }
-            //qDebug() << "Forbi avodec_open\n";
+            qDebug() << "Forbi avodec_open\n";
             ret = avcodec_send_packet(inputVideoCodecContext, pkt);
             if(ret < 0)
             {
@@ -213,20 +240,15 @@ void VideoHandler::grabFrames() {
                 exit(1);
             }
 
-            //qDebug() << "Forbi send packet\n";
+            qDebug() << "Forbi send packet\n";
             ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
             if(ret < 0)
             {
                 qDebug() << "Recieve frame error";
                 exit(1);
             }
-            /*ret = avcodec_receive_frame(inputVideoCodecContext, videoFrame);
-            if(ret < 0)
-            {
-                qDebug() << "Recieve frame error";
-                exit(1);
-            }*/
-            //qDebug() << "Etter recieve frame: " << ret;
+
+            qDebug() << "Etter recieve frame: " << ret;
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
@@ -234,12 +256,19 @@ void VideoHandler::grabFrames() {
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
                 scaledFrame->pts = videoFrame->best_effort_timestamp;
+                //static int encodedFrames = 0;
+                //static int prev = videoFrame->pts;
+                //scaledFrame->pts = encodedFrames;
+                //encodedFrames++;
+                //prev += scaledFrame->pts;
+                //pts += scaledFrame->pkt_duration;
+
 
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
                                 videoFrame->linesize, 0,
                                 inputVideoCodecContext->height,
                                 scaledFrame->data, scaledFrame->linesize);
-                //qDebug() << "Etter swsScale\n";
+                qDebug() << "Etter swsScale\n";
                 if(ret < 0)
                 {
                     qDebug() << "Error with scale " << ret <<"\n";
@@ -261,6 +290,8 @@ void VideoHandler::grabFrames() {
                     exit(1);
                 }
             }
+            qDebug() << "Etter sendFrame\n";
+
             AVPacket* outPacket = av_packet_alloc();
             outPacket->data = NULL;
             outPacket->size = 0;
@@ -271,6 +302,7 @@ void VideoHandler::grabFrames() {
             ret = avcodec_receive_packet(outputVideoCodecContext, outPacket);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
                 skipped_frames++;
+                qDebug() << "Skipped a Frame";
                 continue;
             }
             else if (ret < 0) {
@@ -280,6 +312,22 @@ void VideoHandler::grabFrames() {
 
             else
             {
+                /*if(firstPacket)
+                {
+                    start_pts = outPacket->pts;
+                    start_dts = outPacket->dts;
+                    firstPacket = false;
+                }
+
+                outPacket->pts = outPacket->pts - start_pts;
+                outPacket->dts = outPacket->dts - start_dts;
+*/
+                //outPacket->dts = av_gettime();
+                //outPacket->pts = av_gettime();
+
+
+
+                qDebug() << "ready for write";
                 skipped_frames = 0;
 
                 AVStream *in_stream, *out_stream;
@@ -295,14 +343,23 @@ void VideoHandler::grabFrames() {
                 //out_stream->time_base = AVRational{1, 30};
                 AVRational encoderTimebase = outputVideoCodecContext->time_base;//{1, 30};
                 AVRational muxerTimebase = out_stream->time_base;
+                qDebug() << "**********VIDEO*****************";
+                qDebug() << "Outpacket pts: " << outPacket->pts;
+                qDebug() << "Outpacket dts: " << outPacket->dts;
 
                 outPacket->pts = av_rescale_q_rnd(outPacket->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
                 outPacket->dts = av_rescale_q_rnd(outPacket->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
                 outPacket->duration = av_rescale_q(outPacket->duration, encoderTimebase, muxerTimebase);
                 outPacket->pos = -1;
 
+                qDebug() << "Outpacket pts: " << outPacket->pts;
+                qDebug() << "Outpacket dts: " << outPacket->dts;
+
+
                 writeLock->lock();
+                qDebug() << "Writing Video Packet";
                 int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
+                qDebug() << "Wrote video packet ret = " << ret;
                 writeLock->unlock();
                 //int ret = av_write_frame(ofmt_ctx, outPacket);
 
@@ -318,11 +375,14 @@ void VideoHandler::grabFrames() {
             }
         }
         static int count = 0;
+        qDebug() << count << "/" << numberOfFrames;
         if(count > numberOfFrames) break;
         count++;
     }
+    qDebug() << "About to write trailer from video";
+    writeLock->lock();
     av_write_trailer(ofmt_ctx);
-
+    writeLock->unlock();
     outfile.close();
     avformat_close_input(&ifmt_ctx);
     /* close output */
