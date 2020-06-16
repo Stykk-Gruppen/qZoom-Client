@@ -275,6 +275,15 @@ void VideoHandler::grabFrames() {
                     qDebug() << "Error with scale " << ret <<"\n";
                     exit(1);
                 }
+                if(firstPacket){
+                        pts = av_gettime();
+                        firstPacket = false;
+                    }
+
+                if (scaledFrame) {
+                    scaledFrame->pts = pts;
+                   pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
+                }
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
                 if(ret < 0)
                 {
@@ -290,7 +299,7 @@ void VideoHandler::grabFrames() {
 
                 if (videoFrame) {
                     videoFrame->pts = pts;
-                    pts += (int)inputVideoCodecContext->time_base.den/30;
+                   pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
                 }
                 ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
                 if(ret < 0)
