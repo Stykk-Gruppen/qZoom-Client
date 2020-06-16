@@ -76,7 +76,7 @@ void ImageHandler::veryFunStianLoop()
     });
 }
 
-void ImageHandler::readLocalImage(AVCodec* codec, AVCodecContext* codecContext, AVFrame* frame)
+void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
 {
     QImage img( frame->width, frame->height, QImage::Format_RGB888 );
 

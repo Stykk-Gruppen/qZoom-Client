@@ -40,7 +40,7 @@ public:
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;
     AVFormatContext* ofmt_ctx;
-    const char* filename = "video.isma";
+    const char* filename = "video.ismv";
     void record();
     bool writeToFile = true;
     std::mutex writeLock;

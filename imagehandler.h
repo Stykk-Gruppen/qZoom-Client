@@ -38,7 +38,7 @@ public:
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
     void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
-    void readLocalImage(AVCodec* codec, AVCodecContext* codecContext, AVFrame* scaledFrame);
+    void readLocalImage(AVCodecContext* codecContext, AVFrame* scaledFrame);
 
 public slots:
     void updateImage(const QImage &image);
