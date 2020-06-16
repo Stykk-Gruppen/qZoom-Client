@@ -276,7 +276,7 @@ void VideoHandler::grabFrames() {
                     qDebug() << "Error with scale " << ret <<"\n";
                     exit(1);
                 }
-                imageHandler->readLocalImage(NULL, outputVideoCodecContext, scaledFrame);
+                imageHandler->readLocalImage(outputVideoCodecContext, scaledFrame);
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
                 if(ret < 0)
                 {
