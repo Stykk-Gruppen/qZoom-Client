@@ -5,7 +5,7 @@
 AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock, int _numberOfFrames)/*, QObject* parent): QObject(parent)*/
 {
     writeToFile = _writeToFile;
-    numberOfFrames = _numberOfFrames;
+    numberOfFrames = _numberOfFrames * 10;
     cDeviceName = _cDeviceName;
     writeLock = _writeLock;
     outputFormatContext = _ofmt_ctx;
@@ -579,6 +579,7 @@ int AudioHandler::initOutputFrame(AVFrame **frame,int frame_size)
 
 /* Global timestamp for the audio frames. */
 static int64_t pts = 0;
+static bool first = true;
 
 /**
  * Encode one frame worth of audio to the output file.
@@ -600,10 +601,16 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
     initPacket(&output_packet);
 
     /* Set a timestamp based on the sample rate for the container. */
+    if(first){
+            pts = av_gettime()*10;
+            first = false;
+        }
+
     if (frame) {
         frame->pts = pts;
         pts += frame->nb_samples;
     }
+    //frame->pts = frame->best_effort_timestamp;
 
     /* Send the audio frame stored in the temporary packet to the encoder.
      * The output audio stream encoder is used to do this. */
@@ -638,6 +645,12 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
 
     /* Write one audio frame from the temporary packet to the output file. */
     writeLock->lock();
+    qDebug() << "**********AUDIO*****************";
+    qDebug() << "PTS:" << output_packet.pts;
+    qDebug() << "DTS:" << output_packet.dts;
+    qDebug() << output_packet.stream_index;
+    output_packet.stream_index = 1;
+
     if (*data_present &&
             (error = av_interleaved_write_frame(outputFormatContext, &output_packet)) < 0) {
         fprintf(stderr, "Could not write audio frame");

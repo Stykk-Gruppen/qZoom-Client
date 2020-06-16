@@ -36,6 +36,7 @@ extern "C" {
 #include "libswresample/swresample.h"
 #include "libavutil/common.h"
 #include "libavutil/pixdesc.h"
+#include "libavutil/time.h"
 #include "libavutil/imgutils.h"
 }
 
@@ -54,6 +55,9 @@ public:
     QString aDeviceName;
     QString cDeviceName;
     std::mutex* writeLock;
+    bool firstPacket = true;
+    int start_pts;
+    int start_dts;
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 
 private:

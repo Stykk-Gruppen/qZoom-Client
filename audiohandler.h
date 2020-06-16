@@ -42,6 +42,7 @@ extern "C" {
 #include "libavutil/frame.h"
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
+#include "libavutil/time.h"
 }
 #include <stdlib.h>
 #include <stdio.h>
