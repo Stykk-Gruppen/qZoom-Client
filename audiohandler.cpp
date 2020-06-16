@@ -646,10 +646,10 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
 
     /* Write one audio frame from the temporary packet to the output file. */
     writeLock->lock();
-    qDebug() << "**********AUDIO*****************";
-    qDebug() << "PTS:" << output_packet.pts;
-    qDebug() << "DTS:" << output_packet.dts;
-    qDebug() << output_packet.stream_index;
+//    qDebug() << "**********AUDIO*****************";
+//    qDebug() << "PTS:" << output_packet.pts;
+//    qDebug() << "DTS:" << output_packet.dts;
+//    qDebug() << output_packet.stream_index;
     output_packet.stream_index = 1;
 
     if (*data_present &&

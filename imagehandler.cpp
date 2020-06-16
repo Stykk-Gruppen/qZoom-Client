@@ -87,7 +87,7 @@ void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
 
     SwsContext *imgConvertCtx = nullptr;
 
-    qDebug() << frame->height << frame->width << codecContext->pix_fmt;
+    //qDebug() << frame->height << frame->width << codecContext->pix_fmt;
 
     avpicture_alloc( ( AVPicture *) frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
     imgConvertCtx = sws_getContext( codecContext->width, codecContext->height,

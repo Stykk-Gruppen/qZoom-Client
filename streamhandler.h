@@ -43,10 +43,10 @@ public:
     AVFormatContext* ofmt_ctx;
     const char* filename = "video.ismv";
     void record();
-    bool writeToFile = true;
+    bool writeToFile = false;
     std::mutex writeLock;
     SocketHandler* socketHandler;
-    int numberOfFrames = 200;
+    int numberOfFrames = 2000;
 
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 
