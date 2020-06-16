@@ -3,7 +3,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 //import QtQuick 2.0
-import VLCQt 1.1
+//import VLCQt 1.1
 
 ApplicationWindow {
     id: window
@@ -12,18 +12,27 @@ ApplicationWindow {
     height: 800
     title: qsTr("qZoom")
 
-    Rectangle {
-        width: 640
-        height: 480
-        color: "black"
+    Image {
+      id: liveImage
+      property bool counter: false
 
-   /* VlcVideoPlayer
-    {
-        id: vidwidget
-        anchors.fill: parent
-        //url: "udp://@:1337"
-        url: "http://www.spacese.spacegrant.org/myvideoplayer_files/Gentry_Lee_2005.flv"
-            }*/
+      asynchronous: true
+      source: "image://live/10"
+      anchors.fill: parent
+      fillMode: Image.PreserveAspectFit
+      cache: false
+
+      function reload() {
+        counter = !counter
+        source = "image://live/image?id=" + counter
+      }
+    }
+
+    Item {
+        Timer {
+            interval: 41; running: true; repeat: true
+            onTriggered: liveImage.reload();
+        }
     }
 }
 
