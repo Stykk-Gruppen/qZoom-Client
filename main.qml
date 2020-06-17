@@ -11,33 +11,68 @@ ApplicationWindow {
     width: 1400
     height: 800
     title: qsTr("qZoom")
+   // Rectangle{
+       // width: 400
+    Column{
+        spacing: 2
+        Image {
+            id: liveImage
+            property bool counter: false
 
-    Image {
-      id: liveImage
-      property bool counter: false
+            asynchronous: true
+            source: "image://live/10"
+            //anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+            cache: false
+            width: 480
+            height: 360
 
-      asynchronous: true
-      source: "image://live/10"
-      anchors.fill: parent
-      fillMode: Image.PreserveAspectFit
-      cache: false
 
-      function reload() {
-        counter = !counter
-        source = "image://live/image?id=" + counter
-      }
-    }
 
-    Item {
-        Timer {
-            interval: 41; running: true; repeat: true
-            onTriggered: liveImage.reload();
+
+            function reload() {
+                counter = !counter
+                source = "image://live/image?id=" + counter
+            }
+        }
+        Item {
+            Timer {
+                interval: 41; running: true; repeat: true
+                onTriggered: liveImage.reload();
+            }
+        }
+        Image {
+            id: liveImage2
+            property bool counter: false
+
+            asynchronous: true
+            source: "image://live/10"
+            //anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+            cache: false
+            width: 480
+            height: 360
+
+
+
+
+            function reload() {
+                counter = !counter
+                source = "image://live/image?id=" + counter
+            }
+        }
+        Item {
+            Timer {
+                interval: 41; running: true; repeat: true
+                onTriggered: liveImage2.reload();
+            }
         }
     }
+
 }
 
 
-    /*VideoOutput {
+/*VideoOutput {
         id: test
         width: 1920
         height: 1080
@@ -100,7 +135,7 @@ ApplicationWindow {
             id: photoPreview
         } */
 
-        /*ComboBox {
+/*ComboBox {
                 width: 200
                 model: ListModel {
                     id: t
