@@ -250,7 +250,6 @@ void VideoHandler::grabFrames() {
                 exit(1);
             }
 
-            //qDebug() << "Etter recieve frame: " << ret;
             if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);

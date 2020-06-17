@@ -47,8 +47,8 @@ signals:
     void imageChanged();
 
 private:
-    QImage image;
-    QImage no_image;
+    QImage mImage;
+    QImage mDefaultImage;
     unsigned int mFramesFinished;
 };
 

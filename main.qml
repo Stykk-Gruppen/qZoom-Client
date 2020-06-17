@@ -27,9 +27,6 @@ ApplicationWindow {
             width: 480
             height: 360
 
-
-
-
             function reload() {
                 counter = !counter
                 source = "image://live/image?id=" + counter
@@ -52,9 +49,6 @@ ApplicationWindow {
             cache: false
             width: 480
             height: 360
-
-
-
 
             function reload() {
                 counter = !counter

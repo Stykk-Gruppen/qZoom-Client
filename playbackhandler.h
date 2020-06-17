@@ -31,24 +31,26 @@ extern "C" {
 #include "libswresample/swresample.h"
 }
 
+#include <QAudioFormat>
+#include <QAudioOutput>
 
-class PlaybackHandler : public QMediaPlayer
+class PlaybackHandler : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QAbstractVideoSurface* videoSurface READ getVideoSurface WRITE setVideoSurface )
 public:
     PlaybackHandler(QObject *parent = nullptr);
-    void setVideoSurface(QAbstractVideoSurface* surface);
-    QAbstractVideoSurface* getVideoSurface();
-    void playFromFile(const QString& strFile);
-    void playFromStream(const QString& str);
     void getStream();
     int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
+    int decodeAndPlay();
 private:
-    QAbstractVideoSurface* m_surface;
-    QUdpSocket *udpSocket;
-    QByteArray buffer;
+    void initAudio(QObject *parent);
+
+    QUdpSocket *mpUdpSocket;
+    QByteArray mBuffer;
+    QAudioFormat mAudioFormat;
+    QAudioOutput* mpAudio;
+    QIODevice* mpOut;
 signals:
 };
 

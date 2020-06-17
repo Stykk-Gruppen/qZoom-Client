@@ -1,41 +1,47 @@
 #include "playbackhandler.h"
 
-PlaybackHandler::PlaybackHandler(QObject *parent) : QMediaPlayer(parent)
+PlaybackHandler::PlaybackHandler(QObject *parent)
 {
     //udpSocket = new QUdpSocket();
+    initAudio(parent);
 }
 
-void PlaybackHandler::setVideoSurface(QAbstractVideoSurface* surface)
+void PlaybackHandler::initAudio(QObject *parent)
 {
-    qDebug() << "Changing surface";
-    m_surface = surface;
-    setVideoOutput(m_surface);
+    mAudioFormat.setSampleRate(44100);
+    mAudioFormat.setChannelCount(2);
+    mAudioFormat.setCodec("audio/pcm");
+    mAudioFormat.setSampleType(QAudioFormat::SignedInt);
+    mAudioFormat.setSampleSize(16);
+    mAudioFormat.setByteOrder(QAudioFormat::LittleEndian);
+
+    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    if (!info.isFormatSupported(mAudioFormat))
+    {
+        qDebug() << "Raw audio format not supported by backend, cannot play audio.";
+    }
+
+    mpAudio = new QAudioOutput(mAudioFormat, parent);
+    mpOut = mpAudio->start();
 }
 
-QAbstractVideoSurface* PlaybackHandler::getVideoSurface()
+/*
+void PlaybackHandler::changeSpeaker()
 {
-    return m_surface;
+    //todo
 }
+*/
 
-void PlaybackHandler::playFromFile(const QString &strFile)
+int PlaybackHandler::decodeAndPlay()
 {
-    QMediaPlayer::setMedia(QUrl::fromLocalFile(strFile));
-    //QMediaPlayer::setVideoOutput(m_surface);
-    QMediaPlayer::play();
-    qDebug() << "Tried to play from file";
+    av_register_all();
+    AVFormatContext *pInFmtCtx = nullptr;
+    AVCodecContext *pInCodecCtx = nullptr;
 }
 
-void PlaybackHandler::getStream()
-{
 
-}
 
-void PlaybackHandler::playFromStream(const QString &str)
-{
-    QMediaPlayer::setMedia(QUrl(str));
-    QMediaPlayer::play();
-    qDebug() << "Tried to play from stream";
-}
+
 
 /*
 int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
