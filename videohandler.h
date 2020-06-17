@@ -58,7 +58,7 @@ public:
     bool firstPacket = true;
     int start_pts;
     int start_dts;
-    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+    //static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 
 private:
     int64_t time;

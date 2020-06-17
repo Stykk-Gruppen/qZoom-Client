@@ -36,6 +36,7 @@ ApplicationWindow {
     }
 }
 
+
     /*VideoOutput {
         id: test
         width: 1920
