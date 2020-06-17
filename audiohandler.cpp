@@ -6,7 +6,7 @@ AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, boo
 {
     time = _time;
     writeToFile = _writeToFile;
-    numberOfFrames = _numberOfFrames * 10;
+    numberOfFrames = _numberOfFrames * 2;
     cDeviceName = _cDeviceName;
     writeLock = _writeLock;
     outputFormatContext = _ofmt_ctx;
@@ -825,7 +825,7 @@ int AudioHandler::grabFrames()
      * @param outputFormatContext Format context of the output file
      * @return Error code (0 if successful)
      */
-    if(writeToFile){
+    if(!writeToFile){
         if ((av_write_trailer(outputFormatContext)) < 0) {
             fprintf(stderr, "Could not write output file trailer");
             cleanup();

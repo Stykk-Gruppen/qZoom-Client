@@ -419,7 +419,7 @@ void VideoHandler::grabFrames() {
     qDebug() << "Ferdig med grabFrames!!!\n";
 }
 
-int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
+/*int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
 
@@ -430,7 +430,7 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     return socketHandler->sendDatagram(send);
 
     //outfile.write((char*)buffer, buffer_size);
-}
+}*/
 
 
 

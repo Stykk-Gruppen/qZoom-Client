@@ -46,7 +46,7 @@ public:
     bool writeToFile = false;
     std::mutex writeLock;
     SocketHandler* socketHandler;
-    int numberOfFrames = 2000;
+    int numberOfFrames = 200;
 
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 
