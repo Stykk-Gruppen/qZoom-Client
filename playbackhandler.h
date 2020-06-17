@@ -6,6 +6,8 @@
 #include <QUdpSocket>
 #include <QByteArray>
 #include <QtConcurrent/QtConcurrent>
+#include <QNetworkDatagram>
+
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -33,24 +35,28 @@ extern "C" {
 
 #include <QAudioFormat>
 #include <QAudioOutput>
+#include "imagehandler.h"
 
 class PlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    PlaybackHandler(QObject *parent = nullptr);
+    PlaybackHandler(ImageHandler* _imageHandler, QObject *parent = nullptr);
     void getStream();
-    int read_packet(void *opaque, uint8_t *buf, int buf_size);
+    static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
     int decodeAndPlay();
+    int mVideoStreamIndex;
+    int mAudioStreamIndex;
 private:
     void initAudio(QObject *parent);
 
-    QUdpSocket *mpUdpSocket;
+    QUdpSocket *mUdpSocket;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
+    ImageHandler* imageHandler;
 signals:
 };
 

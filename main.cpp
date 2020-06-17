@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     ImageHandler* t = new ImageHandler();
     QScopedPointer<ImageHandler> imageHandler(t);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t));
+    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(t));
 
     streamHandler->record();
     //streamHandler->finish();
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
     //engine.rootContext()->setContextProperty("mediaplayer", player);
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.addImageProvider("live", imageHandler.data());
+
 
     //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
     //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
@@ -89,6 +91,8 @@ int main(int argc, char *argv[])
     //VideoHandler->init();
     //imageHandler->veryFunStianLoop();
 
+
+    //playbackHandler->start();
 
 
 

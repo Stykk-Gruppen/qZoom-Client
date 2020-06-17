@@ -1,4 +1,4 @@
-QT += quick multimedia core multimediawidgets
+QT += quick multimedia core multimediawidgets network
 
 CONFIG += c++17 console
 
