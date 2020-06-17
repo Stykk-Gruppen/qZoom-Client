@@ -41,13 +41,13 @@ public:
     void readLocalImage(AVCodecContext* codecContext, AVFrame* scaledFrame);
 
 public slots:
-    void updateImage(const QImage &image);
+    void updateImage(const QImage &image,int);
 
 signals:
     void imageChanged();
 
 private:
-    QImage mImage;
+    QImage mImageArray[2];
     QImage mDefaultImage;
     unsigned int mFramesFinished;
 };
