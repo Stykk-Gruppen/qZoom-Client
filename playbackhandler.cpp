@@ -140,7 +140,7 @@ int PlaybackHandler::start()
                 avcodec_send_packet(codec_context, &packet);
                 err = avcodec_receive_frame(codec_context, frame);
 
-                imageHandler->readLocalImage(codec_context, frame);
+                imageHandler->readImage(codec_context, frame, 0);
             }
             else if(packet.stream_index = mAudioStreamIndex)
             {

@@ -34,22 +34,21 @@ class ImageHandler : public QObject, public QQuickImageProvider
     Q_OBJECT
 public:
     explicit ImageHandler();
-
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
     void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
-    void readLocalImage(AVCodecContext* codecContext, AVFrame* scaledFrame);
+    void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
+    void addPeer(uint8_t index);
 
 public slots:
-    void updateImage(const QImage &image,int);
+    void updateImage(const QImage &image, uint8_t index);
 
 signals:
     void imageChanged();
 
 private:
-    QImage mImageArray[2];
+    QMap<uint8_t, QImage> mImageMap;
     QImage mDefaultImage;
-    unsigned int mFramesFinished;
 };
 
 #endif // IMAGEHANDLER_H

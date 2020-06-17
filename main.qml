@@ -29,7 +29,7 @@ ApplicationWindow {
 
             function reload() {
                 counter = !counter
-                source = "image://live/image?id=" + counter + "&1"
+                source = "image://live/image?id=" + counter + "&0"
             }
         }
         Item {
@@ -52,7 +52,7 @@ ApplicationWindow {
 
             function reload() {
                 counter = !counter
-                source = "image://live/image?id=" + counter + "&0"
+                source = "image://live/image?id=" + counter + "&1"
             }
         }
         Item {

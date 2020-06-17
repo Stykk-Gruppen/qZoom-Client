@@ -285,7 +285,7 @@ void VideoHandler::grabFrames() {
                     scaledFrame->pts = pts;
                    pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
                 }
-                imageHandler->readLocalImage(outputVideoCodecContext, scaledFrame);
+                imageHandler->readImage(outputVideoCodecContext, scaledFrame, 0);
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
                 if(ret < 0)
                 {
@@ -303,7 +303,7 @@ void VideoHandler::grabFrames() {
                     videoFrame->pts = pts;
                    pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
                 }
-                imageHandler->readLocalImage(outputVideoCodecContext, videoFrame);
+                imageHandler->readImage(outputVideoCodecContext, videoFrame, 0);
                 ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
                 if(ret < 0)
                 {

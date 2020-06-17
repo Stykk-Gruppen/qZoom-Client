@@ -4,29 +4,30 @@ ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
 {
     mDefaultImage = QImage("0.png");
     this->blockSignals(false);
-    this->mFramesFinished = 1;
+    addPeer(1);
+    //addPeer(2);
 
 }
 
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
-//Jeg tror id må være her selvom den ikke blir brukt. Det er QML som kaller funksjonen på en usynlig måte.
 {
-
-   // qDebug() << id;
     int index = 0;
     QStringList onlyId = id.split("=");
-    if(onlyId.size() >= 2){
+    if(onlyId.size() >= 2)
+    {
         QStringList idIndex = onlyId[1].split("&");
-        if(idIndex.size() >= 2){
+        if(idIndex.size() >= 2)
+        {
             //qDebug() << idIndex[1];
             index = idIndex[1].toInt();
         }
     }
-    QImage result = mImageArray[index];
+    QImage result = mImageMap[index];
 
     if(result.isNull())
     {
         result = mDefaultImage;
+        qDebug() << "Default image is null";
     }
 
     if(size)
@@ -42,16 +43,17 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
     return result;
 }
 
-void ImageHandler::updateImage(const QImage &image,int index)
+void ImageHandler::addPeer(uint8_t index)
 {
-    if(mImageArray[index]!=image){
-        mImageArray[index] = image;
-    }
-    /*if(mImage != image)
+    mImageMap[index] = mDefaultImage;
+}
+
+void ImageHandler::updateImage(const QImage &image, uint8_t index)
+{
+    if(mImageMap[index] != image)
     {
-        mImage = image;
-        //emit imageChanged();
-    }*/
+        mImageMap[index] = image;
+    }
 }
 
 void ImageHandler::veryFunStianLoop()
@@ -89,10 +91,10 @@ void ImageHandler::veryFunStianLoop()
         }
     });*/
 }
-static int k = 0;
-void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
+
+void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8_t index)
 {
-    QImage img( frame->width, frame->height, QImage::Format_RGB888 );
+    QImage img(frame->width, frame->height, QImage::Format_RGB888);
 
     AVFrame	*frameRGB = av_frame_alloc();
     frameRGB->format = AV_PIX_FMT_RGB24;
@@ -101,24 +103,24 @@ void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
 
     SwsContext *imgConvertCtx = nullptr;
 
-    avpicture_alloc( ( AVPicture *) frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
+    avpicture_alloc((AVPicture*)frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
     //av_image_alloc
-    imgConvertCtx = sws_getContext( codecContext->width, codecContext->height,
-                                    codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
-                                    SWS_BICUBIC, NULL, NULL, NULL);
-    if( 1 == mFramesFinished && nullptr != imgConvertCtx )
+    imgConvertCtx = sws_getContext(codecContext->width, codecContext->height,
+                                   codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
+                                   SWS_BICUBIC, NULL, NULL, NULL);
+    if (imgConvertCtx)
     {
         //conversion frame to frameRGB
         sws_scale(imgConvertCtx, frame->data, frame->linesize, 0, codecContext->height, frameRGB->data, frameRGB->linesize);
         //setting QImage from frameRGB
 
-        for( int y = 0; y < frame->height; ++y )
-            memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0] );
+        for (int y = 0; y < frame->height; ++y)
+        {
+            memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0]);
+        }
     }
 
-    emit updateImage(img,k);
-    k = !k;
-
+    emit updateImage(img, index);
 }
 
 /*
