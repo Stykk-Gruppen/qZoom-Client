@@ -2,7 +2,7 @@
 
 ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
 {
-    this->no_image = QImage("0.png");
+    mDefaultImage = QImage("0.png");
     this->blockSignals(false);
     this->mFramesFinished = 1;
 }
@@ -10,12 +10,11 @@ ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 //Jeg tror id må være her selvom den ikke blir brukt. Det er QML som kaller funksjonen på en usynlig måte.
 {
-    QImage result = this->image;
+    QImage result = mImage;
 
     if(result.isNull())
     {
-        result = this->no_image;
-        qDebug() << "Result is null";
+        result = mDefaultImage;
     }
 
     if(size)
@@ -33,9 +32,9 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 
 void ImageHandler::updateImage(const QImage &image)
 {
-    if(this->image != image)
+    if(mImage != image)
     {
-        this->image = image;
+        mImage = image;
         emit imageChanged();
     }
 }
@@ -87,9 +86,8 @@ void ImageHandler::readLocalImage(AVCodecContext* codecContext, AVFrame* frame)
 
     SwsContext *imgConvertCtx = nullptr;
 
-    qDebug() << frame->height << frame->width << codecContext->pix_fmt;
-
     avpicture_alloc( ( AVPicture *) frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
+    //av_image_alloc
     imgConvertCtx = sws_getContext( codecContext->width, codecContext->height,
                                      codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
                                      SWS_BICUBIC, NULL, NULL, NULL);

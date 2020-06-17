@@ -251,7 +251,7 @@ void VideoHandler::grabFrames() {
             }
 
             qDebug() << "Etter recieve frame: " << ret;
-            if (inputVideoCodecContext->pix_fmt == STREAM_PIX_FMT)
+            if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
             {
                 int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt,outputVideoCodecContext->width,outputVideoCodecContext->height, 1);
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));

@@ -30,7 +30,7 @@ ApplicationWindow {
 
     Item {
         Timer {
-            interval: 41; running: true; repeat: true
+            interval: 20; running: true; repeat: true
             onTriggered: liveImage.reload();
         }
     }

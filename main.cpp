@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
     //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
 
+
     //videoHandler->init();
     //Denne klassen klarer å lagre audio stream til fil
     //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
