@@ -13,15 +13,41 @@
 #include <QBuffer>
 #include "camerahandler.h"
 #include "videohandler.h"
+#include "filetest.h"
+#include "audiohandler.h"
 #include <QCameraViewfinder>
 #include <QVariant>
+#include <libavutil/opt.h>
+#include <libavformat/avformat.h>
+#include <QAudioInput>
+#include <QFile>
+#include "videohandler.h"
+#include <QTimer>
+#include "streamhandler.h"
+#include "playbackhandler.h"
+#include "imagehandler.h"
+#include <QQuickView>
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavutil/opt.h>
+#include <libavutil/imgutils.h>
+#include <libavdevice/avdevice.h>
+}
+
+#include <QtCore/QCoreApplication>
+#include <QtGui/QGuiApplication>
+#include <QtQuick/QQuickView>
+
+//#include <VLCQtCore/Common.h>
+//#include <VLCQtQml/QmlVideoPlayer.h>
+//#include <VLCQtQml/QmlPlayer.h>
+//#include <QtPlugin>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
     QGuiApplication app(argc, argv);
-
-
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -32,93 +58,35 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
+    ImageHandler* t = new ImageHandler();
+    QScopedPointer<ImageHandler> imageHandler(t);
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t));
 
+    streamHandler->record();
+    //streamHandler->finish();
+    //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
+    //PlaybackHandler* player = new PlaybackHandler();
+    //QQuickView view;
+    //engine.rootContext()->setContextProperty("mediaplayer", player);
+    engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
+    engine.addImageProvider("live", imageHandler.data());
 
-    //QScopedPointer<VideoHandler> videoHandler(new VideoHandler);
-    //QScopedPointer<CameraHandler> cameraHandler(new CameraHandler);
-
-    //engine.rootContext()->setContextProperty("cameraHandler", cameraHandler.data());
-    //qDebug() << "Camera: " << cameraHandler->getDeviceId() << "\n";
-
+    //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
+    //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
 
+    //videoHandler->init();
+    //Denne klassen klarer å lagre audio stream til fil
+    //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
+    //pureAudio->main();
 
+    //Denne klassen klarer å lagre video stream til fil
+    //QScopedPointer<filetest> fil(new filetest);
+    //fil->main();
+    //exit(1337);
 
-    //cameraHandler->camera->setCaptureMode(QCamera::CaptureVideo);
-
-
-
-
-    /*if(cameraHandler->capture->isReadyForCapture())
-        qDebug() << "Ready!!!\n";
-    else
-        qDebug() << "Capture is not ready\n";
-
-    auto* recorder = new QMediaRecorder(cameraHandler->camera);
-
-
-
-    cameraHandler->camera->setCaptureMode(QCamera::CaptureVideo);
-
-    /*auto&& settings = recorder->videoSettings();//6
-    settings.setResolution(1280,720);
-    settings.setQuality(QMultimedia::VeryHighQuality);
-    settings.setFrameRate(30.0);
-    recorder->setVideoSettings(settings);
-*/
-    /*
-    recorder->setOutputLocation(QUrl::fromLocalFile("test.mp4"));
-    cameraHandler->camera->start();
-
-
-
-
-    qDebug() << cameraHandler->camera->status() << "\n";
-    qDebug() << cameraHandler->camera->state() << "\n";
-    qDebug() << cameraHandler->camera->error() << "\n";
-
-    recorder->record();
-
-    qDebug()<<recorder->supportedVideoCodecs() << "\n";
-    qDebug()<<recorder->status() << "\n";
-    qDebug()<<recorder->state() << "\n";
-    qDebug()<<recorder->error() << "\n";
-    qDebug()<<recorder->outputLocation() << "\n";
-
-    /*if(cameraHandler->capture->isReadyForCapture())
-        qDebug() << "Ready!!!\n";
-    else
-        qDebug() << "Capture is not ready\n";
-
-
-    //recorder->stop();
-
-
-
-    */
-
-/*
-
-
-
-    QObject *qmlCamera = engine.rootObjects().at(0)->findChild<QObject*>("qrCameraQML");
-
-    QCamera* camera_;
-    camera_ = qvariant_cast<QCamera*>(qmlCamera->property("mediaObject"));
-
-    QVideoProbe probe_;
-
-    connect(&probe_,SIGNAL(videoFrameProbed(QVideoFrame)),this,SLOT(handleFrame(QVideoFrame)));
-
-    probe_.setSource(camera_)
-*/
-
-
-
-    QScopedPointer<VideoHandler> videoHandler(new VideoHandler);
-    QObject *qmlCamera = engine.rootObjects().at(0)->findChild<QObject*>("qrCameraQML");
-
-    videoHandler->setup(qmlCamera);
+    //VideoHandler->init();
+    //imageHandler->veryFunStianLoop();
 
 
 
