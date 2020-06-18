@@ -50,15 +50,18 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
     QByteArray package;
     QUdpSocket* u = s->socketHandler->udpSocket;
 
+
     //while(!u->hasPendingDatagrams())
     //{
-        if(u->hasPendingDatagrams())
-        {
-            package = u->receiveDatagram().data();
-           // break;
-        }
-   // }
-
+    if(u->hasPendingDatagrams())
+    {
+        package = u->receiveDatagram().data();
+        // break;
+    }
+    // }
+    if(package.size()>0){
+    qDebug() << package;
+    }
     //qDebug() << package.constData()[0];
     memcpy(buf, package.constData(), buf_size);
     //mSenderId = something;
@@ -67,8 +70,8 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
 int PlaybackHandler::start()
 {
-    QtConcurrent::run([this]()
-    {
+    //QtConcurrent::run([this]()
+    //{
 
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
@@ -191,16 +194,16 @@ int PlaybackHandler::start()
 
             av_frame_unref(frame);
             av_packet_unref(&packet);
-        //}
-        //if (imgConvertCtx) sws_freeContext(imgConvertCtx);
+            //}
+            //if (imgConvertCtx) sws_freeContext(imgConvertCtx);
 
 
 
 
 
-        //end:
-        //avformat_close_input(&fmt_ctx);
-        /* note: the internal buffer could have changed, and be != avio_ctx_buffer
+            //end:
+            //avformat_close_input(&fmt_ctx);
+            /* note: the internal buffer could have changed, and be != avio_ctx_buffer
         if (avio_ctx) {
             av_freep(&avio_ctx->buffer);
             av_freep(&avio_ctx);
@@ -213,7 +216,8 @@ int PlaybackHandler::start()
         return 0;
     });
     */
-}
+        }
 
-});}
+    //});
+}
 
