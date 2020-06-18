@@ -11,7 +11,7 @@ void SocketHandler::initSocket()
 {
 
     udpSocket = new QUdpSocket(this);
-    //udpSocket->bind(address, port);
+    udpSocket->bind(address, port);
     //connect(udpSocket, &QUdpSocket::readyRead,this, &SocketHandler::readPendingDatagrams);
 }
 

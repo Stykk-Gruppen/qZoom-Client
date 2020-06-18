@@ -39,11 +39,6 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
-//#include <VLCQtCore/Common.h>
-//#include <VLCQtQml/QmlVideoPlayer.h>
-//#include <VLCQtQml/QmlPlayer.h>
-//#include <QtPlugin>
-
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -58,18 +53,16 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    ImageHandler* t = new ImageHandler();
-    SocketHandler* tt = new SocketHandler();
-    QScopedPointer<ImageHandler> imageHandler(t);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t, tt));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(t, tt));
 
-    streamHandler->record();
+    ImageHandler* imageHandlerObject = new ImageHandler();
+    SocketHandler* socketHandlerObject = new SocketHandler();
+    QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
+    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(imageHandlerObject, socketHandlerObject));
+
+    //streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
-    //PlaybackHandler* player = new PlaybackHandler();
-    //QQuickView view;
-    //engine.rootContext()->setContextProperty("mediaplayer", player);
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 
@@ -93,7 +86,7 @@ int main(int argc, char *argv[])
     //imageHandler->veryFunStianLoop();
 
 
-    //playbackHandler->start();
+    playbackHandler->start();
 
 
 

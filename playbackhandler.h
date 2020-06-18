@@ -50,15 +50,19 @@ public:
     int mVideoStreamIndex;
     int mAudioStreamIndex;
 private:
+    struct SocketAndIDStruct {
+        SocketHandler* socketHandler;
+        int id;
+    };
+    SocketAndIDStruct* mStruct;
     void initAudio(QObject *parent);
-
     SocketHandler* mSocketHandler;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
-    ImageHandler* imageHandler;
-    uint8_t mSenderId;
+    uint8_t mSenderId = 0; //Value set to 0 just for testing.
+    ImageHandler* mImageHandler;
 signals:
 };
 

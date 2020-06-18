@@ -36,8 +36,7 @@ extern "C" {
 class StreamHandler
 {
 public:
-    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler,);
-
+    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler);
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;
     AVFormatContext* ofmt_ctx;
@@ -49,6 +48,11 @@ public:
     int numberOfFrames = 200;
 
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+private:
+    SocketHandler* mSocketHandler;
+    bool mAudioEnabled = true;
+    bool mVideoEnabled = true;
+    int mAudioOutputStreamIndex = 1;
 
 };
 

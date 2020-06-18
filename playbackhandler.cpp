@@ -1,10 +1,12 @@
 #include "playbackhandler.h"
 
-PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
+PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler,SocketHandler* _socketHandler, QObject *parent)
 {
-    mSocket = _socketHandler;
-    imageHandler = _imageHandler;
+    mSocketHandler = _socketHandler;
+    mImageHandler = _imageHandler;
     initAudio(parent);
+    mStruct = new SocketAndIDStruct();
+    mStruct->socketHandler = _socketHandler;
 }
 
 void PlaybackHandler::initAudio(QObject *parent)
@@ -43,18 +45,21 @@ int PlaybackHandler::decodeAndPlay()
 
 int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
-    mUdpSocket = reinterpret_cast<SocketHandler*>(opaque);
-        //QMutexLocker	l(&fil->mutex);
-        //qDebug() << buf_size << fil->buffer.length();
-
-    //qDebug() << buf_size << mBuffer.length();
+    SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
     QByteArray package;
-    mUdpSocket->bind(1337);
+    QUdpSocket* u = s->socketHandler->udpSocket;
 
-    if(socket.hasPendingDatagrams())
-        package = socket.receiveDatagram().data();
+    //while(!u->hasPendingDatagrams())
+    //{
+        if(u->hasPendingDatagrams())
+        {
+            package = u->receiveDatagram().data();
+           // break;
+        }
+   // }
 
+    //qDebug() << package.constData()[0];
     memcpy(buf, package.constData(), buf_size);
     //mSenderId = something;
     return buf_size;
@@ -64,8 +69,6 @@ int PlaybackHandler::start()
 {
     QtConcurrent::run([this]()
     {
-        mUdpSocket = new QUdpSocket;
-        //mUdpSocket->bind(1337);
 
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
@@ -78,14 +81,26 @@ int PlaybackHandler::start()
 
         avio_ctx_buffer = reinterpret_cast<uint8_t*>(av_malloc(avio_ctx_buffer_size));
         Q_ASSERT(avio_ctx_buffer);
-        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, &mUdpSocket, &read_packet, nullptr, nullptr);
+        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, mStruct, &read_packet, nullptr, nullptr);
         Q_ASSERT(avio_ctx);
 
         fmt_ctx->pb = avio_ctx;
         ret = avformat_open_input(&fmt_ctx, nullptr, nullptr, nullptr);
-        Q_ASSERT(ret >= 0);
+        if(ret < 0)
+        {
+            char* errbuff = (char *)malloc((1000)*sizeof(char));
+            av_strerror(ret,errbuff,1000);
+            qDebug() << "UDP Stream input alloc failed " << errbuff;
+            exit(1);
+        }
         ret = avformat_find_stream_info(fmt_ctx, nullptr);
-        Q_ASSERT(ret >= 0);
+        if(ret < 0)
+        {
+            char* errbuff = (char *)malloc((1000)*sizeof(char));
+            av_strerror(ret,errbuff,1000);
+            qDebug() << "UDP Input stream info not found" << errbuff;
+            exit(1);
+        }
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;
@@ -137,7 +152,7 @@ int PlaybackHandler::start()
                 avcodec_send_packet(codec_context, &packet);
                 err = avcodec_receive_frame(codec_context, frame);
 
-                imageHandler->readImage(codec_context, frame, mSenderId);
+                mImageHandler->readImage(codec_context, frame, mSenderId);
             }
             else if(packet.stream_index = mAudioStreamIndex)
             {
