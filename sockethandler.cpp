@@ -9,18 +9,19 @@ SocketHandler::SocketHandler(QObject *parent) : QObject(parent)
 
 void SocketHandler::initSocket()
 {
-
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
     // udpSocket->connectToHost(address,port,QIODevice::ReadWrite);
     connect(udpSocket, &QUdpSocket::readyRead,this, &SocketHandler::readPendingDatagrams);
 
-    //starter ffmpeg streaming for debugging
     QString program = "ffmpeg";
     QStringList arguments;
-    arguments << "-i" << "test.ismv" << "-f" << "ismv" << "udp://localhost:1337";
+    arguments << "-i" << "/home/stian/Videos/Band.of.Brothers.S01E03.Carentan.1080p.Hybrid.Remux.AVC.FLAC.5.1-ToK.mkv" << "-f" << "matroska" << "udp://localhost:1337";
     QProcess *myProcess = new QProcess(this);
     myProcess->start(program, arguments);
+
+    //starter ffmpeg streaming for debugging
+
 
 }
 
@@ -36,15 +37,15 @@ void SocketHandler::readPendingDatagrams()
         if (numRead == 0 && !socket.waitForReadyRead())
             break;
     }*/
-    qDebug() << "signal recieved";
+    qDebug() << "signal recieved: " << signalCount;
     while (udpSocket->hasPendingDatagrams())
     {
 
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         mBuffer.append(datagram.data());
-        qDebug() << "datagram read";
         //processTheDatagram(datagram);
     }
+    signalCount++;
 }
 
 int SocketHandler::sendDatagram(QByteArray arr)

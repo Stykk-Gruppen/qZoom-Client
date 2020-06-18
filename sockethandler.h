@@ -20,6 +20,8 @@ public:
     QByteArray mBuffer;
 public slots:
     void readPendingDatagrams();
+private:
+    uint signalCount = 0;
 signals:
 
 
