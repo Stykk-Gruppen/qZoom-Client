@@ -2,8 +2,9 @@
 #define OUTPUT_BIT_RATE 96000
 /* The number of output channels */
 #define OUTPUT_CHANNELS 2
-AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames, int index)/*, QObject* parent): QObject(parent)*/
 {
+    mOutputStreamIndex = index;
     time = _time;
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames * 2;
@@ -593,7 +594,7 @@ static bool first = true;
  */
 int AudioHandler::encodeAudioFrame(AVFrame *frame,
                                    /*AVFormatContext *outputFormatContext,
-                                                                      AVCodecContext *outputCodecContext,*/
+                                                                                                         AVCodecContext *outputCodecContext,*/
                                    int *data_present)
 {
     /* Packet used for temporary storage. */
@@ -603,9 +604,9 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
 
     /* Set a timestamp based on the sample rate for the container. */
     if(first){
-            pts = time*10;
-            first = false;
-        }
+        pts = time*10;
+        first = false;
+    }
 
     if (frame) {
         frame->pts = pts;
@@ -646,11 +647,11 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
 
     /* Write one audio frame from the temporary packet to the output file. */
     writeLock->lock();
-//    qDebug() << "**********AUDIO*****************";
-//    qDebug() << "PTS:" << output_packet.pts;
-//    qDebug() << "DTS:" << output_packet.dts;
-//    qDebug() << output_packet.stream_index;
-    output_packet.stream_index = 1;
+    //    qDebug() << "**********AUDIO*****************";
+    //    qDebug() << "PTS:" << output_packet.pts;
+    //    qDebug() << "DTS:" << output_packet.dts;
+    //    qDebug() << output_packet.stream_index;
+    output_packet.stream_index = mOutputStreamIndex;
 
     if (*data_present &&
             (error = av_interleaved_write_frame(outputFormatContext, &output_packet)) < 0) {
@@ -673,8 +674,8 @@ cleanup:
  * @return Error code (0 if successful)
  */
 int AudioHandler::loadEncodeAndWrite(/*AVAudioFifo *fifo,
-                                                                          AVFormatContext *outputFormatContext,
-                                                                          AVCodecContext *outputCodecContext*/)
+                                                                                                               AVFormatContext *outputFormatContext,
+                                                                                                               AVCodecContext *outputCodecContext*/)
 {
     /* Temporary storage of the output samples of the frame written to the file. */
     AVFrame *output_frame;
@@ -825,11 +826,9 @@ int AudioHandler::grabFrames()
      * @param outputFormatContext Format context of the output file
      * @return Error code (0 if successful)
      */
-    if(!writeToFile){
-        if ((av_write_trailer(outputFormatContext)) < 0) {
-            fprintf(stderr, "Could not write output file trailer");
-            cleanup();
-        }
+    if ((av_write_trailer(outputFormatContext)) < 0) {
+        fprintf(stderr, "Could not write output file trailer");
+        cleanup();
     }
     return 0;
 

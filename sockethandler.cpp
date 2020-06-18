@@ -4,6 +4,8 @@ SocketHandler::SocketHandler(QObject *parent) : QObject(parent)
 {
     address = QHostAddress::LocalHost;
     port = 1337;
+    udpSocket = new QUdpSocket(this);
+    udpSocket->bind(address, port);
 }
 
 void SocketHandler::initSocket()

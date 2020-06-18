@@ -58,12 +58,13 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    ImageHandler* t = new ImageHandler();
-    QScopedPointer<ImageHandler> imageHandler(t);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(t));
+    ImageHandler* imageHandlerObject = new ImageHandler();
+    SocketHandler* socketHandler = new SocketHandler();
+    QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject,socketHandler));
+    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(imageHandlerObject,socketHandler));
 
-    streamHandler->record();
+    //streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     //PlaybackHandler* player = new PlaybackHandler();
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
     //imageHandler->veryFunStianLoop();
 
 
-    //playbackHandler->start();
+    playbackHandler->start();
 
 
 

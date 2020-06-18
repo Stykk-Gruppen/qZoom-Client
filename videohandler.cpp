@@ -7,8 +7,8 @@ VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool
     writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames;
     //std::ofstream outfile("video.ismv", std::ostream::binary);
-    socketHandler = new SocketHandler();
-    socketHandler->initSocket();
+    //socketHandler = new SocketHandler();
+    //socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
     this->aDeviceName = aDeviceName;
     this->imageHandler = imageHandler;

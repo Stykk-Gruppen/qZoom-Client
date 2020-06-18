@@ -27,7 +27,7 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
     if(result.isNull())
     {
         result = mDefaultImage;
-        qDebug() << "Default image is null";
+        //qDebug() << "Default image is null";
     }
 
     if(size)
