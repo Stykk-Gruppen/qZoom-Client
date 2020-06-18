@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
 
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
-    //QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
     QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(imageHandlerObject, socketHandlerObject));
 
 
-    //streamHandler->record();
+    streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());

@@ -12,13 +12,15 @@ void SocketHandler::initSocket()
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
     // udpSocket->connectToHost(address,port,QIODevice::ReadWrite);
-    connect(udpSocket, &QUdpSocket::readyRead,this, &SocketHandler::readPendingDatagrams);
+    connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
 
+    /*
     QString program = "ffmpeg";
     QStringList arguments;
-    arguments << "-i" << "/home/stian/Videos/Band.of.Brothers.S01E03.Carentan.1080p.Hybrid.Remux.AVC.FLAC.5.1-ToK.mkv" << "-f" << "matroska" << "udp://localhost:1337";
+    arguments << "-i" << "/home/stian/Downloads/Gentry_Lee_2005.flv" << "-f" << "matroska" << "udp://localhost:1337";
     QProcess *myProcess = new QProcess(this);
     myProcess->start(program, arguments);
+    */
 
     //starter ffmpeg streaming for debugging
 
@@ -44,6 +46,7 @@ void SocketHandler::readPendingDatagrams()
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         mBuffer.append(datagram.data());
         //processTheDatagram(datagram);
+        qDebug() << datagram.data();
     }
     signalCount++;
 }

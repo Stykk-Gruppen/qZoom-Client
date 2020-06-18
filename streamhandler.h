@@ -53,7 +53,6 @@ private:
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;
     int mAudioOutputStreamIndex = 1;
-
 };
 
 #endif // STREAMHANDLER_H

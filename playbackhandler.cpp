@@ -8,7 +8,7 @@ PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _so
     mStruct = new SocketAndIDStruct();
     mStruct->socketHandler = _socketHandler;
 
-    connect(mSocketHandler->udpSocket, &QUdpSocket::readyRead, this, &PlaybackHandler::start);
+    //connect(mSocketHandler->udpSocket, &QUdpSocket::readyRead, this, &PlaybackHandler::start);
 }
 
 void PlaybackHandler::initAudio(QObject *parent)
@@ -50,11 +50,11 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
     s->socketHandler->mBuffer.remove(0,buf_size);
-    qDebug() << tempBuffer.size();
+    //qDebug() << tempBuffer.size();
 
     memcpy(buf, tempBuffer.constData(), buf_size);
     //mSenderId = something;
-    qDebug() << "Buffer size outside:" << buf_size;
+    //qDebug() << "Reading packet";
     return buf_size;
 }
 
@@ -62,9 +62,9 @@ int PlaybackHandler::start()
 {
     QtConcurrent::run([this]()
     {
-        int ms = 10000;
-        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        nanosleep(&ts, NULL);
+        //int ms = 10000;
+        //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+        //nanosleep(&ts, NULL);
 
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
@@ -100,7 +100,7 @@ int PlaybackHandler::start()
         }
 
         qDebug() << "Success!";
-        exit(1);
+        //exit(1);
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;
@@ -145,22 +145,32 @@ int PlaybackHandler::start()
 
         while (av_read_frame(fmt_ctx, &packet) >= 0) {
 
-            if(packet.stream_index = mVideoStreamIndex)
+            if(packet.stream_index == mVideoStreamIndex)
             {
                 //Decode and send to ImageHandler
 
-                avcodec_send_packet(codec_context, &packet);
+                err = avcodec_send_packet(codec_context, &packet);
+                if (err > 0)
+                {
+                    qDebug() << "Failed avcodec_send_packet";
+                }
                 err = avcodec_receive_frame(codec_context, frame);
+                if (err > 0)
+                {
+                    qDebug() << "Failed avcodec_receive_frame";
+                }
+                qDebug() << frame->data[0];
 
-                mImageHandler->readImage(codec_context, frame, mSenderId);
+
+                mImageHandler->readImage(codec_context, frame, 1);
             }
-            else if(packet.stream_index = mAudioStreamIndex)
+            else if(packet.stream_index == mAudioStreamIndex)
             {
                 //Decode and send to SpeakerHandler
             }
             else
             {
-
+                qDebug() << "Vi er fucked";
             }
 
 
@@ -213,7 +223,9 @@ int PlaybackHandler::start()
             return 0;
         });
         */
+
         }
+        qDebug() << "At the end";
 
     });
 }

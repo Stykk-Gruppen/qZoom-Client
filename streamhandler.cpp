@@ -59,7 +59,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     int64_t time = av_gettime();
 
     mAudioEnabled = true;
-    mVideoEnabled = false;
+    mVideoEnabled = true;
     writeToFile = false;
     numberOfFrames = 2000;
     if(mAudioEnabled && !mVideoEnabled)
@@ -100,8 +100,11 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     }
     av_dump_format(ofmt_ctx, 0, filename, 1);
     ret = avformat_write_header(ofmt_ctx, &options);
-    if(ret<0){
-        fprintf(stderr, "Could not open write header");
+    if(ret < 0)
+    {
+        char* errbuff = (char *)malloc((1000)*sizeof(char));
+        av_strerror(ret, errbuff, 1000);
+        qDebug() << "Could not open write header " << ret << " meaning: "<< errbuff;
         exit(1);
     }
 }
@@ -117,7 +120,6 @@ void StreamHandler::record()
     {
         QtConcurrent::run(audioHandler, &AudioHandler::grabFrames);
     }
-
 }
 
 int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
