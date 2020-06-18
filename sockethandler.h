@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QUdpSocket>
 #include <QNetworkDatagram>
+#include <QProcess>
 
 class SocketHandler : public QObject
 {
@@ -11,12 +12,16 @@ class SocketHandler : public QObject
 public:
     explicit SocketHandler(QObject *parent = nullptr);
     void initSocket();
-    void readPendingDatagrams();
+
     QUdpSocket* udpSocket;
     int sendDatagram(QByteArray arr);
     QHostAddress address;
     int port;
+    QByteArray mBuffer;
+public slots:
+    void readPendingDatagrams();
 signals:
+
 
 };
 
