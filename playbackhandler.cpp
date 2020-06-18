@@ -1,8 +1,8 @@
 #include "playbackhandler.h"
 
-PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, QObject *parent)
+PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
 {
-    mUdpSocket = new QUdpSocket();
+    mSocket = _socketHandler;
     imageHandler = _imageHandler;
     initAudio(parent);
 }
@@ -43,19 +43,20 @@ int PlaybackHandler::decodeAndPlay()
 
 int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
-    QUdpSocket socket;//reinterpret_cast<QUdpSocket*>(opaque);
+    mUdpSocket = reinterpret_cast<SocketHandler*>(opaque);
         //QMutexLocker	l(&fil->mutex);
         //qDebug() << buf_size << fil->buffer.length();
 
     //qDebug() << buf_size << mBuffer.length();
 
     QByteArray package;
-    socket.bind(1337);
+    mUdpSocket->bind(1337);
 
     if(socket.hasPendingDatagrams())
         package = socket.receiveDatagram().data();
 
     memcpy(buf, package.constData(), buf_size);
+    //mSenderId = something;
     return buf_size;
 }
 
@@ -88,7 +89,7 @@ int PlaybackHandler::start()
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;
-        for (uint i=0; i<fmt_ctx->nb_streams; ++i) {
+        for (uint i=0; i < fmt_ctx->nb_streams; ++i) {
             auto	st = fmt_ctx->streams[i];
             qDebug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
             if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
@@ -115,9 +116,6 @@ int PlaybackHandler::start()
         qDebug() << codec->name << codec->id;
         qDebug() << codecpar->width << codecpar->height << codecpar->format << codec_context->pix_fmt;
 
-
-
-
         AVFrame	*frameRGB = av_frame_alloc();
         frameRGB->format = AV_PIX_FMT_RGB24;
         frameRGB->width = codecpar->width;
@@ -130,7 +128,6 @@ int PlaybackHandler::start()
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
 
-
         while (av_read_frame(fmt_ctx, &packet) >= 0) {
 
             if(packet.stream_index = mVideoStreamIndex)
@@ -140,7 +137,7 @@ int PlaybackHandler::start()
                 avcodec_send_packet(codec_context, &packet);
                 err = avcodec_receive_frame(codec_context, frame);
 
-                imageHandler->readImage(codec_context, frame, 0);
+                imageHandler->readImage(codec_context, frame, mSenderId);
             }
             else if(packet.stream_index = mAudioStreamIndex)
             {

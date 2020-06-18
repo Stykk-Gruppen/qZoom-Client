@@ -36,7 +36,7 @@ extern "C" {
 class StreamHandler
 {
 public:
-    StreamHandler(ImageHandler* imageHandler);
+    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler,);
 
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;

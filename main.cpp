@@ -59,9 +59,10 @@ int main(int argc, char *argv[])
 
 
     ImageHandler* t = new ImageHandler();
+    SocketHandler* tt = new SocketHandler();
     QScopedPointer<ImageHandler> imageHandler(t);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(t));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(t, tt));
+    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(t, tt));
 
     streamHandler->record();
     //streamHandler->finish();

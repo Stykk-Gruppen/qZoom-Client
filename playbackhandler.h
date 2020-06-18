@@ -36,12 +36,13 @@ extern "C" {
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include "imagehandler.h"
+#include "sockethandler.h"
 
 class PlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    PlaybackHandler(ImageHandler* _imageHandler, QObject *parent = nullptr);
+    PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
@@ -51,12 +52,13 @@ public:
 private:
     void initAudio(QObject *parent);
 
-    QUdpSocket *mUdpSocket;
+    SocketHandler* mSocketHandler;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
     ImageHandler* imageHandler;
+    uint8_t mSenderId;
 signals:
 };
 

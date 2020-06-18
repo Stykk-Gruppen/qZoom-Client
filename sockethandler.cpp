@@ -4,6 +4,7 @@ SocketHandler::SocketHandler(QObject *parent) : QObject(parent)
 {
     address = QHostAddress::LocalHost;
     port = 1337;
+    initSocket();
 }
 
 void SocketHandler::initSocket()

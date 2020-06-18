@@ -4,15 +4,15 @@ std::ofstream outfile("videoStream.ismv", std::ostream::binary);
 
 
 
-StreamHandler::StreamHandler(ImageHandler* imageHandler)
+StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler)
 {
     avcodec_register_all();
     av_register_all();
     int ret;
     ofmt_ctx = NULL;
 
-    socketHandler = new SocketHandler();
-    socketHandler->initSocket();
+    socketHandler = _socketHandler;
+    //socketHandler->initSocket();
     if(writeToFile)
     {
         ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
@@ -58,7 +58,7 @@ StreamHandler::StreamHandler(ImageHandler* imageHandler)
     }
 
     int64_t time = av_gettime();
-    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, time,numberOfFrames, imageHandler);
+    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, time,numberOfFrames, _imageHandler);
     audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock,time, numberOfFrames);
     ret = videoHandler->init();
     if(ret<0){
@@ -88,13 +88,13 @@ void StreamHandler::record()
 int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
     qDebug() << "Inne i custom io write";
-    /*SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
+    SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
 
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
-    return socketHandler->sendDatagram(send);*/
+    return socketHandler->sendDatagram(send);
 
     outfile.write((char*)buffer, buffer_size);
 
