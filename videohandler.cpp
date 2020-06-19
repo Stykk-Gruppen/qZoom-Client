@@ -399,8 +399,8 @@ void VideoHandler::grabFrames() {
         }
         static int count = 0;
         //qDebug() << count << "/" << numberOfFrames;
-        if(count > numberOfFrames) break;
-        count++;
+        //if(count > numberOfFrames) break;
+        //count++;
     }
     qDebug() << "About to write trailer from video";
     writeLock->lock();

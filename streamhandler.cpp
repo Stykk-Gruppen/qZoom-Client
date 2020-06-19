@@ -14,7 +14,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mAudioEnabled = true;
     mVideoEnabled = true;
     writeToFile = false;
-    numberOfFrames = 2000;
+    numberOfFrames = 2000000;
     mSocketHandler = _socketHandler;
     if(writeToFile)
     {

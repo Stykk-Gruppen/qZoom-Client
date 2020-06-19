@@ -48,20 +48,20 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
-    buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
+    //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
-    if (!buf_size)
+    if (!s->socketHandler->mBuffer.data())
     {
         int ms = 10000;
         struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         nanosleep(&ts, NULL);
         qDebug() << "read packet buffer size 0";
-        return AVERROR(EAGAIN);
+        return 0;
         //return AVERROR_EOF;
     }
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
     s->socketHandler->mBuffer.remove(0,buf_size);
-    qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
+    //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
 
 
     memcpy(buf, tempBuffer.constData(), buf_size);
@@ -81,7 +81,7 @@ int PlaybackHandler::start()
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 64*1024;
+        size_t buffer_size = 0, avio_ctx_buffer_size = 4*1024;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();
@@ -133,6 +133,7 @@ int PlaybackHandler::start()
 
 
         Q_ASSERT(video_stream);
+        video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
         AVCodecParameters	*codecpar = video_stream->codecpar;
         AVCodec* codec = avcodec_find_decoder(codecpar->codec_id);
@@ -161,11 +162,18 @@ int PlaybackHandler::start()
                 //Decode and send to ImageHandler
 
                 ret = avcodec_send_packet(codec_context, &packet);
-                if (ret < 0)
+                if (ret == AVERROR_EOF || ret == AVERROR(EOF))
+                {
+                    int ms = 10000;
+                    struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+                    nanosleep(&ts, NULL);
+                    continue;
+                }
+                else if(ret < 0)
                 {
                     char* errbuff = (char *)malloc((1000)*sizeof(char));
                     av_strerror(ret,errbuff,1000);
-                    qDebug() << "Failed avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+                    qDebug() << "Failed udp inpu avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
                     exit(1);
 
                 }
@@ -248,7 +256,7 @@ int PlaybackHandler::start()
         }
         char* errbuff = (char *)malloc((1000)*sizeof(char));
         av_strerror(ret,errbuff,1000);
-        qDebug() << "Failed avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+        qDebug() << "Failed av_read_frame: code "<<ret<< " meaning: " << errbuff;
         exit(1);
 
     });

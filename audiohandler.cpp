@@ -767,7 +767,7 @@ int AudioHandler::init()
 int AudioHandler::grabFrames()
 {
     int count = 0;
-    while (count < numberOfFrames) {
+    while (1) {
         count++;
         //qDebug() << count;
         /* Use the encoder's desired frame size for processing. */

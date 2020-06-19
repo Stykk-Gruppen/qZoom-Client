@@ -39,20 +39,20 @@ void SocketHandler::readPendingDatagrams()
         if (numRead == 0 && !socket.waitForReadyRead())
             break;
     }*/
-    qDebug() << "signal recieved: " << signalCount;
+    //qDebug() << "signal recieved: " << signalCount;
     while (udpSocket->hasPendingDatagrams())
     {
 
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         mBuffer.append(datagram.data());
-        if(!mPlaybackStarted && mBuffer.size()>= 64*1024)
+        if(!mPlaybackStarted && mBuffer.size()>= 512*1024)
         {
             emit startPlayback();
             mPlaybackStarted = true;
         }
         //processTheDatagram(datagram);
-        qDebug() << "buffer size " << mBuffer.size();
     }
+   // qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
     signalCount++;
 }
 
