@@ -1,7 +1,8 @@
 #include "sockethandler.h"
 
-SocketHandler::SocketHandler(QObject *parent) : QObject(parent)
+SocketHandler::SocketHandler(std::mutex* _writeLock,QObject *parent) : QObject(parent)
 {
+    writeLock = _writeLock;
     address = QHostAddress::LocalHost;
     port = 1337;
     initSocket();
@@ -44,7 +45,9 @@ void SocketHandler::readPendingDatagrams()
     {
 
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
+        writeLock->lock();
         mBuffer.append(datagram.data());
+        writeLock->unlock();
         if(!mPlaybackStarted && mBuffer.size()>= 512*1024)
         {
             emit startPlayback();

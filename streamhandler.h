@@ -43,6 +43,7 @@ public:
     const char* filename = "video.ismv";
     void record();
     bool writeToFile = false;
+
     std::mutex writeLock;
     SocketHandler* socketHandler;
     int numberOfFrames = 200;

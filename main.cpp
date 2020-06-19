@@ -55,12 +55,13 @@ int main(int argc, char *argv[])
 
 
     ImageHandler* imageHandlerObject = new ImageHandler();
-    SocketHandler* socketHandlerObject = new SocketHandler();
+    std::mutex *udpBufferLock = new std::mutex;
+    SocketHandler* socketHandlerObject = new SocketHandler(udpBufferLock);
 
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(imageHandlerObject, socketHandlerObject));
+    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
 
 
     streamHandler->record();

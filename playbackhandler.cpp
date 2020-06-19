@@ -1,12 +1,13 @@
 #include "playbackhandler.h"
 
-PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
+PlaybackHandler::PlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
 {
     mSocketHandler = _socketHandler;
     mImageHandler = _imageHandler;
     initAudio(parent);
     mStruct = new SocketAndIDStruct();
     mStruct->socketHandler = _socketHandler;
+    mStruct->writeLock = writeLock;
 
     connect(mSocketHandler, &SocketHandler::startPlayback, this, &PlaybackHandler::start);
 }
@@ -50,17 +51,16 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
-    while (!s->socketHandler->mBuffer.data())
+    while (s->socketHandler->mBuffer.size() <= buf_size)
     {
         int ms = 1000;
         struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         nanosleep(&ts, NULL);
-        //qDebug() << "read packet buffer size 0";
-        //return 0;
-        //return AVERROR_EOF;
     }
+    s->writeLock->lock();
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
     s->socketHandler->mBuffer.remove(0,buf_size);
+    s->writeLock->unlock();
     //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
 
 

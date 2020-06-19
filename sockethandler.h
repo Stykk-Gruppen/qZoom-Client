@@ -5,12 +5,13 @@
 #include <QUdpSocket>
 #include <QNetworkDatagram>
 #include <QProcess>
+#include <mutex>
 
 class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(QObject *parent = nullptr);
+    explicit SocketHandler(std::mutex*,QObject *parent = nullptr);
     void initSocket();
 
     QUdpSocket* udpSocket;
@@ -22,6 +23,7 @@ public slots:
     void readPendingDatagrams();
 private:
     uint signalCount = 0;
+    std::mutex *writeLock;
     bool mPlaybackStarted = false;
 signals:
     void startPlayback();
