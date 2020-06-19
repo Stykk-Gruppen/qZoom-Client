@@ -11,6 +11,10 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     int ret;
     ofmt_ctx = NULL;
 
+    mAudioEnabled = true;
+    mVideoEnabled = true;
+    writeToFile = false;
+    numberOfFrames = 2000;
     mSocketHandler = _socketHandler;
     if(writeToFile)
     {
@@ -24,7 +28,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     else
     {
        // ofmt_ctx = avformat_alloc_context();
-        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "mpegts", NULL);
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "matroska", NULL);
         if (ret < 0) {
             fprintf(stderr, "Could not alloc output context with file '%s'", filename);
             exit(1);
@@ -62,11 +66,6 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     }
 
     int64_t time = av_gettime();
-
-    mAudioEnabled = true;
-    mVideoEnabled = false;
-    writeToFile = false;
-    numberOfFrames = 2000;
     if(mAudioEnabled && !mVideoEnabled)
     {
         mAudioOutputStreamIndex = 0;

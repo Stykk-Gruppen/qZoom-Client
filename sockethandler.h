@@ -22,6 +22,7 @@ public slots:
     void readPendingDatagrams();
 private:
     uint signalCount = 0;
+    bool mPlaybackStarted = false;
 signals:
     void startPlayback();
 
