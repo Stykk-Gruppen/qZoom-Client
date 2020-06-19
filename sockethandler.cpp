@@ -45,8 +45,12 @@ void SocketHandler::readPendingDatagrams()
 
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         mBuffer.append(datagram.data());
+        if(mBuffer.size()>= 16*1024)
+        {
+            emit startPlayback();
+        }
         //processTheDatagram(datagram);
-        qDebug() << datagram.data();
+        //qDebug() << datagram.data();
     }
     signalCount++;
 }

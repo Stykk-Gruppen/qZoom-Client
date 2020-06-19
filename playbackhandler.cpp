@@ -8,7 +8,7 @@ PlaybackHandler::PlaybackHandler(ImageHandler* _imageHandler, SocketHandler* _so
     mStruct = new SocketAndIDStruct();
     mStruct->socketHandler = _socketHandler;
 
-    //connect(mSocketHandler->udpSocket, &QUdpSocket::readyRead, this, &PlaybackHandler::start);
+    connect(mSocketHandler, &SocketHandler::startPlayback, this, &PlaybackHandler::start);
 }
 
 void PlaybackHandler::initAudio(QObject *parent)
@@ -100,7 +100,7 @@ int PlaybackHandler::start()
         }
 
         qDebug() << "Success!";
-        //exit(1);
+        exit(1);
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;

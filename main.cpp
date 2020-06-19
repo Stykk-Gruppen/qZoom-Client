@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     //imageHandler->veryFunStianLoop();
 
 
-    playbackHandler->start();
+    //playbackHandler->start();
 
 
 

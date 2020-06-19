@@ -23,7 +23,7 @@ public slots:
 private:
     uint signalCount = 0;
 signals:
-
+    void startPlayback();
 
 };
 

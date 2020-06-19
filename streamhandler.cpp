@@ -23,9 +23,14 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     }
     else
     {
-        ofmt_ctx = avformat_alloc_context();
+       // ofmt_ctx = avformat_alloc_context();
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "mpegts", NULL);
+        if (ret < 0) {
+            fprintf(stderr, "Could not alloc output context with file '%s'", filename);
+            exit(1);
+        }
     }
-    ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
+   // ofmt_ctx->oformat = av_guess_format(NULL, NULL, NULL);
 
     AVDictionary *options = NULL;
 
@@ -59,7 +64,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     int64_t time = av_gettime();
 
     mAudioEnabled = true;
-    mVideoEnabled = true;
+    mVideoEnabled = false;
     writeToFile = false;
     numberOfFrames = 2000;
     if(mAudioEnabled && !mVideoEnabled)
@@ -100,11 +105,8 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     }
     av_dump_format(ofmt_ctx, 0, filename, 1);
     ret = avformat_write_header(ofmt_ctx, &options);
-    if(ret < 0)
-    {
-        char* errbuff = (char *)malloc((1000)*sizeof(char));
-        av_strerror(ret, errbuff, 1000);
-        qDebug() << "Could not open write header " << ret << " meaning: "<< errbuff;
+    if(ret<0){
+        fprintf(stderr, "Could not open write header");
         exit(1);
     }
 }
@@ -120,6 +122,7 @@ void StreamHandler::record()
     {
         QtConcurrent::run(audioHandler, &AudioHandler::grabFrames);
     }
+
 }
 
 int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
