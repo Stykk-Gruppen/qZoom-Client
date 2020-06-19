@@ -48,9 +48,21 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
+    buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
+
+    if (!buf_size)
+    {
+        int ms = 10000;
+        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+        nanosleep(&ts, NULL);
+        qDebug() << "read packet buffer size 0";
+        return AVERROR(EAGAIN);
+        //return AVERROR_EOF;
+    }
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
     s->socketHandler->mBuffer.remove(0,buf_size);
-    //qDebug() << tempBuffer.size();
+    qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
+
 
     memcpy(buf, tempBuffer.constData(), buf_size);
     //mSenderId = something;
@@ -63,13 +75,13 @@ int PlaybackHandler::start()
     QtConcurrent::run([this]()
     {
         //int ms = 10000;
-        //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+        // struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         //nanosleep(&ts, NULL);
 
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 4096;
+        size_t buffer_size = 0, avio_ctx_buffer_size = 64*1024;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();
@@ -87,7 +99,7 @@ int PlaybackHandler::start()
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
             av_strerror(ret,errbuff,1000);
-            qDebug() << "UDP Stream input alloc failed " << errbuff;
+            qDebug() << "AVformat open input UDP stream failed" << errbuff;
             exit(1);
         }
         ret = avformat_find_stream_info(fmt_ctx, nullptr);
@@ -95,17 +107,17 @@ int PlaybackHandler::start()
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
             av_strerror(ret,errbuff,1000);
-            qDebug() << "UDP Input stream info not found" << errbuff;
+            qDebug() << "AVFormat find udp stream failed" << errbuff;
             exit(1);
         }
 
-        av_dump_format(fmt_ctx, 0, 0, 1);
+        av_dump_format(fmt_ctx, 0, NULL, 0);
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;
         for (uint i=0; i < fmt_ctx->nb_streams; ++i) {
             auto	st = fmt_ctx->streams[i];
-            qDebug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
+            //Debug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
             if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 video_stream = st;
@@ -127,8 +139,8 @@ int PlaybackHandler::start()
         AVCodecContext *codec_context = avcodec_alloc_context3(codec);
         int err = avcodec_open2(codec_context, codec, nullptr);
         Q_ASSERT(err>=0);
-        qDebug() << codec->name << codec->id;
-        qDebug() << codecpar->width << codecpar->height << codecpar->format << codec_context->pix_fmt;
+        qDebug() << "codec name: " << codec->name<< " codec id " << codec->id;
+        qDebug() << "codecpar width" << codecpar->width <<" h: "<< codecpar->height << " format: "<< codecpar->format<< " pix fmt: " << codec_context->pix_fmt;
 
         AVFrame	*frameRGB = av_frame_alloc();
         frameRGB->format = AV_PIX_FMT_RGB24;
@@ -142,25 +154,35 @@ int PlaybackHandler::start()
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
 
-        while (av_read_frame(fmt_ctx, &packet) >= 0) {
+        while ((ret = av_read_frame(fmt_ctx, &packet)) >= 0) {
 
             if(packet.stream_index == mVideoStreamIndex)
             {
                 //Decode and send to ImageHandler
 
-                err = avcodec_send_packet(codec_context, &packet);
-                if (err > 0)
+                ret = avcodec_send_packet(codec_context, &packet);
+                if (ret < 0)
                 {
-                    qDebug() << "Failed avcodec_send_packet";
+                    char* errbuff = (char *)malloc((1000)*sizeof(char));
+                    av_strerror(ret,errbuff,1000);
+                    qDebug() << "Failed avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+                    exit(1);
+
                 }
-                err = avcodec_receive_frame(codec_context, frame);
-                if (err > 0)
-                {
-                    qDebug() << "Failed avcodec_receive_frame";
+                ret = avcodec_receive_frame(codec_context, frame);
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+                    //skipped_frames++;
+                    //qDebug() << "Skipped a Frame";
+                    continue;
                 }
+                else if (ret < 0) {
+                    char* errbuff = (char *)malloc((1000)*sizeof(char));
+                    av_strerror(ret,errbuff,1000);
+                    qDebug() << "Failed avcodec_receive_frame: code "<<ret<< " meaning: " << errbuff;
+                    exit(1);
+                }
+
                 qDebug() << frame->data[0];
-
-
                 mImageHandler->readImage(codec_context, frame, 1);
             }
             else if(packet.stream_index == mAudioStreamIndex)
@@ -224,7 +246,10 @@ int PlaybackHandler::start()
         */
 
         }
-        qDebug() << "At the end";
+        char* errbuff = (char *)malloc((1000)*sizeof(char));
+        av_strerror(ret,errbuff,1000);
+        qDebug() << "Failed avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+        exit(1);
 
     });
 }

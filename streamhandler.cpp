@@ -28,7 +28,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     else
     {
         // ofmt_ctx = avformat_alloc_context();
-        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "mxf", NULL);
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "ismv", NULL);
         if (ret < 0) {
             fprintf(stderr, "Could not alloc output context with file '%s'", filename);
             exit(1);

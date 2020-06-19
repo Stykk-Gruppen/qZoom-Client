@@ -324,7 +324,7 @@ void VideoHandler::grabFrames() {
             ret = avcodec_receive_packet(outputVideoCodecContext, outPacket);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
                 skipped_frames++;
-                qDebug() << "Skipped a Frame";
+                //qDebug() << "Skipped a Frame";
                 continue;
             }
             else if (ret < 0) {
