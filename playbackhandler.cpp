@@ -50,13 +50,13 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
-    if (!s->socketHandler->mBuffer.data())
+    while (!s->socketHandler->mBuffer.data())
     {
-        int ms = 10000;
+        int ms = 1000;
         struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         nanosleep(&ts, NULL);
-        qDebug() << "read packet buffer size 0";
-        return 0;
+        //qDebug() << "read packet buffer size 0";
+        //return 0;
         //return AVERROR_EOF;
     }
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
@@ -155,7 +155,18 @@ int PlaybackHandler::start()
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
 
-        while ((ret = av_read_frame(fmt_ctx, &packet)) >= 0) {
+        while (1) {
+            ret = av_read_frame(fmt_ctx,&packet);
+            if(ret < 0)
+            {
+                char* errbuff = (char *)malloc((1000)*sizeof(char));
+                av_strerror(ret,errbuff,1000);
+                qDebug() << "Failed av_read_frame: code " << ret << " meaning: " << errbuff;
+                int ms = 1000;
+                struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+                nanosleep(&ts, NULL);
+                continue;
+            }
 
             if(packet.stream_index == mVideoStreamIndex)
             {
@@ -164,7 +175,7 @@ int PlaybackHandler::start()
                 ret = avcodec_send_packet(codec_context, &packet);
                 if (ret == AVERROR_EOF || ret == AVERROR(EOF))
                 {
-                    int ms = 10000;
+                    int ms = 1000;
                     struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
                     nanosleep(&ts, NULL);
                     continue;
@@ -254,11 +265,6 @@ int PlaybackHandler::start()
         */
 
         }
-        char* errbuff = (char *)malloc((1000)*sizeof(char));
-        av_strerror(ret,errbuff,1000);
-        qDebug() << "Failed av_read_frame: code "<<ret<< " meaning: " << errbuff;
-        exit(1);
-
     });
 }
 

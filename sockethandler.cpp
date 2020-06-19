@@ -52,7 +52,7 @@ void SocketHandler::readPendingDatagrams()
         }
         //processTheDatagram(datagram);
     }
-   // qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
+    qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
     signalCount++;
 }
 
