@@ -99,8 +99,7 @@ int PlaybackHandler::start()
             exit(1);
         }
 
-        qDebug() << "Success!";
-        exit(1);
+        av_dump_format(fmt_ctx, 0, 0, 1);
 
         AVStream	*video_stream = nullptr;
         AVStream * audio_stream = nullptr;

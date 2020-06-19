@@ -27,14 +27,14 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     }
     else
     {
-       // ofmt_ctx = avformat_alloc_context();
-        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "matroska", NULL);
+        // ofmt_ctx = avformat_alloc_context();
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "mxf", NULL);
         if (ret < 0) {
             fprintf(stderr, "Could not alloc output context with file '%s'", filename);
             exit(1);
         }
     }
-   // ofmt_ctx->oformat = av_guess_format(NULL, NULL, NULL);
+    // ofmt_ctx->oformat = av_guess_format(NULL, NULL, NULL);
 
     AVDictionary *options = NULL;
 
@@ -102,7 +102,14 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
         qDebug() << "Both audio and video has been disabled in streamhandler";
         exit(1);
     }
-    av_dump_format(ofmt_ctx, 0, filename, 1);
+    if(writeToFile)
+    {
+        av_dump_format(ofmt_ctx, 0, filename, 1);
+    }
+    else
+    {
+        av_dump_format(ofmt_ctx, 0, 0, 1);
+    }
     ret = avformat_write_header(ofmt_ctx, &options);
     if(ret<0){
         fprintf(stderr, "Could not open write header");
