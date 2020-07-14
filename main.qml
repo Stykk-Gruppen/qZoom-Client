@@ -4,6 +4,8 @@ import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 //import QtQuick 2.0
 //import VLCQt 1.1
+//import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.15
 
 ApplicationWindow {
     id: window
@@ -13,6 +15,7 @@ ApplicationWindow {
     title: qsTr("qZoom")
    // Rectangle{
        // width: 400
+    /*
     Column{
         spacing: 2
         Image {
@@ -62,6 +65,52 @@ ApplicationWindow {
             }
         }
     }
+
+
+    Button {
+        text: "Add Screen"
+        onClicked: {
+        }
+    }
+    */
+
+    GridLayout {
+            columns: 2 //Må nok gjøre litt matte her etterhvert
+            Repeater {
+                model: imageHandler.getNumberOfScreens()
+                Rectangle {
+                    width: 480
+                    height: 360
+                    Image {
+                        anchors.fill: parent
+
+                        id: liveImage
+                        property bool counter: false
+
+                        asynchronous: true
+                        source: "image://live/10"
+                        //anchors.fill: parent
+                        fillMode: Image.PreserveAspectFit
+                        cache: false
+                        width: 480
+                        height: 360
+
+                        function reload() {
+                            counter = !counter
+                            source = "image://live/image?id=" + counter + "&" + index
+                        }
+                    }
+
+                    Item {
+                        Timer {
+                            interval: 41; running: true; repeat: true
+                            onTriggered: liveImage.reload();
+                        }
+                    }
+                }
+
+            }
+        }
 
 }
 

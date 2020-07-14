@@ -123,6 +123,11 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     emit updateImage(img, index);
 }
 
+int ImageHandler::getNumberOfScreens()
+{
+    return mImageMap.size();
+}
+
 /*
 void ImageHandler::readPacket(uint8_t *buffer, int buffer_size)
 {

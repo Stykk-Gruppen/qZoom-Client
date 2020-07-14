@@ -96,13 +96,14 @@ int VideoHandler::init()
             //Denne trenger vi egentlig ikke lenger
             videoStream = i;
             //Setter div parametere.
-            outputVideoCodecContext->bit_rate = 10000000;//in_stream->codecpar->bit_rate;
+            //outputVideoCodecContext->bit_rate = 10000000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
             outputVideoCodecContext->max_b_frames = 2;
             outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
+            outputVideoCodecContext->gop_size = 10;
             //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
 
             //Kopierer parametere inn i out_stream

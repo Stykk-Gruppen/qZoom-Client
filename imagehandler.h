@@ -39,6 +39,7 @@ public:
     void readPacket(uint8_t *buffer, int buffer_size);
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
     void addPeer(uint8_t index);
+    Q_INVOKABLE int getNumberOfScreens();
 
 public slots:
     void updateImage(const QImage &image, uint8_t index);
