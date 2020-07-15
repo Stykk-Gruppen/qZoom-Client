@@ -54,7 +54,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     {
         //ofmt_ctx->oformat->flags |= AVFMT_NOFILE;
 
-        int avio_buffer_size = 4 * 1024;
+        int avio_buffer_size = 8 * 1024;
         void* avio_buffer = av_malloc(avio_buffer_size);
         AVIOContext* custom_io = avio_alloc_context (
                     (unsigned char*)avio_buffer, avio_buffer_size,

@@ -81,7 +81,7 @@ int PlaybackHandler::start()
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 4*1024;
+        size_t buffer_size = 0, avio_ctx_buffer_size = 8*1024;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();
@@ -201,7 +201,7 @@ int PlaybackHandler::start()
                     exit(1);
                 }
 
-                qDebug() << frame->data[0];
+                //qDebug() << frame->data[0];
                 mImageHandler->readImage(codec_context, frame, 1);
             }
             else if(packet.stream_index == mAudioStreamIndex)

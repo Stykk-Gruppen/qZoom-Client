@@ -48,14 +48,14 @@ void SocketHandler::readPendingDatagrams()
         writeLock->lock();
         mBuffer.append(datagram.data());
         writeLock->unlock();
-        if(!mPlaybackStarted && mBuffer.size()>= 512*1024)
+        if(!mPlaybackStarted && mBuffer.size()>= 64*1024)
         {
             emit startPlayback();
             mPlaybackStarted = true;
         }
         //processTheDatagram(datagram);
     }
-    qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
+    //qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
     signalCount++;
 }
 
