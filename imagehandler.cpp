@@ -4,6 +4,7 @@ ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
 {
     mDefaultImage = QImage("0.png");
     this->blockSignals(false);
+
     addPeer(1);
     //addPeer(2);
 
@@ -96,15 +97,13 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 {
     QImage img(frame->width, frame->height, QImage::Format_RGB888);
 
-    AVFrame	*frameRGB = av_frame_alloc();
+
     frameRGB->format = AV_PIX_FMT_RGB24;
     frameRGB->width = frame->width;
     frameRGB->height = frame->height;
 
-    SwsContext *imgConvertCtx = nullptr;
-
-    avpicture_alloc((AVPicture*)frameRGB, AV_PIX_FMT_RGB24, frame->width, frame->height);
-    //av_image_alloc
+    //avpicture_alloc((AVPicture*)frameRGB, A frame->width, frame->height);
+    av_image_alloc(frameRGB->data,frameRGB->linesize,frame->width,frame->height,AV_PIX_FMT_RGB24,1);
     imgConvertCtx = sws_getContext(codecContext->width, codecContext->height,
                                    codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
                                    SWS_BICUBIC, NULL, NULL, NULL);
@@ -119,7 +118,10 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
             memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0]);
         }
     }
-
+    av_freep(&frameRGB->data[0]);
+    av_frame_unref(frameRGB);
+    //sws_freeContext(imgConvertCtx);
+    //av_frame_free(&frameRGB);
     emit updateImage(img, index);
 }
 

@@ -53,18 +53,23 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     while (s->socketHandler->mBuffer.size() <= buf_size)
     {
-        int ms = 1000;
+        int ms = 5;
         struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        nanosleep(&ts, NULL);
+        //qDebug() << "sleeping";
+        //nanosleep(&ts, NULL);
     }
     s->writeLock->lock();
+
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
     s->socketHandler->mBuffer.remove(0,buf_size);
+
     s->writeLock->unlock();
     //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
 
 
+
     memcpy(buf, tempBuffer.constData(), buf_size);
+
     //mSenderId = something;
     //qDebug() << "Reading packet";
     return buf_size;
@@ -175,6 +180,7 @@ int PlaybackHandler::start()
                 ret = avcodec_send_packet(codec_context, &packet);
                 if (ret == AVERROR_EOF || ret == AVERROR(EOF))
                 {
+                    qDebug() << "send packet sleep";
                     int ms = 1000;
                     struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
                     nanosleep(&ts, NULL);
@@ -191,7 +197,7 @@ int PlaybackHandler::start()
                 ret = avcodec_receive_frame(codec_context, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
                     //skipped_frames++;
-                    //qDebug() << "Skipped a Frame";
+                    qDebug() << "Skipped a Frame playbackhandler";
                     continue;
                 }
                 else if (ret < 0) {

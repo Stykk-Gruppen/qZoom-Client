@@ -104,6 +104,7 @@ int VideoHandler::init()
             outputVideoCodecContext->max_b_frames = 2;
             outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
             outputVideoCodecContext->gop_size = 10;
+            //av_opt_set(outputVideoCodecContext->priv_data, "preset", "slow", 0);
             //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
 
             //Kopierer parametere inn i out_stream
@@ -185,6 +186,9 @@ static int64_t pts = 0;
 void VideoHandler::grabFrames() {
 
     AVPacket* pkt = av_packet_alloc();
+    AVStream *in_stream, *out_stream;
+    AVPacket* outPacket = av_packet_alloc();
+
     pkt->size = 0;
     pkt->data = NULL;
 
@@ -257,6 +261,7 @@ void VideoHandler::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
+                //delete frame2_buffer;
                 //scaledFrame->pts = videoFrame->best_effort_timestamp;
                 //static int encodedFrames = 0;
                 //static int prev = videoFrame->pts;
@@ -271,6 +276,7 @@ void VideoHandler::grabFrames() {
                                 videoFrame->linesize, 0,
                                 inputVideoCodecContext->height,
                                 scaledFrame->data, scaledFrame->linesize);
+
                 //qDebug() << "Etter swsScale\n";
                 if(ret < 0)
                 {
@@ -288,12 +294,14 @@ void VideoHandler::grabFrames() {
                 }
                 imageHandler->readImage(outputVideoCodecContext, scaledFrame, 0);
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
+                av_frame_free(&scaledFrame);
                 if(ret < 0)
                 {
                     qDebug() << "Error with send frame " << ret <<"\n";
 
                     exit(1);
                 }
+                av_free(frame2_buffer);
             } else {
                 if(firstPacket){
                         pts = time;
@@ -306,6 +314,7 @@ void VideoHandler::grabFrames() {
                 }
                 imageHandler->readImage(outputVideoCodecContext, videoFrame, 0);
                 ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
+                //av_frame_free(&videoFrame);
                 if(ret < 0)
                 {
                     qDebug() << "Error with send frame " << ret <<"\n";
@@ -315,7 +324,7 @@ void VideoHandler::grabFrames() {
             }
             //qDebug() << "Etter sendFrame\n";
 
-            AVPacket* outPacket = av_packet_alloc();
+
             outPacket->data = NULL;
             outPacket->size = 0;
             if(ret < 0){
@@ -353,7 +362,7 @@ void VideoHandler::grabFrames() {
                 //qDebug() << "ready for write";
                 skipped_frames = 0;
 
-                AVStream *in_stream, *out_stream;
+
                 in_stream  = ifmt_ctx->streams[pkt->stream_index];
                 out_stream = ofmt_ctx->streams[pkt->stream_index];
                 //out_stream->avg_frame_rate = (AVRational){60, 1};
@@ -394,6 +403,8 @@ void VideoHandler::grabFrames() {
                 }
                 av_packet_unref(pkt);
                 av_packet_unref(outPacket);
+                //av_packet_free(&outPacket);
+
                 //av_packet_free(&pkt);
                 //av_packet_free(&outPacket);
             }

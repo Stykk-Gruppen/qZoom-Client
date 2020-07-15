@@ -39,6 +39,8 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
+#include <testing.h>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -62,6 +64,8 @@ int main(int argc, char *argv[])
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
     QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
+    QScopedPointer<testing> test(new testing());
+    //test->run();
 
 
     streamHandler->record();
