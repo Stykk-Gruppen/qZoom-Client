@@ -51,7 +51,7 @@ public:
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
 private:
     SocketHandler* mSocketHandler;
-    bool mAudioEnabled = true;
+    bool mAudioEnabled = false;
     bool mVideoEnabled = true;
     int mAudioOutputStreamIndex = 1;
 };

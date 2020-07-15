@@ -143,7 +143,7 @@ int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_siz
     return socketHandler->sendDatagram(send);
 
     //outfile.write((char*)buffer, buffer_size);
-    //delete socketHandler;
+
     delete cptr;
 
     return 0;

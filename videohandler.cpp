@@ -96,16 +96,18 @@ int VideoHandler::init()
             //Denne trenger vi egentlig ikke lenger
             videoStream = i;
             //Setter div parametere.
-            //outputVideoCodecContext->bit_rate = 10000000;//in_stream->codecpar->bit_rate;
+            //outputVideoCodecContext->bit_rate = 1000000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
-            outputVideoCodecContext->max_b_frames = 2;
-            outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
+            //outputVideoCodecContext->max_b_frames = 2;
+            //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
             outputVideoCodecContext->gop_size = 10;
+
             //av_opt_set(outputVideoCodecContext->priv_data, "preset", "slow", 0);
             //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
+
 
             //Kopierer parametere inn i out_stream
             avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
@@ -261,15 +263,6 @@ void VideoHandler::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
-                //delete frame2_buffer;
-                //scaledFrame->pts = videoFrame->best_effort_timestamp;
-                //static int encodedFrames = 0;
-                //static int prev = videoFrame->pts;
-                //scaledFrame->pts = encodedFrames;
-                //encodedFrames++;
-                //prev += scaledFrame->pts;
-                //pts += scaledFrame->pkt_duration;
-
 
 
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
@@ -278,6 +271,7 @@ void VideoHandler::grabFrames() {
                                 scaledFrame->data, scaledFrame->linesize);
 
                 //qDebug() << "Etter swsScale\n";
+
                 if(ret < 0)
                 {
                     qDebug() << "Error with scale " << ret <<"\n";
@@ -294,14 +288,16 @@ void VideoHandler::grabFrames() {
                 }
                 imageHandler->readImage(outputVideoCodecContext, scaledFrame, 0);
                 ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
-                av_frame_free(&scaledFrame);
+                //av_frame_free(&scaledFrame);
                 if(ret < 0)
                 {
                     qDebug() << "Error with send frame " << ret <<"\n";
 
                     exit(1);
                 }
-                av_free(frame2_buffer);
+
+                av_free(frame2_buffer); //Viktig! Ellers skjer det memory leaks.
+
             } else {
                 if(firstPacket){
                         pts = time;
@@ -429,6 +425,7 @@ void VideoHandler::grabFrames() {
         //fprintf(stderr, "Error occurred: %s\n", av_err2str(ret));
     }
     qDebug() << "Ferdig med grabFrames!!!\n";
+
 }
 
 /*int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)

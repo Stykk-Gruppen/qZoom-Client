@@ -104,6 +104,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
     //avpicture_alloc((AVPicture*)frameRGB, A frame->width, frame->height);
     av_image_alloc(frameRGB->data,frameRGB->linesize,frame->width,frame->height,AV_PIX_FMT_RGB24,1);
+
     imgConvertCtx = sws_getContext(codecContext->width, codecContext->height,
                                    codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
                                    SWS_BICUBIC, NULL, NULL, NULL);
@@ -123,6 +124,15 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     //sws_freeContext(imgConvertCtx);
     //av_frame_free(&frameRGB);
     emit updateImage(img, index);
+
+    //av_frame_unref(frameRGB);
+    //av_frame_free(&frameRGB);
+    //delete frameRGB;
+    sws_freeContext(imgConvertCtx);
+    av_freep(&frameRGB->data[0]);
+    //av_frame_free(&frame);
+
+    //av_packet_unref(&packet);
 }
 
 int ImageHandler::getNumberOfScreens()

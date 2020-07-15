@@ -43,12 +43,11 @@ void SocketHandler::readPendingDatagrams()
     //qDebug() << "signal recieved: " << signalCount;
     while (udpSocket->hasPendingDatagrams())
     {
-
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         writeLock->lock();
         mBuffer.append(datagram.data());
         writeLock->unlock();
-        if(!mPlaybackStarted && mBuffer.size()>= 64*1024)
+        if(!mPlaybackStarted && mBuffer.size() >= 64*1024)
         {
             emit startPlayback();
             mPlaybackStarted = true;
