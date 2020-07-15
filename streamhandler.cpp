@@ -14,7 +14,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mAudioEnabled = true;
     mVideoEnabled = true;
     writeToFile = false;
-    numberOfFrames = 2000000;
+    numberOfFrames = 200;
     mSocketHandler = _socketHandler;
     if(writeToFile)
     {
@@ -143,6 +143,7 @@ int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_siz
     return socketHandler->sendDatagram(send);
 
     //outfile.write((char*)buffer, buffer_size);
+    delete cptr;
 
     return 0;
 }

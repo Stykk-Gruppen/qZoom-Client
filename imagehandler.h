@@ -27,6 +27,10 @@ extern "C" {
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
 #include "libswresample/swresample.h"
+#include <libavutil/imgutils.h>
+#include <libavutil/samplefmt.h>
+#include <libavutil/timestamp.h>
+#include <libavformat/avformat.h>
 }
 
 class ImageHandler : public QObject, public QQuickImageProvider

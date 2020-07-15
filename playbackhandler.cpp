@@ -51,18 +51,19 @@ int PlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
+
     while (s->socketHandler->mBuffer.size() <= buf_size)
     {
-        int ms = 1000;
+        int ms = 5;
         struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         nanosleep(&ts, NULL);
     }
+
     s->writeLock->lock();
     QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
-    s->socketHandler->mBuffer.remove(0,buf_size);
+    s->socketHandler->mBuffer.remove(0, buf_size);
     s->writeLock->unlock();
     //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
-
 
     memcpy(buf, tempBuffer.constData(), buf_size);
     //mSenderId = something;
@@ -102,7 +103,7 @@ int PlaybackHandler::start()
             qDebug() << "AVformat open input UDP stream failed" << errbuff;
             exit(1);
         }
-        ret = avformat_find_stream_info(fmt_ctx, nullptr);
+        //ret = avformat_find_stream_info(fmt_ctx, nullptr);
         if(ret < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -184,7 +185,7 @@ int PlaybackHandler::start()
                 {
                     char* errbuff = (char *)malloc((1000)*sizeof(char));
                     av_strerror(ret,errbuff,1000);
-                    qDebug() << "Failed udp inpu avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+                    qDebug() << "Failed udp input avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
                     exit(1);
 
                 }
