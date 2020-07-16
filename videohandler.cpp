@@ -99,13 +99,16 @@ int VideoHandler::init()
             //outputVideoCodecContext->bit_rate = 1000000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
+            //outputVideoCodecContext->width = 160;
+            //outputVideoCodecContext->height = 120;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
-            //outputVideoCodecContext->max_b_frames = 2;
+            //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
+            outputVideoCodecContext->max_b_frames = 2;
             //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-            outputVideoCodecContext->gop_size = 10;
+            outputVideoCodecContext->gop_size = 0;
 
-            //av_opt_set(outputVideoCodecContext->priv_data, "preset", "slow", 0);
+            av_opt_set(outputVideoCodecContext->priv_data, "preset", "ultrafast", 0);
             //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
 
 
@@ -119,7 +122,8 @@ int VideoHandler::init()
             img_convert_ctx = sws_getContext(
                         in_stream->codecpar->width,
                         in_stream->codecpar->height,
-                        in_stream->codec->pix_fmt,
+                        //in_stream->codec->pix_fmt,
+                        (AVPixelFormat)in_stream->codecpar->format,
                         outputVideoCodecContext->width,
                         outputVideoCodecContext->height,
                         outputVideoCodecContext->pix_fmt,
@@ -263,8 +267,6 @@ void VideoHandler::grabFrames() {
                 uint8_t* frame2_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
                 av_image_fill_arrays(scaledFrame->data,scaledFrame->linesize, frame2_buffer, outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width, outputVideoCodecContext->height,1);
 
-
-
                 ret = sws_scale(img_convert_ctx, videoFrame->data,
                                 videoFrame->linesize, 0,
                                 inputVideoCodecContext->height,
@@ -278,7 +280,7 @@ void VideoHandler::grabFrames() {
                     exit(1);
                 }
                 if(firstPacket){
-                        pts = av_gettime();
+                        pts = time;
                         firstPacket = false;
                     }
 

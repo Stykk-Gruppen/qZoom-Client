@@ -87,7 +87,7 @@ int PlaybackHandler::start()
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 8*1024;
+        size_t buffer_size = 0, avio_ctx_buffer_size = 4*1024;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();
@@ -143,7 +143,9 @@ int PlaybackHandler::start()
 
         AVCodecParameters	*codecpar = video_stream->codecpar;
         AVCodec* codec = avcodec_find_decoder(codecpar->codec_id);
+
         AVCodecContext *codec_context = avcodec_alloc_context3(codec);
+        codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
         int err = avcodec_open2(codec_context, codec, nullptr);
         Q_ASSERT(err>=0);
         qDebug() << "codec name: " << codec->name<< " codec id " << codec->id;
@@ -160,7 +162,20 @@ int PlaybackHandler::start()
 
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
+        /*mStruct->writeLock->unlock();
+         qDebug() << "etter unlock";
 
+        mStruct->writeLock->lock();
+        qDebug() << "etter lock";
+        while (mStruct->socketHandler->mBuffer.size() <= 4*1024)
+        {
+            int ms = 500;
+            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+            qDebug() << "sleeping";
+            nanosleep(&ts, NULL);
+            qDebug() << mStruct->socketHandler->mBuffer.size();
+        }*/
+        //mStruct->socketHandler->mBuffer.clear();
         while (1) {
             ret = av_read_frame(fmt_ctx,&packet);
             if(ret < 0)
@@ -177,7 +192,8 @@ int PlaybackHandler::start()
             if(packet.stream_index == mVideoStreamIndex)
             {
                 //Decode and send to ImageHandler
-
+                //qDebug() << "packet dts playbackhandler: " << packet.dts;
+                //qDebug() << "packet pts playbackhandler: " << packet.pts;
                 ret = avcodec_send_packet(codec_context, &packet);
                 if (ret == AVERROR_EOF || ret == AVERROR(EOF))
                 {
