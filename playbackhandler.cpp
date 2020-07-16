@@ -107,7 +107,7 @@ int PlaybackHandler::start()
             qDebug() << "AVformat open input UDP stream failed" << errbuff;
             exit(1);
         }
-        ret = avformat_find_stream_info(fmt_ctx, nullptr);
+        //ret = avformat_find_stream_info(fmt_ctx, nullptr);
         if(ret < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -136,54 +136,59 @@ int PlaybackHandler::start()
         }
         //Må sikkert gjøre masse piss med audio her.
 
-
-
-        AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
-        AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
-        AVCodecContext *audioDecoderCodecContext = avcodec_alloc_context3(audioDecoderCodec);
-        int err  = avcodec_parameters_to_context(audioDecoderCodecContext, audio_stream->codecpar);
-        Q_ASSERT(err>=0);
-        err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
-        Q_ASSERT(err>=0);
-
-        //audioDecoderCodecContext->sample_rate = 48000;
-        //audioDecoderCodecContext->channels = 2;
-        // To initalize libao for playback
-        ao_initialize();
-
-        int driver = ao_default_driver_id();
-
-        // The format of the decoded PCM samples
-        ao_sample_format sample_format;
-        sample_format.bits = 16;
-        sample_format.channels = 2;
-        sample_format.rate = 44100;
-        sample_format.byte_format = AO_FMT_NATIVE;
-        sample_format.matrix = 0;
-
-        ao_device* device = ao_open_live(driver, &sample_format, NULL);
-
+        int err;
+        AVCodecContext *audioDecoderCodecContext;
+        ao_device* device;
         SwrContext *resample_context = NULL;
+        if(audio_stream)
+        {
+            AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
+            AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
+            audioDecoderCodecContext = avcodec_alloc_context3(audioDecoderCodec);
+            err  = avcodec_parameters_to_context(audioDecoderCodecContext, audio_stream->codecpar);
+            Q_ASSERT(err>=0);
+            err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
+            Q_ASSERT(err>=0);
 
-        resample_context = swr_alloc_set_opts(NULL,
-                                              av_get_default_channel_layout(2),
-                                              AV_SAMPLE_FMT_S16,
-                                              audioDecoderCodecContext->sample_rate,
-                                              av_get_default_channel_layout(audioDecoderCodecContext->channels),
-                                              audioDecoderCodecContext->sample_fmt,
-                                              audioDecoderCodecContext->sample_rate,
-                                              0, NULL);
+            //audioDecoderCodecContext->sample_rate = 48000;
+            //audioDecoderCodecContext->channels = 2;
+            // To initalize libao for playback
+            ao_initialize();
 
-        if (!(resample_context)) {
-            fprintf(stderr,"Unable to allocate resampler context\n");
-            //return AVERROR(ENOMEM);
-        }
+            int driver = ao_default_driver_id();
 
-        // Open the resampler
+            // The format of the decoded PCM samples
+            ao_sample_format sample_format;
+            sample_format.bits = 16;
+            sample_format.channels = 2;
+            sample_format.rate = 44100;
+            sample_format.byte_format = AO_FMT_NATIVE;
+            sample_format.matrix = 0;
 
-        if ((ret = swr_init(resample_context)) < 0) {
-            fprintf(stderr,"Unable to open resampler context: ");
-            swr_free(&resample_context);
+            device = ao_open_live(driver, &sample_format, NULL);
+
+
+
+            resample_context = swr_alloc_set_opts(NULL,
+                                                  av_get_default_channel_layout(2),
+                                                  AV_SAMPLE_FMT_S16,
+                                                  audioDecoderCodecContext->sample_rate,
+                                                  av_get_default_channel_layout(audioDecoderCodecContext->channels),
+                                                  audioDecoderCodecContext->sample_fmt,
+                                                  audioDecoderCodecContext->sample_rate,
+                                                  0, NULL);
+
+            if (!(resample_context)) {
+                fprintf(stderr,"Unable to allocate resampler context\n");
+                //return AVERROR(ENOMEM);
+            }
+
+            // Open the resampler
+
+            if ((ret = swr_init(resample_context)) < 0) {
+                fprintf(stderr,"Unable to open resampler context: ");
+                swr_free(&resample_context);
+            }
         }
 
         //Q_ASSERT(video_stream);
@@ -239,7 +244,7 @@ int PlaybackHandler::start()
                 nanosleep(&ts, NULL);
                 continue;
             }
-            qDebug() << "stream: " << packet.stream_index << " mvideostream: " << mVideoStreamIndex;
+            //qDebug() << "stream: " << packet.stream_index << " mvideostream: " << mVideoStreamIndex;
             if(packet.stream_index == mVideoStreamIndex)
             {
                 //Decode and send to ImageHandler
