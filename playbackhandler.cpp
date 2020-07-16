@@ -126,11 +126,13 @@ int PlaybackHandler::start()
             //Debug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
             if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
             {
+                //qDebug() << "found video stream";
                 video_stream = st;
                 mVideoStreamIndex = i;
             }
             else if(st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
             {
+                //qDebug() << "found audio stream";
                 audio_stream = st;
                 mAudioStreamIndex = i;
             }
@@ -141,20 +143,65 @@ int PlaybackHandler::start()
         Q_ASSERT(video_stream);
         video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-        AVCodecParameters	*codecpar = video_stream->codecpar;
-        AVCodec* codec = avcodec_find_decoder(codecpar->codec_id);
-
-        AVCodecContext *codec_context = avcodec_alloc_context3(codec);
-        codec_context->pix_fmt = AV_PIX_FMT_YUV420P;
-        int err = avcodec_open2(codec_context, codec, nullptr);
+        AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
+        AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
+        AVCodecContext *audioDecoderCodecContext = avcodec_alloc_context3(audioDecoderCodec);
+        int err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
         Q_ASSERT(err>=0);
-        qDebug() << "codec name: " << codec->name<< " codec id " << codec->id;
-        qDebug() << "codecpar width" << codecpar->width <<" h: "<< codecpar->height << " format: "<< codecpar->format<< " pix fmt: " << codec_context->pix_fmt;
+
+        // To initalize libao for playback
+        ao_initialize();
+
+        int driver = ao_default_driver_id();
+
+        // The format of the decoded PCM samples
+        ao_sample_format sample_format;
+        sample_format.bits = 16;
+        sample_format.channels = 2;
+        sample_format.rate = 44100;
+        sample_format.byte_format = AO_FMT_NATIVE;
+        sample_format.matrix = 0;
+        int audioBufferSize = 192000;
+
+        ao_device* device = ao_open_live(driver, &sample_format, NULL);
+
+        SwrContext *resample_context = NULL;
+
+        resample_context = swr_alloc_set_opts(NULL,
+                                              av_get_default_channel_layout(2),
+                                              AV_SAMPLE_FMT_S16,
+                                              audioDecoderCodecContext->sample_rate,
+                                              av_get_default_channel_layout(audioDecoderCodecContext->channels),
+                                              audioDecoderCodecContext->sample_fmt,
+                                              audioDecoderCodecContext->sample_rate,
+                                              0, NULL);
+
+        if (!(resample_context)) {
+            fprintf(stderr,"Unable to allocate resampler context\n");
+            //return AVERROR(ENOMEM);
+        }
+
+        // Open the resampler
+
+        if ((ret = swr_init(resample_context)) < 0) {
+            fprintf(stderr,"Unable to open resampler context: ");
+            swr_free(&resample_context);
+        }
+
+
+        AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
+        AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
+        AVCodecContext *videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
+        videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+        err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
+        Q_ASSERT(err>=0);
+        qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
+        qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
 
         AVFrame	*frameRGB = av_frame_alloc();
         frameRGB->format = AV_PIX_FMT_RGB24;
-        frameRGB->width = codecpar->width;
-        frameRGB->height = codecpar->height;
+        frameRGB->width = videoStreamCodecParameters->width;
+        frameRGB->height = videoStreamCodecParameters->height;
         err = av_frame_get_buffer(frameRGB, 0);
         Q_ASSERT(err == 0);
         ///
@@ -162,6 +209,7 @@ int PlaybackHandler::start()
 
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
+        AVFrame* resampled = 0;
         /*mStruct->writeLock->unlock();
          qDebug() << "etter unlock";
 
@@ -194,7 +242,7 @@ int PlaybackHandler::start()
                 //Decode and send to ImageHandler
                 //qDebug() << "packet dts playbackhandler: " << packet.dts;
                 //qDebug() << "packet pts playbackhandler: " << packet.pts;
-                ret = avcodec_send_packet(codec_context, &packet);
+                ret = avcodec_send_packet(videoDecoderCodecContext, &packet);
                 if (ret == AVERROR_EOF || ret == AVERROR(EOF))
                 {
                     qDebug() << "send packet sleep";
@@ -211,7 +259,7 @@ int PlaybackHandler::start()
                     exit(1);
 
                 }
-                ret = avcodec_receive_frame(codec_context, frame);
+                ret = avcodec_receive_frame(videoDecoderCodecContext, frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
                     //skipped_frames++;
                     qDebug() << "Skipped a Frame playbackhandler";
@@ -225,11 +273,37 @@ int PlaybackHandler::start()
                 }
 
                 //qDebug() << frame->data[0];
-                mImageHandler->readImage(codec_context, frame, 1);
+                mImageHandler->readImage(videoDecoderCodecContext, frame, 1);
             }
             else if(packet.stream_index == mAudioStreamIndex)
             {
-                //Decode and send to SpeakerHandler
+                ret = avcodec_send_packet(audioDecoderCodecContext, &packet);
+                ret = avcodec_receive_frame(audioDecoderCodecContext, frame);
+
+                if (!resampled)
+                {
+                    resampled = av_frame_alloc();
+                }
+
+                resampled->channel_layout = av_get_default_channel_layout(2);
+                resampled->sample_rate = audioDecoderCodecContext->sample_rate;
+                resampled->format = AV_SAMPLE_FMT_S16;
+
+                if ((ret = swr_convert_frame(resample_context, resampled, frame)) < 0)
+                {
+                    qDebug() << "Error resampling";
+                }
+                else
+                {
+                    //ao_play(device,(char*)resampled->data[0], resampled->linesize[0]);
+                    ao_play(device, (char*)resampled->extended_data[0], av_samples_get_buffer_size(resampled->linesize,
+                                                                                                   resampled->channels,
+                                                                                                   resampled->nb_samples,
+                                                                                                   (AVSampleFormat)resampled->format,
+                                                                                                   0));
+                }
+                av_frame_unref(resampled);
+                av_frame_unref(frame);
             }
             else
             {

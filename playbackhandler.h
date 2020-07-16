@@ -29,7 +29,7 @@ extern "C" {
 #include "libavutil/fifo.h"
 #include "libavutil/pixfmt.h"
 #include "libavutil/rational.h"
-
+#include <ao/ao.h>
 #include "libswresample/swresample.h"
 }
 

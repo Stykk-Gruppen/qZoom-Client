@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
     //playbackHandler->start();
 
-    AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
+    //AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
 
 
 

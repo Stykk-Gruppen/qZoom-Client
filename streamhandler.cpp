@@ -11,7 +11,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     int ret;
     ofmt_ctx = NULL;
 
-    mAudioEnabled = false;
+    mAudioEnabled = true;
     mVideoEnabled = true;
     writeToFile = false;
     numberOfFrames = 200;
