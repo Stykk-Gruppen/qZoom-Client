@@ -173,7 +173,7 @@ int PlaybackHandler::start()
         resample_context = swr_alloc_set_opts(NULL,
                                               av_get_default_channel_layout(2),
                                               AV_SAMPLE_FMT_S16,
-                                              sample_format.rate,
+                                              audioDecoderCodecContext->sample_rate,
                                               av_get_default_channel_layout(audioDecoderCodecContext->channels),
                                               audioDecoderCodecContext->sample_fmt,
                                               audioDecoderCodecContext->sample_rate,
@@ -281,7 +281,34 @@ int PlaybackHandler::start()
             else if(packet.stream_index == mAudioStreamIndex)
             {
                 ret = avcodec_send_packet(audioDecoderCodecContext, &packet);
+                if (ret == AVERROR_EOF || ret == AVERROR(EOF))
+                {
+                    qDebug() << "send packet sleep";
+                    int ms = 1000;
+                    struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+                    nanosleep(&ts, NULL);
+                    continue;
+                }
+                else if(ret < 0)
+                {
+                    char* errbuff = (char *)malloc((1000)*sizeof(char));
+                    av_strerror(ret,errbuff,1000);
+                    qDebug() << "Failed udp input avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+                    exit(1);
+
+                }
                 ret = avcodec_receive_frame(audioDecoderCodecContext, frame);
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF){
+                    //skipped_frames++;
+                    qDebug() << "Skipped a Frame playbackhandler";
+                    continue;
+                }
+                else if (ret < 0) {
+                    char* errbuff = (char *)malloc((1000)*sizeof(char));
+                    av_strerror(ret,errbuff,1000);
+                    qDebug() << "Failed avcodec_receive_frame: code "<<ret<< " meaning: " << errbuff;
+                    exit(1);
+                }
 
                 if (!resampled)
                 {
