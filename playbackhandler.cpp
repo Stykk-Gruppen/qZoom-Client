@@ -146,9 +146,13 @@ int PlaybackHandler::start()
         AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
         AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
         AVCodecContext *audioDecoderCodecContext = avcodec_alloc_context3(audioDecoderCodec);
-        int err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
+        int err  = avcodec_parameters_to_context(audioDecoderCodecContext, audio_stream->codecpar);
+        Q_ASSERT(err>=0);
+        err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
         Q_ASSERT(err>=0);
 
+        //audioDecoderCodecContext->sample_rate = 48000;
+        //audioDecoderCodecContext->channels = 2;
         // To initalize libao for playback
         ao_initialize();
 
@@ -161,7 +165,6 @@ int PlaybackHandler::start()
         sample_format.rate = 44100;
         sample_format.byte_format = AO_FMT_NATIVE;
         sample_format.matrix = 0;
-        int audioBufferSize = 192000;
 
         ao_device* device = ao_open_live(driver, &sample_format, NULL);
 
@@ -170,7 +173,7 @@ int PlaybackHandler::start()
         resample_context = swr_alloc_set_opts(NULL,
                                               av_get_default_channel_layout(2),
                                               AV_SAMPLE_FMT_S16,
-                                              audioDecoderCodecContext->sample_rate,
+                                              sample_format.rate,
                                               av_get_default_channel_layout(audioDecoderCodecContext->channels),
                                               audioDecoderCodecContext->sample_fmt,
                                               audioDecoderCodecContext->sample_rate,
@@ -291,7 +294,10 @@ int PlaybackHandler::start()
 
                 if ((ret = swr_convert_frame(resample_context, resampled, frame)) < 0)
                 {
-                    qDebug() << "Error resampling";
+                    char* errbuff = (char *)malloc((1000)*sizeof(char));
+                    av_strerror(ret,errbuff,1000);
+                    qDebug() << "Failed playbackhandler swr_convert_frame: code "<<ret<< " meaning: " << errbuff;
+                    exit(1);
                 }
                 else
                 {
