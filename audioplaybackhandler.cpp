@@ -122,15 +122,6 @@ AudioPlaybackHandler::AudioPlaybackHandler(QObject *parent) : QObject(parent)
             ret = avcodec_send_packet(codec_context, &packet);
             ret = avcodec_receive_frame(codec_context, frame);
 
-
-            //int got_frame;
-            // Decodes from `packet` into the buffer
-            /*
-            if (avcodec_decode_audio4(codec_context, frame, &got_frame, &packet) < 1) {
-                break;  // Error in decoding
-            }
-            */
-
             if (!resampled)
             {
                 resampled = av_frame_alloc();
@@ -146,12 +137,15 @@ AudioPlaybackHandler::AudioPlaybackHandler(QObject *parent) : QObject(parent)
             }
             else
             {
-                ao_play(device,(char*)resampled->extended_data[0],resampled->linesize[0]);
-                //ao_play(device, (char*)resampled->extended_data[0], av_sample_get_buffer_size(resampled->linesize, resampled->channels, resampled->nb_samples, resampled->format, 0));
+                //ao_play(device,(char*)resampled->data[0], resampled->linesize[0]);
+                ao_play(device, (char*)resampled->extended_data[0], av_samples_get_buffer_size(resampled->linesize,
+                                                                                               resampled->channels,
+                                                                                               resampled->nb_samples,
+                                                                                               (AVSampleFormat)resampled->format,
+                                                                                               0));
             }
             av_frame_unref(resampled);
             av_frame_unref(frame);
-
 
 
             //av_sample_get_buffer_size
@@ -169,4 +163,45 @@ AudioPlaybackHandler::AudioPlaybackHandler(QObject *parent) : QObject(parent)
         fprintf(stdout, "Done playing. Exiting...");
     });
 
+}
+
+int av_samples_get_buffer_size(int *linesize, int nb_channels, int nb_samples,
+                               enum AVSampleFormat sample_fmt, int align)
+{
+    int line_size;
+    int sample_size = av_get_bytes_per_sample(sample_fmt);
+    int planar      = av_sample_fmt_is_planar(sample_fmt);
+
+    /* validate parameter ranges */
+    if (!sample_size || nb_samples <= 0 || nb_channels <= 0)
+    {
+        return AVERROR(EINVAL);
+    }
+
+    /* auto-select alignment if not specified */
+    if (!align)
+    {
+        if (nb_samples > INT_MAX - 31)
+        {
+            return AVERROR(EINVAL);
+        }
+        align = 1;
+        nb_samples = FFALIGN(nb_samples, 32);
+    }
+
+    /* check for integer overflow */
+    if (nb_channels > INT_MAX / align ||
+        (int64_t)nb_channels * nb_samples > (INT_MAX - (align * nb_channels)) / sample_size)
+    {
+        return AVERROR(EINVAL);
+    }
+
+    line_size = planar ? FFALIGN(nb_samples * sample_size,               align) :
+                         FFALIGN(nb_samples * sample_size * nb_channels, align);
+    if (linesize)
+    {
+        *linesize = line_size;
+    }
+
+    return planar ? line_size * nb_channels : line_size;
 }
