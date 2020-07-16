@@ -33,6 +33,7 @@ extern "C"
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
 #include <libavdevice/avdevice.h>
+#include <ao/ao.h>
 }
 
 #include <QtCore/QCoreApplication>
@@ -40,6 +41,7 @@ extern "C"
 #include <QtQuick/QQuickView>
 
 #include <testing.h>
+#include "audioplaybackhandler.h"
 
 int main(int argc, char *argv[])
 {
@@ -95,6 +97,9 @@ int main(int argc, char *argv[])
 
 
     //playbackHandler->start();
+
+    AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
+
 
 
 
