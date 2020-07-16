@@ -47,8 +47,8 @@ public:
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
     int decodeAndPlay();
-    int mVideoStreamIndex;
-    int mAudioStreamIndex;
+    int mVideoStreamIndex = -1;
+    int mAudioStreamIndex = -1;
 private:
     struct SocketAndIDStruct {
         SocketHandler* socketHandler;

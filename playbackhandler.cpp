@@ -99,7 +99,6 @@ int PlaybackHandler::start()
         Q_ASSERT(avio_ctx);
 
         fmt_ctx->pb = avio_ctx;
-
         ret = avformat_open_input(&fmt_ctx, nullptr, nullptr, nullptr);
         if(ret < 0)
         {
@@ -108,7 +107,7 @@ int PlaybackHandler::start()
             qDebug() << "AVformat open input UDP stream failed" << errbuff;
             exit(1);
         }
-        //ret = avformat_find_stream_info(fmt_ctx, nullptr);
+        ret = avformat_find_stream_info(fmt_ctx, nullptr);
         if(ret < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -126,13 +125,11 @@ int PlaybackHandler::start()
             //Debug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
             if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
             {
-                //qDebug() << "found video stream";
                 video_stream = st;
                 mVideoStreamIndex = i;
             }
             else if(st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
             {
-                //qDebug() << "found audio stream";
                 audio_stream = st;
                 mAudioStreamIndex = i;
             }
@@ -140,8 +137,6 @@ int PlaybackHandler::start()
         //Må sikkert gjøre masse piss med audio her.
 
 
-        Q_ASSERT(video_stream);
-        video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
         AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
         AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
@@ -191,24 +186,29 @@ int PlaybackHandler::start()
             swr_free(&resample_context);
         }
 
+        //Q_ASSERT(video_stream);
+        AVCodecContext *videoDecoderCodecContext;
+        if(video_stream)
+        {
+            video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-        AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
-        AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
-        AVCodecContext *videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
-        videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
-        err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
-        Q_ASSERT(err>=0);
-        qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
-        qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
+            AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
+            AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
+            videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
+            videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+            err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
+            Q_ASSERT(err>=0);
+            qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
+            qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
 
-        AVFrame	*frameRGB = av_frame_alloc();
-        frameRGB->format = AV_PIX_FMT_RGB24;
-        frameRGB->width = videoStreamCodecParameters->width;
-        frameRGB->height = videoStreamCodecParameters->height;
-        err = av_frame_get_buffer(frameRGB, 0);
-        Q_ASSERT(err == 0);
-        ///
-        SwsContext *imgConvertCtx = nullptr;
+            AVFrame	*frameRGB = av_frame_alloc();
+            frameRGB->format = AV_PIX_FMT_RGB24;
+            frameRGB->width = videoStreamCodecParameters->width;
+            frameRGB->height = videoStreamCodecParameters->height;
+            err = av_frame_get_buffer(frameRGB, 0);
+            Q_ASSERT(err == 0);
+        }
+
 
         AVFrame* frame = av_frame_alloc();
         AVPacket packet;
@@ -239,7 +239,7 @@ int PlaybackHandler::start()
                 nanosleep(&ts, NULL);
                 continue;
             }
-
+            qDebug() << "stream: " << packet.stream_index << " mvideostream: " << mVideoStreamIndex;
             if(packet.stream_index == mVideoStreamIndex)
             {
                 //Decode and send to ImageHandler

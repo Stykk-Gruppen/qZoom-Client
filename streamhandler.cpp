@@ -12,7 +12,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     ofmt_ctx = NULL;
 
     mAudioEnabled = true;
-    mVideoEnabled = true;
+    mVideoEnabled = false;
     writeToFile = false;
     numberOfFrames = 200;
     mSocketHandler = _socketHandler;
@@ -28,7 +28,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     else
     {
         // ofmt_ctx = avformat_alloc_context();
-        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, "ismv", NULL);
+        ret = avformat_alloc_output_context2(&ofmt_ctx, NULL,"mp3", NULL);
         if (ret < 0) {
             fprintf(stderr, "Could not alloc output context with file '%s'", filename);
             exit(1);

@@ -48,6 +48,9 @@ int AudioHandler::openInputFile()
         return error;
     }
 
+    //Print stream information
+    av_dump_format(inputFormatContext, 0, NULL, 0);
+
     /* Make sure that there is only one stream in the input file. */
     if ((inputFormatContext)->nb_streams != 1) {
         fprintf(stderr, "Expected one audio input stream, but found %d\n",
@@ -652,12 +655,13 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
     //    qDebug() << "DTS:" << output_packet.dts;
     //    qDebug() << output_packet.stream_index;
     output_packet.stream_index = mOutputStreamIndex;
-
+    //qDebug() << "writing interleaved";
     if (*data_present &&
             (error = av_interleaved_write_frame(outputFormatContext, &output_packet)) < 0) {
         fprintf(stderr, "Could not write audio frame");
         goto cleanup;
     }
+    //qDebug() << error;
     writeLock->unlock();
 
 cleanup:
@@ -780,6 +784,7 @@ int AudioHandler::grabFrames()
          * need to FIFO buffer to store as many frames worth of input samples
          * that they make up at least one frame worth of output samples. */
         while (av_audio_fifo_size(fifo) < output_frame_size) {
+            //qDebug() << "fifo < outputframe zie";
             /* Decode one frame worth of audio samples, convert it to the
              * output sample format and put it into the FIFO buffer. */
             if (readDecodeConvertAndStore(&finished)){
