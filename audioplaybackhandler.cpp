@@ -41,6 +41,7 @@ void PlaybackHandler::changeSpeaker()
 
 int AudioPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
+    qDebug() << buf_size;
     SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
