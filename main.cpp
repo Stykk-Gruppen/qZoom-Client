@@ -59,14 +59,15 @@ int main(int argc, char *argv[])
 
 
     ImageHandler* imageHandlerObject = new ImageHandler();
-    std::mutex *udpBufferLock = new std::mutex;
-    SocketHandler* socketHandlerObject = new SocketHandler(udpBufferLock);
+    std::mutex *audioUdpBufferLock = new std::mutex;
+    std::mutex *videoUdpBufferLock = new std::mutex;
+    SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock);
 
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
-    QScopedPointer<testing> test(new testing());
+    QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject));
+    //QScopedPointer<testing> test(new testing());
     //test->run();
 
 
