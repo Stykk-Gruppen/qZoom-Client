@@ -25,6 +25,7 @@
 #include <QTimer>
 #include "streamhandler.h"
 #include "playbackhandler.h"
+#include "videoplaybackhandler.h"
 #include "imagehandler.h"
 #include <QQuickView>
 extern "C"
@@ -42,6 +43,7 @@ extern "C"
 
 #include <testing.h>
 #include "audioplaybackhandler.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -65,7 +67,8 @@ int main(int argc, char *argv[])
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
-    QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
+    //QScopedPointer<PlaybackHandler> playbackHandler(new PlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
+    QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(udpBufferLock,imageHandlerObject, socketHandlerObject));
     QScopedPointer<testing> test(new testing());
     //test->run();
 
