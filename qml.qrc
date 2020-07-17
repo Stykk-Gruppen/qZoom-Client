@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>components/TaskBar.qml</file>
+        <file>view/session.qml</file>
+        <file>view/main.qml</file>
+        <file>view/home.qml</file>
+        <file>components/PushButton.qml</file>
     </qresource>
 </RCC>

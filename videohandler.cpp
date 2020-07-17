@@ -1,7 +1,7 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock, int64_t _time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent): QObject(parent)
 {
     writeToFile = false;
     socketHandler = _socketHandler;

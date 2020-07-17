@@ -1,6 +1,6 @@
 #include "videoplaybackhandler.h"
 
-VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
+VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock, ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
 {
     mSocketHandler = _socketHandler;
     mImageHandler = _imageHandler;

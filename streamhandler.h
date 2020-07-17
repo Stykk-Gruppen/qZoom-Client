@@ -38,19 +38,25 @@ class StreamHandler : public QObject
     Q_OBJECT
 public:
     StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
-    VideoHandler* videoHandler;
-    AudioHandler* audioHandler;
-    void record();
-    /*Q_INVOKABLE void enableAudio();
+    VideoHandler* mVideoHandler;
+    AudioHandler* mAudioHandler;
+    Q_INVOKABLE void record();
+    Q_INVOKABLE void stopRecording();
+    Q_INVOKABLE void enableAudio();
     Q_INVOKABLE void enableVideo();
     Q_INVOKABLE void disableAudio();
-    Q_INVOKABLE void disableVideo();*/
+    Q_INVOKABLE void disableVideo();
+    Q_INVOKABLE QVariantList getAudioInputDevices();
+    Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
 
 private:
     SocketHandler* mSocketHandler;
+    ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
-    bool mVideoEnabled = false;
+    bool mVideoEnabled = true;
     std::mutex mUDPSendDatagramMutexLock;
+    QString mAudioDevice;
+    QString mVideoDevice;
 };
 
 #endif // STREAMHANDLER_H

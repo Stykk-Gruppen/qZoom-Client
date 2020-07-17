@@ -42,6 +42,8 @@ extern "C"
 
 #include <testing.h>
 #include "audioplaybackhandler.h"
+#include "handlers/sessionhandler.h"
+#include "core/database.h"
 
 
 int main(int argc, char *argv[])
@@ -50,32 +52,31 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    const QUrl url(QStringLiteral("qrc:/view/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-
-
     ImageHandler* imageHandlerObject = new ImageHandler();
     std::mutex *audioUdpBufferLock = new std::mutex;
     std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock);
-
+    Database* databaseObject = new Database();
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject));
+    QScopedPointer<SessionHandler> sessionHandler(new SessionHandler(databaseObject));
 
-
-
-    streamHandler->record();
+    //streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
+    engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
+    engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 
 

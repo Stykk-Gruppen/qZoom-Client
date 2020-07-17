@@ -1,4 +1,4 @@
-QT += quick multimedia core multimediawidgets network
+QT += quick multimedia core multimediawidgets network sql
 
 CONFIG += c++17 console
 
@@ -19,7 +19,10 @@ SOURCES += \
         audiohandler.cpp \
         audioplaybackhandler.cpp \
         camerahandler.cpp \
+        config.cpp \
+        core/database.cpp \
         filetest.cpp \
+        handlers/sessionhandler.cpp \
         imagehandler.cpp \
         main.cpp \
         sockethandler.cpp \
@@ -51,7 +54,9 @@ HEADERS += \
     audiohandler.h \
     audioplaybackhandler.h \
     camerahandler.h \
+    core/database.h \
     filetest.h \
+    handlers/sessionhandler.h \
     imagehandler.h \
     sockethandler.h \
     streamhandler.h \
