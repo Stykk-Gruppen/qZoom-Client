@@ -416,8 +416,6 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     send.prepend(int(1));
     //delete cptr;
     return socketHandler->sendDatagram(send);
-
-    //return 0;
 }
 
 

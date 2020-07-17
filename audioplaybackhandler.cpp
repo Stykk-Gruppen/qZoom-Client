@@ -139,8 +139,8 @@ int AudioPlaybackHandler::start()
         err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
         Q_ASSERT(err>=0);
 
-        //audioDecoderCodecContext->sample_rate = 48000;
-        //audioDecoderCodecContext->channels = 2;
+        audioDecoderCodecContext->sample_rate = 48000;
+        audioDecoderCodecContext->channels = 2;
         // To initalize libao for playback
         ao_initialize();
 
@@ -169,6 +169,8 @@ int AudioPlaybackHandler::start()
                                               audioDecoderCodecContext->sample_rate,
                                               0, NULL);
 
+
+        qDebug() << resample_context;
         if (!(resample_context)) {
             fprintf(stderr,"Unable to allocate resampler context\n");
             exit(-1);
