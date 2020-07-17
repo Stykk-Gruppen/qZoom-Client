@@ -49,7 +49,7 @@ public:
 private:
     SocketHandler* mSocketHandler;
     bool mAudioEnabled = true;
-    bool mVideoEnabled = false;
+    bool mVideoEnabled = true;
     std::mutex mUDPSendDatagramMutexLock;
 };
 
