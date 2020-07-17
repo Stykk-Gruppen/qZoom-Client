@@ -8,14 +8,14 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _
     mStruct->socketHandler = _socketHandler;
     mStruct->writeLock = writeLock;
 
-    connect(mSocketHandler, &SocketHandler::startPlayback, this, &VideoPlaybackHandler::start);
+    connect(mSocketHandler, &SocketHandler::startVideoPlayback, this, &VideoPlaybackHandler::start);
 }
 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
-    while (s->socketHandler->mBuffer.size() <= buf_size)
+    while (s->socketHandler->mVideoBuffer.size() <= buf_size)
     {
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
@@ -25,8 +25,8 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     s->writeLock->lock();
 
-    QByteArray tempBuffer = QByteArray(s->socketHandler->mBuffer.data(), buf_size);
-    s->socketHandler->mBuffer.remove(0,buf_size);
+    QByteArray tempBuffer = QByteArray(s->socketHandler->mVideoBuffer.data(), buf_size);
+    s->socketHandler->mVideoBuffer.remove(0,buf_size);
 
     s->writeLock->unlock();
     //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
