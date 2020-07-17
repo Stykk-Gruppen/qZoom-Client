@@ -44,6 +44,7 @@ int VideoHandler::init()
         return -1;
     }
     //Print stream information
+    qDebug() << "Dumping video input";
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
 
@@ -54,6 +55,8 @@ int VideoHandler::init()
             }
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
+
+
 
     //Allocate CodecContext for outputstreams
     outputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
@@ -143,7 +146,8 @@ int VideoHandler::init()
     ofmt_ctx->pb = custom_io;
     av_dict_set(&options, "live", "1", 0);
 
-
+    qDebug() << "Dumping video output";
+    av_dump_format(ofmt_ctx, 0, NULL, 1);
 
     ret = avformat_write_header(ofmt_ctx, &options);
     if(ret<0){
@@ -151,7 +155,7 @@ int VideoHandler::init()
         exit(1);
     }
 
-    qDebug() << "Kom til slutten av init";
+    //qDebug() << "Kom til slutten av init";
 }
 
 static int64_t pts = 0;

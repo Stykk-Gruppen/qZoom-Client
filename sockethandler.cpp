@@ -45,6 +45,7 @@ void SocketHandler::readPendingDatagrams()
                 emit startAudioPlayback();
                 mAudioPlaybackStarted = true;
             }
+            qDebug() << "audio buffer size " << mAudioBuffer.size() << "after signal: " << signalCount;
         }
         else if (audioOrVideoInt ==1)
         {
@@ -56,6 +57,7 @@ void SocketHandler::readPendingDatagrams()
                 emit startVideoPlayback();
                 mVideoPlaybackStarted = true;
             }
+            qDebug() << "video buffer size " << mVideoBuffer.size() << "after signal: " << signalCount;
         }
         else
         {
@@ -63,7 +65,7 @@ void SocketHandler::readPendingDatagrams()
             exit(-1);
         }
     }
-    //qDebug() << "buffer size " << mBuffer.size() << "after signal: " << signalCount;
+
     signalCount++;
 }
 

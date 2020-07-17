@@ -48,6 +48,7 @@ int AudioHandler::openInputFile()
     }
 
     //Print stream information
+    qDebug() << "Dumping audiohandler input";
     av_dump_format(inputFormatContext, 0, NULL, 0);
 
     /* Make sure that there is only one stream in the input file. */
@@ -764,6 +765,9 @@ int AudioHandler::init()
     {
         return ret;
     }
+
+    qDebug() << "dumping audiohandler output";
+    av_dump_format(outputFormatContext,0,NULL,1);
 
     ret = avformat_write_header(outputFormatContext, &options);
     if(ret<0){

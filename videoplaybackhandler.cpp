@@ -77,6 +77,7 @@ int VideoPlaybackHandler::start()
             exit(1);
         }
 
+        qDebug() << "Dumping videoplayback format";
         av_dump_format(fmt_ctx, 0, NULL, 0);
 
         AVStream* video_stream = nullptr;
