@@ -11,23 +11,27 @@ class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(std::mutex*,QObject *parent = nullptr);
+    explicit SocketHandler(std::mutex*,std::mutex*,QObject *parent = nullptr);
     void initSocket();
 
     QUdpSocket* udpSocket;
     int sendDatagram(QByteArray arr);
     QHostAddress address;
     int port;
-    QByteArray mBuffer;
+    QByteArray mAudioBuffer;
+    QByteArray mVideoBuffer;
 public slots:
     void readPendingDatagrams();
 private:
+    int mInitialBufferSize = 4 * 1024;
     uint signalCount = 0;
-    std::mutex *writeLock;
-    bool mPlaybackStarted = false;
+    std::mutex *mAudioWriteLock;
+    std::mutex *mVideoWriteLock;
+    bool mVideoPlaybackStarted = false;
+    bool mAudioPlaybackStarted = false;
 signals:
-    void startPlayback();
-
+    void startVideoPlayback();
+    void startAudioPlayback();
 };
 
 #endif // SOCKETHANDLER_H
