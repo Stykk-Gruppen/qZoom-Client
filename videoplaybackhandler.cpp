@@ -46,7 +46,7 @@ int VideoPlaybackHandler::start()
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 1*1024;
+        size_t buffer_size = 0, avio_ctx_buffer_size = 4*1024;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();

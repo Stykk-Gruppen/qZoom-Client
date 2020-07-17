@@ -41,7 +41,7 @@ void PlaybackHandler::changeSpeaker()
 
 int AudioPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
-    qDebug() << buf_size;
+    //qDebug() << buf_size;
     SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
@@ -139,8 +139,10 @@ int AudioPlaybackHandler::start()
         err = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
         Q_ASSERT(err>=0);
 
+        //Hardcoded sample because the audio_stream codecpar does not contain samplerate
         audioDecoderCodecContext->sample_rate = 48000;
         audioDecoderCodecContext->channels = 2;
+
         // To initalize libao for playback
         ao_initialize();
 
@@ -150,15 +152,15 @@ int AudioPlaybackHandler::start()
         ao_sample_format sample_format;
         sample_format.bits = 16;
         sample_format.channels = 2;
-        sample_format.rate = 44100;
+        sample_format.rate = 48000; //Must match input with 48000 or audio stream delay keeps increasing
         sample_format.byte_format = AO_FMT_NATIVE;
         sample_format.matrix = 0;
 
         device = ao_open_live(driver, &sample_format, NULL);
 
 
-        qDebug() << audio_stream->codecpar->sample_rate;
-        qDebug() << audioDecoderCodecContext->sample_rate;
+       // qDebug() << audio_stream->codecpar->sample_rate;
+        //qDebug() << audioDecoderCodecContext->sample_rate;
         SwrContext *resample_context = NULL;
         resample_context = swr_alloc_set_opts(NULL,
                                               av_get_default_channel_layout(2),
@@ -170,7 +172,7 @@ int AudioPlaybackHandler::start()
                                               0, NULL);
 
 
-        qDebug() << resample_context;
+        //qDebug() << resample_context;
         if (!(resample_context)) {
             fprintf(stderr,"Unable to allocate resampler context\n");
             exit(-1);

@@ -45,7 +45,7 @@ void SocketHandler::readPendingDatagrams()
                 emit startAudioPlayback();
                 mAudioPlaybackStarted = true;
             }
-            qDebug() << "audio buffer size " << mAudioBuffer.size() << "after signal: " << signalCount;
+            //qDebug() << "audio buffer size " << mAudioBuffer.size() << "after signal: " << signalCount;
         }
         else if (audioOrVideoInt ==1)
         {
