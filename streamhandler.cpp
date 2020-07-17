@@ -11,12 +11,11 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     int ret;
     ofmt_ctx = NULL;
 
-    mAudioEnabled = true;
+    mAudioEnabled = false;
     mVideoEnabled = true;
-    writeToFile = false;
-    numberOfFrames = 200;
+
     mSocketHandler = _socketHandler;
-    if(writeToFile)
+    /*if(writeToFile)
     {
         ret = avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
         if (ret < 0) {
@@ -33,10 +32,10 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
             fprintf(stderr, "Could not alloc output context with file '%s'", filename);
             exit(1);
         }
-    }
+    }*/
     // ofmt_ctx->oformat = av_guess_format(NULL, NULL, NULL);
 
-    AVDictionary *options = NULL;
+    /*AVDictionary *options = NULL;
 
     if (writeToFile)
     {
@@ -63,14 +62,11 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
                     NULL, &custom_io_write, NULL);
         ofmt_ctx->pb = custom_io;
         av_dict_set(&options, "live", "1", 0);
-    }
+    }*/
 
     int64_t time = av_gettime();
-    if(mAudioEnabled && !mVideoEnabled)
-    {
-        mAudioOutputStreamIndex = 0;
-    }
-    videoHandler = new VideoHandler("/dev/video0", ofmt_ctx, writeToFile, &writeLock, time,numberOfFrames, _imageHandler);
+
+    videoHandler = new VideoHandler("/dev/video0", &writeLock, time,numberOfFrames, _imageHandler, mSocketHandler);
     audioHandler = new AudioHandler("default", ofmt_ctx, writeToFile, &writeLock,time, numberOfFrames, mAudioOutputStreamIndex);
     if(mVideoEnabled)
     {
@@ -102,19 +98,6 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
         qDebug() << "Both audio and video has been disabled in streamhandler";
         exit(1);
     }
-    if(writeToFile)
-    {
-        av_dump_format(ofmt_ctx, 0, filename, 1);
-    }
-    else
-    {
-        av_dump_format(ofmt_ctx, 0, 0, 1);
-    }
-    ret = avformat_write_header(ofmt_ctx, &options);
-    if(ret<0){
-        fprintf(stderr, "Could not open write header");
-        exit(1);
-    }
 }
 
 void StreamHandler::record()
@@ -131,7 +114,7 @@ void StreamHandler::record()
 
 }
 
-int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
+/*int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
     //qDebug() << "Inne i custom io write";
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
@@ -151,3 +134,4 @@ int StreamHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_siz
 
     return 0;
 }
+*/

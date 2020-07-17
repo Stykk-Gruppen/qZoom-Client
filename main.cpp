@@ -67,9 +67,9 @@ int main(int argc, char *argv[])
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject));
-
+    qDebug() << "Kom hit";
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject));
-    QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject));
+    //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject));
 
 
 

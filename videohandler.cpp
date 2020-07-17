@@ -1,10 +1,11 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time, int _numberOfFrames, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent): QObject(parent)
 {
+    writeToFile = false;
+    socketHandler = _socketHandler;
     time = _time;
-    writeToFile = _writeToFile;
     numberOfFrames = _numberOfFrames;
     //std::ofstream outfile("video.ismv", std::ostream::binary);
     //socketHandler = new SocketHandler();
@@ -13,7 +14,7 @@ VideoHandler::VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool
     this->aDeviceName = aDeviceName;
     this->imageHandler = imageHandler;
     writeLock = _writeLock;
-    ofmt_ctx = _ofmt_ctx;
+    //ofmt_ctx = _ofmt_ctx;
 }
 
 int VideoHandler::init()
@@ -46,23 +47,12 @@ int VideoHandler::init()
     //Print stream information
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
-    //Allocate outputStreamFormatContext
-    if (writeToFile)
-    {
-        //avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
-    }
-    else
-    {
-        //ofmt_ctx = avformat_alloc_context();
-    }
-    /*if (!ofmt_ctx) {
-        fprintf(stderr, "Could not create output context\n");
-        ret = AVERROR_UNKNOWN;
-        return -1;
-    }*/
-    //Set OutputFormat
-    //ofmt_ctx->oformat = av_guess_format(NULL, filename, NULL);
 
+    ret = avformat_alloc_output_context2(&ofmt_ctx, NULL,"ismv", NULL);
+            if (ret < 0) {
+                fprintf(stderr, "Could not alloc output context with file '%s'", filename);
+                exit(1);
+            }
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
 
@@ -143,51 +133,29 @@ int VideoHandler::init()
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    /*if (writeToFile)
-    {
-        if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
-        {
-            ret = avio_open(&ofmt_ctx->pb, ofmt_ctx->filename, AVIO_FLAG_WRITE);
+    AVDictionary *options = NULL;
+    int avio_buffer_size = 4 * 1024;
+    void* avio_buffer = av_malloc(avio_buffer_size);
+    AVIOContext* custom_io = avio_alloc_context (
+                (unsigned char*)avio_buffer, avio_buffer_size,
+                1,
+                (void*) socketHandler,
+                NULL, &custom_io_write, NULL);
+    ofmt_ctx->pb = custom_io;
+    av_dict_set(&options, "live", "1", 0);
 
-            if (ret < 0) {
-                fprintf(stderr, "Could not open output file '%s'", filename);
-                return -1;
-            }
-        }
-        ret = avformat_write_header(ofmt_ctx, NULL);
-        if (ret < 0) {
-            fprintf(stderr, "Error occurred when opening output file\n");
-            return -1;
-        }
+
+
+    ret = avformat_write_header(ofmt_ctx, &options);
+    if(ret<0){
+        fprintf(stderr, "Could not open write header");
+        exit(1);
     }
-    else
-    {
-        int avio_buffer_size = 4 * 1024;
-        void* avio_buffer = av_malloc(avio_buffer_size);
-        AVIOContext* custom_io = avio_alloc_context (
-                    (unsigned char*)avio_buffer, avio_buffer_size,
-                    1,
-                    (void*) socketHandler,
-                    NULL, &custom_io_write, NULL);
-        ofmt_ctx->pb = custom_io;
-        av_dump_format(ofmt_ctx, 0, filename, 1);
-        AVDictionary *options = NULL;
-        av_dict_set(&options, "live", "1", 0);
-        qDebug() << "About to write header\n";
-        int t = avformat_write_header(ofmt_ctx, &options);
-        qDebug() << "T ER LIK: " << t;
-        av_dump_format(ofmt_ctx, 0, filename, 1);
-    }*/
 
-
-    //QtConcurrent::run(this, &VideoHandler::grabFrames);
-    //return 0;
-    //qDebug() << "Kom til slutten av init";
+    qDebug() << "Kom til slutten av init";
 }
 
 static int64_t pts = 0;
-
-
 
 void VideoHandler::grabFrames() {
 
@@ -430,18 +398,24 @@ void VideoHandler::grabFrames() {
 
 }
 
-/*int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
+int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
+    //qDebug() << "Inne i custom io write";
+
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
 
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
+    //qDebug() << "written to socket";
+
+    send.prepend(int(1));
+    //delete cptr;
     return socketHandler->sendDatagram(send);
 
-    //outfile.write((char*)buffer, buffer_size);
-}*/
+    //return 0;
+}
 
 
 
