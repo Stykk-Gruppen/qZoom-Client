@@ -24,7 +24,6 @@
 #include "videohandler.h"
 #include <QTimer>
 #include "streamhandler.h"
-#include "playbackhandler.h"
 #include "imagehandler.h"
 #include <QQuickView>
 extern "C"

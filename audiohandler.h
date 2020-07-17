@@ -43,6 +43,7 @@ extern "C" {
 #include "libavutil/opt.h"
 #include "libswresample/swresample.h"
 #include "libavutil/time.h"
+
 }
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,6 +51,7 @@ extern "C" {
 #include <math.h>
 #include <QAudioDeviceInfo>
 #include <QtConcurrent/QtConcurrent>
+#include "sockethandler.h"
 
 
 
@@ -57,20 +59,17 @@ class AudioHandler //: public QObject
 {
     //Q_OBJECT
 public:
-    AudioHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t time ,int _numberOfFrames,int);
+    AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*);
     int grabFrames();
     int init();
+
 private:
-    int mOutputStreamIndex;
     int64_t time;
-    bool writeToFile;
-    int numberOfFrames;
     QString aDeviceName;
     QString cDeviceName;
     std::mutex* writeLock;
     void cleanup();
     int openInputFile();
-    char* filename;
     int openOutputFile();
     void initPacket(AVPacket *packet);
     int loadEncodeAndWrite();
@@ -84,6 +83,7 @@ private:
     int writeOutputFileHeader();
     int initFifo();
     int initResampler();
+    SocketHandler *mSocketHandler;
     AVFormatContext *inputFormatContext;
     AVFormatContext *outputFormatContext;
     AVCodecContext *inputCodecContext;
@@ -92,7 +92,8 @@ private:
     AVAudioFifo *fifo;
     void changeAudioInputDevice(QString deviceName);
     QVariantList getAudioInputDevices();
-
+    static int audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size);
+    AVDictionary *options = NULL;
 };
 
 #endif // AUDIOHANDLER_H

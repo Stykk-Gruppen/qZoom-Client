@@ -3,7 +3,7 @@
 #include "videohandler.h"
 #include "audiohandler.h"
 #include "sockethandler.h"
-
+#include <QObject>
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -33,27 +33,23 @@ extern "C" {
 }
 #include "imagehandler.h"
 
-class StreamHandler
+class StreamHandler : public QObject
 {
+    Q_OBJECT
 public:
-    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler);
+    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;
-    AVFormatContext* ofmt_ctx;
-    const char* filename = "video.ismv";
     void record();
-    bool writeToFile = false;
-
-    std::mutex writeLock;
-    SocketHandler* socketHandler;
-    int numberOfFrames = 200;
-
-    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+    /*Q_INVOKABLE void enableAudio();
+    Q_INVOKABLE void enableVideo();
+    Q_INVOKABLE void disableAudio();
+    Q_INVOKABLE void disableVideo();*/
 private:
     SocketHandler* mSocketHandler;
-    bool mAudioEnabled = false;
+    bool mAudioEnabled = true;
     bool mVideoEnabled = true;
-    int mAudioOutputStreamIndex = 1;
+    std::mutex mUDPSendDatagramMutexLock;
 };
 
 #endif // STREAMHANDLER_H

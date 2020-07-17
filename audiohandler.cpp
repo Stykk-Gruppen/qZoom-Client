@@ -2,15 +2,12 @@
 #define OUTPUT_BIT_RATE 96000
 /* The number of output channels */
 #define OUTPUT_CHANNELS 2
-AudioHandler::AudioHandler(QString _cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t _time, int _numberOfFrames, int index)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler)/*, QObject* parent): QObject(parent)*/
 {
-    mOutputStreamIndex = index;
+    mSocketHandler = _socketHandler;
     time = _time;
-    writeToFile = _writeToFile;
-    numberOfFrames = _numberOfFrames * 2;
     cDeviceName = _cDeviceName;
     writeLock = _writeLock;
-    outputFormatContext = _ofmt_ctx;
     inputFormatContext = NULL;
     inputCodecContext = NULL;
     outputCodecContext = NULL;
@@ -33,6 +30,8 @@ int AudioHandler::openInputFile()
         qDebug() << "Not found audioFormat\n";
         return -1;
     }
+
+
     /* Open the input file to read from it. */
     if ((error = avformat_open_input(&inputFormatContext, cDeviceName.toUtf8().data(), audioInputFormat,
                                      NULL)) < 0) {
@@ -122,16 +121,26 @@ int AudioHandler::openOutputFile()
     }*/
 
     /* Create a new format context for the output container format. */
-    /*if (!(outputFormatContext = avformat_alloc_context())) {
-        fprintf(stderr, "Could not allocate output format context\n");
-        return AVERROR(ENOMEM);
-    }*/
+    error = avformat_alloc_output_context2(&outputFormatContext, NULL,"mp3", NULL);
+    if (error < 0) {
+        fprintf(stderr, "Could not alloc output context");
+        exit(1);
+    }
+    int avio_buffer_size = 4 * 1024;
+    void* avio_buffer = av_malloc(avio_buffer_size);
+    AVIOContext* custom_io = avio_alloc_context (
+                (unsigned char*)avio_buffer, avio_buffer_size,
+                1,
+                (void*) mSocketHandler,
+                NULL, &audioCustomSocketWrite, NULL);
+    outputFormatContext->pb = custom_io;
+    av_dict_set(&options, "live", "1", 0);
 
     /* Associate the output file (pointer) with the container format context. */
     //(outputFormatContext)->pb = output_io_context;
 
     /* Guess the desired container format based on the file extension. */
-    /* if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
+     /*if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
                                                            NULL))) {
         fprintf(stderr, "Could not find output file format\n");
         goto cleanup;
@@ -654,7 +663,6 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
     //    qDebug() << "PTS:" << output_packet.pts;
     //    qDebug() << "DTS:" << output_packet.dts;
     //    qDebug() << output_packet.stream_index;
-    output_packet.stream_index = mOutputStreamIndex;
     //qDebug() << "writing interleaved";
     if (*data_present &&
             (error = av_interleaved_write_frame(outputFormatContext, &output_packet)) < 0) {
@@ -756,6 +764,12 @@ int AudioHandler::init()
     {
         return ret;
     }
+
+    ret = avformat_write_header(outputFormatContext, &options);
+    if(ret<0){
+        fprintf(stderr, "Could not open write header");
+        exit(1);
+    }
     //qDebug() << "Fifo init";
     /* Write the header of the output file container. */
     /*if (writeOutputFileHeader())
@@ -855,4 +869,15 @@ void AudioHandler::changeAudioInputDevice(QString deviceName)
 {
     qDebug() << deviceName;
     //todo. må vel kanskje kjøre init på nytt?
+}
+int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size)
+{
+    SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
+    char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
+    QByteArray send;
+    send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
+    //qDebug() << "written to socket";
+    int audioHeader = 0;
+    send.prepend(audioHeader);
+    return socketHandler->sendDatagram(send);
 }
