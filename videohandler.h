@@ -46,7 +46,7 @@ class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, AVFormatContext* _ofmt_ctx, bool _writeToFile, std::mutex* _writeLock,int64_t time, int _numberOfFrames, ImageHandler* imageHandler, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent = 0);
     int init();
     void grabFrames();
     bool writeToFile = true;
@@ -58,7 +58,8 @@ public:
     bool firstPacket = true;
     int start_pts;
     int start_dts;
-    //static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+
 
 private:
     int64_t time;

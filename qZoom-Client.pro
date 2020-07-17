@@ -25,7 +25,8 @@ SOURCES += \
         sockethandler.cpp \
         streamhandler.cpp \
         testing.cpp \
-        videohandler.cpp
+        videohandler.cpp \
+        videoplaybackhandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -55,4 +56,5 @@ HEADERS += \
     sockethandler.h \
     streamhandler.h \
     testing.h \
-    videohandler.h
+    videohandler.h \
+    videoplaybackhandler.h

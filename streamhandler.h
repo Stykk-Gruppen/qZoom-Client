@@ -45,6 +45,7 @@ public:
     Q_INVOKABLE void enableVideo();
     Q_INVOKABLE void disableAudio();
     Q_INVOKABLE void disableVideo();*/
+
 private:
     SocketHandler* mSocketHandler;
     bool mAudioEnabled = true;
