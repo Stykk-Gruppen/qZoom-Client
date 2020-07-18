@@ -38,8 +38,8 @@ class StreamHandler : public QObject
     Q_OBJECT
 public:
     StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
-    VideoHandler* mVideoHandler;
-    AudioHandler* mAudioHandler;
+    VideoHandler* mVideoHandler = nullptr;
+    AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void record();
     Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void enableAudio();

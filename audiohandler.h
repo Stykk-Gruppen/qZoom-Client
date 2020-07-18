@@ -64,6 +64,7 @@ public:
     int init();
     void changeAudioInputDevice(QString deviceName);
     QVariantList getAudioInputDevices();
+    void toggleGrabFrames(bool a);
 
 private:
     int64_t time;
@@ -95,6 +96,7 @@ private:
 
     static int audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size);
     AVDictionary *options = NULL;
+    bool mAbortGrabFrames = false;
 };
 
 #endif // AUDIOHANDLER_H

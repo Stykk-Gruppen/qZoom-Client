@@ -57,7 +57,7 @@ void SocketHandler::readPendingDatagrams()
                 emit startVideoPlayback();
                 mVideoPlaybackStarted = true;
             }
-            qDebug() << "video buffer size " << mVideoBuffer.size() << "after signal: " << signalCount;
+            //qDebug() << "video buffer size " << mVideoBuffer.size() << "after signal: " << signalCount;
         }
         else
         {

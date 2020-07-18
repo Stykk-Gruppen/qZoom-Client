@@ -50,8 +50,11 @@ Rectangle {
             rows: calcRows()
 
             columnSpacing: 0
+            rowSpacing: 0
+
 
             Repeater {
+                id: repeaterId
                 model: focusScreen ? 1 : imageHandler.getNumberOfScreens()
                 Rectangle {
                     width: focusScreen ? screenGridArea.width : screenGridArea.width/parent.columns
@@ -92,6 +95,7 @@ Rectangle {
                     }
                 }
             }
+
         }
     }
 
@@ -101,12 +105,30 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        //addScreen();
         var roomId = sessionHandler.getRoomId();
         setTitle("qZoom :: Session (" + roomId + ")");
         streamHandler.enableVideo();
         streamHandler.enableAudio();
         streamHandler.record();
     }
+
+    /*
+    function addScreen() {
+        var width = screenGridArea.width/gridId.calcColumns();
+        var height = screenGridArea.height/gridId.calcRows()
+        console.log("width" + width);
+        console.log("height" + height);
+        for (var i = 0; i < imageHandler.getNumberOfScreens(); i++) {
+            var component = Qt.createComponent("../components/Screen.qml");
+            if (component.status === Component.Ready) {
+                var button = component.createObject(gridId);
+                button.setInfo(i, width, height);
+            }
+        }
+        console.log("Number of Screens: " + imageHandler.getNumberOfScreens());
+    }
+    */
 }
 
 

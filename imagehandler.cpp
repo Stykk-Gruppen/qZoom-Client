@@ -137,7 +137,8 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
 int ImageHandler::getNumberOfScreens()
 {
-    return mImageMap.size();
+    //return mImageMap.size();
+    return 5;
 }
 
 /*

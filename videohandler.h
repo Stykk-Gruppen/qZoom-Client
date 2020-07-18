@@ -59,7 +59,7 @@ public:
     int start_pts;
     int start_dts;
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
-
+    void toggleGrabFrames(bool a);
 
 private:
     int64_t time;
@@ -76,5 +76,6 @@ private:
     SocketHandler *socketHandler;
     struct SwsContext* img_convert_ctx;
     ImageHandler* imageHandler;
+    bool mAbortGrabFrames = false;
 };
 #endif // VideoHandler_H

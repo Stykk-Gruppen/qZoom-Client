@@ -78,11 +78,33 @@ Rectangle {
             }
         }
 
+        C.PushButton {
+            id: addScreenButton
+            text: "Add Screens"
+            font.pixelSize: 32
+            property var toggled: true
+            onClicked: {
+                //addScreen();
+                repeaterId.model = 0;
+                gridId.columns = 3;
+                gridId.rows = 2;
+                repeaterId.model = 5;
+            }
+        }
+
+        C.PushButton {
+            id: leaveSessionButton
+            text: "Leave Session"
+            font.pixelSize: 32
+            property var toggled: true
+            onClicked: {
+                streamHandler.stopRecording();
+                changePage("home");
+            }
+        }
     }
 
     Component.onCompleted: {
         t.getAudioTypes()
     }
-
-
 }
