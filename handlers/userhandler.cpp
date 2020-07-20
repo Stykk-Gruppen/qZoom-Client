@@ -46,7 +46,7 @@ bool UserHandler::login(QString username, QString password)
     }
     else
     {
-        qDebug() << "Failed Query" << "UserHandler::login";
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
     }
     return false;
 }
@@ -68,7 +68,7 @@ bool UserHandler::fillUser(int userId)
     }
     else
     {
-        qDebug() << "Failed Query" << "UserHandler::fillUser";
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
         return false;
     }
 }

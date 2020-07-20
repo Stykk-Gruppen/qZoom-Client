@@ -39,7 +39,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
     }
     else
     {
-        qDebug() << "Failed Query" << "SessionHandler::joinSession";
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
     }
     return false;
 }
@@ -68,7 +68,7 @@ void SessionHandler::addUser()
         }
         else
         {
-            qDebug() << "Failed Query" << "SessionHandler::addUser";
+            qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
     }
 }
@@ -92,7 +92,7 @@ bool SessionHandler::leaveSession()
         }
         else
         {
-            qDebug() << "Failed Query" << "SessionHandler::leaveSession";
+            qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
     }
     return false;
