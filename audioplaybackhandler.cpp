@@ -1,7 +1,9 @@
 #include "audioplaybackhandler.h"
 
-AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent)
+AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent)
 {
+    mLastVideoPacketTime = lastVideoPacketTime;
+    mLastAudioPacketTime = lastAudioPacketTime;
     mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     mImageHandler = _imageHandler;
@@ -238,6 +240,10 @@ int AudioPlaybackHandler::start()
                     exit(1);
                 }
 
+                *mLastAudioPacketTime = frame->pts;
+                qDebug() << "AudioPacketTime: " << *mLastAudioPacketTime;
+                sync();
+
                 if (!resampled)
                 {
                     resampled = av_frame_alloc();
@@ -280,3 +286,20 @@ int AudioPlaybackHandler::start()
     });
 }
 
+void AudioPlaybackHandler::sync()
+{
+    if(*mLastAudioPacketTime != -1)
+    {
+        int diff = *mLastVideoPacketTime - *mLastAudioPacketTime;
+        if(diff < 0)
+        {
+            //int ms = abs(diff)/1000;
+            int ms = 5;
+
+            qDebug() << "Audio Sleeping: " << ms;
+
+            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+            nanosleep(&ts, NULL);
+        }
+    }
+}

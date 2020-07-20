@@ -1,7 +1,9 @@
 #include "videoplaybackhandler.h"
 
-VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent)
+VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent)
 {
+    mLastVideoPacketTime = lastVideoPacketTime;
+    mLastAudioPacketTime = lastAudioPacketTime;
     mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     mImageHandler = _imageHandler;
@@ -168,6 +170,10 @@ int VideoPlaybackHandler::start()
                     exit(1);
                 }
 
+                *mLastVideoPacketTime = frame->pts;
+                qDebug() << "VideoPacketTime: " << *mLastVideoPacketTime;
+                sync();
+
                 //qDebug() << frame->data[0];
                 mImageHandler->readImage(videoDecoderCodecContext, frame, 1);
             }
@@ -182,5 +188,22 @@ int VideoPlaybackHandler::start()
     });
     //Skal aldri komme hit
     return 0;
+}
+
+void VideoPlaybackHandler::sync()
+{
+    if(*mLastAudioPacketTime != -1)
+    {
+        int diff = *mLastAudioPacketTime - *mLastVideoPacketTime;
+        if(diff < 0)
+        {
+            //int ms = abs(diff)/1000;
+            int ms = 5;
+            qDebug() << "Video Sleeping: " << ms;
+
+            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+            nanosleep(&ts, NULL);
+        }
+    }
 }
 

@@ -42,7 +42,7 @@ class AudioPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    AudioPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent = nullptr);
+    AudioPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
@@ -55,6 +55,9 @@ private:
         int id;
         std::mutex *writeLock;
     };
+    void sync();
+    int64_t* mLastVideoPacketTime;
+    int64_t* mLastAudioPacketTime;
     int mBufferSize;
     SocketAndIDStruct* mStruct;
     void initAudio(QObject *parent);

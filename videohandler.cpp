@@ -158,7 +158,6 @@ int VideoHandler::init()
         fprintf(stderr, "Could not open write header");
         exit(1);
     }
-
     //qDebug() << "Kom til slutten av init";
 }
 

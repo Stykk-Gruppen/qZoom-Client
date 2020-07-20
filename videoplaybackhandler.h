@@ -42,18 +42,23 @@ class VideoPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent = nullptr);
+    VideoPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
     int mVideoStreamIndex = -1;
 
+
 private:
+    void sync();
+
     struct SocketAndIDStruct {
         SocketHandler* socketHandler;
         int id;
         std::mutex *writeLock;
     };
+    int64_t* mLastVideoPacketTime;
+    int64_t* mLastAudioPacketTime;
     int mBufferSize;
     SocketAndIDStruct* mStruct;
     SocketHandler* mSocketHandler;

@@ -65,11 +65,14 @@ int main(int argc, char *argv[])
     std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock);
 
+    int64_t *lastVideoPacketTime = new int64_t(-1);
+    int64_t *lastAudioPacketTime = new int64_t(-1);
+
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size));
-    QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size));
-    QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size));
+    QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
+    QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
 
 
 
