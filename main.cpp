@@ -41,6 +41,7 @@ extern "C"
 
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
+#include "handlers/userhandler.h"
 #include "core/database.h"
 
 
@@ -58,10 +59,12 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
     int buffer_size = 4 * 1024;
+    Database* databaseObject = new Database();
     ImageHandler* imageHandlerObject = new ImageHandler();
     std::mutex *audioUdpBufferLock = new std::mutex;
     std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock);
+    UserHandler* userHandlerObject = new UserHandler(databaseObject);
 
     int64_t *lastVideoPacketTime = new int64_t(-1);
     int64_t *lastAudioPacketTime = new int64_t(-1);
@@ -70,8 +73,8 @@ int main(int argc, char *argv[])
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size));
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
-    Database* databaseObject = new Database();
-    QScopedPointer<SessionHandler> sessionHandler(new SessionHandler(databaseObject));
+    QScopedPointer<UserHandler> userHandler(userHandlerObject);
+    QScopedPointer<SessionHandler> sessionHandler(new SessionHandler(databaseObject, userHandlerObject));
 
 
     //streamHandler->record();
@@ -80,6 +83,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
     engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
+    engine.rootContext()->setContextProperty("userHandler", userHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 
 

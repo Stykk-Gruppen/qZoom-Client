@@ -57,6 +57,15 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
             }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    optionRow.visible = false;
+                    loginColumn.visible = true
+                    backButton.visible = true
+                }
+            }
         }
     }
 
@@ -107,16 +116,51 @@ Rectangle {
         }
     }
 
+    Column {
+        id: loginColumn
+        visible: false
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 32
+        TextField {
+            id: loginUsernameField
+            width: 200
+            //height: 32
+            text: qsTr("")
+            ///font.pixelSize: 24
+            placeholderText: qsTr("Username")
+            selectByMouse: true
+            focus: true
+        }
+
+        TextField {
+            id: loginPasswordField
+            width: 200
+            //height: 32
+            text: qsTr("")
+            ///font.pixelSize: 24
+            placeholderText: qsTr("Password")
+            //echoMode: "Password"
+            selectByMouse: true
+            focus: true
+        }
+
+        C.PushButton {
+            id: loginButton
+            text: qsTr("Login")
+            //anchors.verticalCenterOffset: 64
+            //visible: false
+            font.pixelSize: 32
+            onClicked: login()
+        }
+    }
+
     C.PushButton {
         id: backButton
         text: "Back"
         font.pixelSize: 32
         visible: false
-        onClicked: {
-            joinSessionColumn.visible = false
-            optionRow.visible = true
-            errorText.text = " "
-        }
+        onClicked: clear()
     }
 
     function joinSession() {
@@ -127,6 +171,25 @@ Rectangle {
             console.log("no such session")
             errorText.text = "Failed to join session"
         }
+    }
+
+    function login() {
+        if (userHandler.login(loginUsernameField.text, loginPasswordField.text)) {
+            console.log("Successfully logged in!")
+            clear()
+        }
+        else {
+            console.log("Failed to login")
+            errorText.text = "Failed to login"
+        }
+    }
+
+    function clear() {
+        joinSessionColumn.visible = false
+        loginColumn.visible = false
+        optionRow.visible = true
+        errorText.text = " "
+        backButton.visible = false
     }
 
     Component.onCompleted: {

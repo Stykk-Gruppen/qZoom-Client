@@ -22,6 +22,7 @@ SOURCES += \
         config.cpp \
         core/database.cpp \
         handlers/sessionhandler.cpp \
+        handlers/userhandler.cpp \
         imagehandler.cpp \
         main.cpp \
         sockethandler.cpp \
@@ -54,6 +55,7 @@ HEADERS += \
     camerahandler.h \
     core/database.h \
     handlers/sessionhandler.h \
+    handlers/userhandler.h \
     imagehandler.h \
     sockethandler.h \
     streamhandler.h \

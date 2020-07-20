@@ -84,11 +84,10 @@ Rectangle {
             font.pixelSize: 32
             property var toggled: true
             onClicked: {
-                //addScreen();
                 repeaterId.model = 0;
-                gridId.columns = 3;
-                gridId.rows = 2;
-                repeaterId.model = 5;
+                gridId.columns = gridId.calcColumns();
+                gridId.rows = gridId.calcRows();
+                repeaterId.model = imageHandler.getNumberOfScreens();
             }
         }
 
@@ -99,6 +98,7 @@ Rectangle {
             property var toggled: true
             onClicked: {
                 streamHandler.stopRecording();
+                sessionHandler.leaveSession();
                 changePage("home");
             }
         }
