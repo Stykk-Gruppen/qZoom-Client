@@ -1,6 +1,9 @@
 #include "audioplaybackhandler.h"
 
-AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent)
+AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler,
+                                           SocketHandler* _socketHandler, int bufferSize,
+                                           int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime,
+                                           QObject *parent)
 {
     mLastVideoPacketTime = lastVideoPacketTime;
     mLastAudioPacketTime = lastAudioPacketTime;
@@ -241,7 +244,7 @@ int AudioPlaybackHandler::start()
                 }
 
                 *mLastAudioPacketTime = frame->pts;
-                qDebug() << "AudioPacketTime: " << *mLastAudioPacketTime;
+                //qDebug() << "AudioPacketTime: " << *mLastAudioPacketTime;
                 sync();
 
                 if (!resampled)
@@ -296,7 +299,7 @@ void AudioPlaybackHandler::sync()
             //int ms = abs(diff)/1000;
             int ms = 5;
 
-            qDebug() << "Audio Sleeping: " << ms;
+            //qDebug() << "Audio Sleeping: " << ms;
 
             struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
             nanosleep(&ts, NULL);

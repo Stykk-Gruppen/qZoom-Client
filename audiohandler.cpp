@@ -1,7 +1,4 @@
 #include "audiohandler.h"
-#define OUTPUT_BIT_RATE 96000
-/* The number of output channels */
-#define OUTPUT_CHANNELS 2
 AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
 {
     mBufferSize = bufferSize;
@@ -172,11 +169,11 @@ int AudioHandler::openOutputFile()
 
     /* Set the basic encoder parameters.
      * The input file's sample rate is used to avoid a sample rate conversion. */
-    avctx->channels       = OUTPUT_CHANNELS;
-    avctx->channel_layout = av_get_default_channel_layout(OUTPUT_CHANNELS);
+    avctx->channels       = 2;
+    avctx->channel_layout = av_get_default_channel_layout(2);
     avctx->sample_rate    = inputCodecContext->sample_rate;
     avctx->sample_fmt     = output_codec->sample_fmts[0];
-    avctx->bit_rate       = OUTPUT_BIT_RATE;
+    avctx->bit_rate       = 48000;
 
     /* Allow the use of the experimental AAC encoder. */
     avctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
@@ -562,12 +559,13 @@ cleanup:
  * @param      frame_size           Size of the frame
  * @return Error code (0 if successful)
  */
-int AudioHandler::initOutputFrame(AVFrame **frame,int frame_size)
+int AudioHandler::initOutputFrame(AVFrame **frame, int frame_size)
 {
     int error;
 
     /* Create a new frame to store the audio samples. */
-    if (!(*frame = av_frame_alloc())) {
+    if (!(*frame = av_frame_alloc()))
+    {
         fprintf(stderr, "Could not allocate audio output frame\n");
         return AVERROR_EXIT;
     }
@@ -584,7 +582,8 @@ int AudioHandler::initOutputFrame(AVFrame **frame,int frame_size)
 
     /* Allocate the samples of the created frame. This call will make
      * sure that the audio frame can hold as many samples as specified. */
-    if ((error = av_frame_get_buffer(*frame, 0)) < 0) {
+    if ((error = av_frame_get_buffer(*frame, 0)) < 0)
+    {
         fprintf(stderr, "Could not allocate output audio frame samples");
         av_frame_free(frame);
         return error;
@@ -617,12 +616,14 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
     initPacket(&output_packet);
 
     /* Set a timestamp based on the sample rate for the container. */
-    if(first){
+    if(first)
+    {
         pts = time*10;
         first = false;
     }
 
-    if (frame) {
+    if (frame)
+    {
         frame->pts = pts;
         pts += frame->nb_samples;
     }
@@ -632,10 +633,12 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,
      * The output audio stream encoder is used to do this. */
     error = avcodec_send_frame(outputCodecContext, frame);
     /* The encoder signals that it has nothing more to encode. */
-    if (error == AVERROR_EOF) {
+    if (error == AVERROR_EOF)
+    {
         error = 0;
         goto cleanup;
-    } else if (error < 0) {
+    } else if (error < 0)
+    {
         fprintf(stderr, "Could not send packet audio for encoding");
         return error;
     }
@@ -742,7 +745,7 @@ void AudioHandler::cleanup()
 int AudioHandler::init()
 {
     int ret = AVERROR_EXIT;
-
+    qDebug() << "audio init";
     /* Open the input file for reading. */
     if (openInputFile())
     {
@@ -791,23 +794,26 @@ int AudioHandler::init()
 int AudioHandler::grabFrames()
 {
     int count = 0;
-    while (1) {
+    while (!mAbortGrabFrames)
+    {
         count++;
         //qDebug() << count;
         /* Use the encoder's desired frame size for processing. */
         const int output_frame_size = outputCodecContext->frame_size;
-        int finished                = 0;
+        int finished = 0;
 
         /* Make sure that there is one frame worth of samples in the FIFO
          * buffer so that the encoder can do its work.
          * Since the decoder's and the encoder's frame size may differ, we
          * need to FIFO buffer to store as many frames worth of input samples
          * that they make up at least one frame worth of output samples. */
-        while (av_audio_fifo_size(fifo) < output_frame_size) {
+        while (av_audio_fifo_size(fifo) < output_frame_size)
+        {
             //qDebug() << "fifo < outputframe zie";
             /* Decode one frame worth of audio samples, convert it to the
              * output sample format and put it into the FIFO buffer. */
-            if (readDecodeConvertAndStore(&finished)){
+            if (readDecodeConvertAndStore(&finished))
+            {
                 cleanup();
             }
 
@@ -815,7 +821,9 @@ int AudioHandler::grabFrames()
             /* If we are at the end of the input file, we continue
              * encoding the remaining audio samples to the output file. */
             if (finished)
+            {
                 break;
+            }
         }
 
         /* If we have enough samples for the encoder, we encode them.
@@ -823,19 +831,23 @@ int AudioHandler::grabFrames()
          * the encoder. */
         while (av_audio_fifo_size(fifo) >= output_frame_size ||
                (finished && av_audio_fifo_size(fifo) > 0))
+        {
             /* Take one frame worth of audio samples from the FIFO buffer,
              * encode it and write it to the output file. */
             if (loadEncodeAndWrite())
             {
                 cleanup();
             }
+        }
 
         /* If we are at the end of the input file and have encoded
          * all remaining samples, we can exit this loop and finish. */
-        if (finished) {
+        if (finished)
+        {
             int data_written;
             /* Flush the encoder as it may have delayed frames. */
-            do {
+            do
+            {
                 data_written = 0;
                 if (encodeAudioFrame(NULL, &data_written))
                 {
@@ -845,17 +857,21 @@ int AudioHandler::grabFrames()
             break;
         }
     }
-
+    cleanup();
+    return 0;
     /**
      * Write the trailer of the output file container.
      * @param outputFormatContext Format context of the output file
      * @return Error code (0 if successful)
      */
-    if ((av_write_trailer(outputFormatContext)) < 0) {
+    /*
+    if ((av_write_trailer(outputFormatContext)) < 0)
+    {
         fprintf(stderr, "Could not write output file trailer");
         cleanup();
     }
     return 0;
+    */
 
 }
 
@@ -886,4 +902,9 @@ int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buff
     int audioHeader = 0;
     send.prepend(audioHeader);
     return socketHandler->sendDatagram(send);
+}
+
+void AudioHandler::toggleGrabFrames(bool a)
+{
+    mAbortGrabFrames = !a;
 }

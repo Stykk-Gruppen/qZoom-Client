@@ -62,6 +62,9 @@ public:
     AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*, int bufferSize);
     int grabFrames();
     int init();
+    void changeAudioInputDevice(QString deviceName);
+    QVariantList getAudioInputDevices();
+    void toggleGrabFrames(bool a);
 
 private:
     int mBufferSize;
@@ -91,10 +94,10 @@ private:
     AVCodecContext *outputCodecContext;
     SwrContext *resampleContext;
     AVAudioFifo *fifo;
-    void changeAudioInputDevice(QString deviceName);
-    QVariantList getAudioInputDevices();
+
     static int audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size);
     AVDictionary *options = NULL;
+    bool mAbortGrabFrames = false;
 };
 
 #endif // AUDIOHANDLER_H

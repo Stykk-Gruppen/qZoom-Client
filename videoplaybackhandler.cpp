@@ -1,6 +1,9 @@
 #include "videoplaybackhandler.h"
 
-VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent)
+VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler,
+                                           SocketHandler* _socketHandler, int bufferSize,
+                                           int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime,
+                                           QObject *parent)
 {
     mLastVideoPacketTime = lastVideoPacketTime;
     mLastAudioPacketTime = lastAudioPacketTime;
@@ -171,7 +174,7 @@ int VideoPlaybackHandler::start()
                 }
 
                 *mLastVideoPacketTime = frame->pts;
-                qDebug() << "VideoPacketTime: " << *mLastVideoPacketTime;
+                //qDebug() << "VideoPacketTime: " << *mLastVideoPacketTime;
                 sync();
 
                 //qDebug() << frame->data[0];
@@ -199,7 +202,7 @@ void VideoPlaybackHandler::sync()
         {
             //int ms = abs(diff)/1000;
             int ms = 5;
-            qDebug() << "Video Sleeping: " << ms;
+           // qDebug() << "Video Sleeping: " << ms;
 
             struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
             nanosleep(&ts, NULL);

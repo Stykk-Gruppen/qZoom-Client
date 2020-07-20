@@ -2,80 +2,12 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
-//import QtQuick 2.0
-//import VLCQt 1.1
-//import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.15
-import "components" as C
+import "../components" as C
 
-ApplicationWindow {
+Rectangle {
     id: window
     visible: true
-    width: 1280
-    height: 720
-    minimumHeight: 400
-    minimumWidth: 400
-    title: qsTr("qZoom")
-   // Rectangle{
-       // width: 400
-    /*
-    Column{
-        spacing: 2
-        Image {
-            id: liveImage
-            property bool counter: false
-
-            asynchronous: true
-            source: "image://live/10"
-            //anchors.fill: parent
-            fillMode: Image.PreserveAspectFit
-            cache: false
-            width: 480
-            height: 360
-
-            function reload() {
-                counter = !counter
-                source = "image://live/image?id=" + counter + "&0"
-            }
-        }
-        Item {
-            Timer {
-                interval: 41; running: true; repeat: true
-                onTriggered: liveImage.reload();
-            }
-        }
-        Image {
-            id: liveImage2
-            property bool counter: false
-
-            asynchronous: true
-            source: "image://live/10"
-            //anchors.fill: parent
-            fillMode: Image.PreserveAspectFit
-            cache: false
-            width: 480
-            height: 360
-
-            function reload() {
-                counter = !counter
-                source = "image://live/image?id=" + counter + "&1"
-            }
-        }
-        Item {
-            Timer {
-                interval: 41; running: true; repeat: true
-                onTriggered: liveImage2.reload();
-            }
-        }
-    }
-
-
-    Button {
-        text: "Add Screen"
-        onClicked: {
-        }
-    }
-    */
 
     property var focusScreen: false;
     property var selectedScreenIndex: 0
@@ -86,6 +18,7 @@ ApplicationWindow {
         height: (window.height - taskBar.height)
         color: "dimgray"
         GridLayout {
+            id: gridId
             function calcColumns() { //Disse to funksjonene kan nok gjøres mye bedre. Hvis man klarer å se mønsteret :P
                 var a = imageHandler.getNumberOfScreens()
                 if (a > 9){
@@ -117,7 +50,11 @@ ApplicationWindow {
             rows: calcRows()
 
             columnSpacing: 0
+            rowSpacing: 0
+
+
             Repeater {
+                id: repeaterId
                 model: focusScreen ? 1 : imageHandler.getNumberOfScreens()
                 Rectangle {
                     width: focusScreen ? screenGridArea.width : screenGridArea.width/parent.columns
@@ -158,16 +95,40 @@ ApplicationWindow {
                     }
                 }
             }
+
         }
     }
 
     C.TaskBar {
         id: taskBar
         anchors.bottom: parent.bottom
-
     }
 
+    Component.onCompleted: {
+        //addScreen();
+        var roomId = sessionHandler.getRoomId();
+        setTitle("qZoom :: Session (" + roomId + ")");
+        streamHandler.enableVideo();
+        streamHandler.enableAudio();
+        streamHandler.record();
+    }
 
+    /*
+    function addScreen() {
+        var width = screenGridArea.width/gridId.calcColumns();
+        var height = screenGridArea.height/gridId.calcRows()
+        console.log("width" + width);
+        console.log("height" + height);
+        for (var i = 0; i < imageHandler.getNumberOfScreens(); i++) {
+            var component = Qt.createComponent("../components/Screen.qml");
+            if (component.status === Component.Ready) {
+                var button = component.createObject(gridId);
+                button.setInfo(i, width, height);
+            }
+        }
+        console.log("Number of Screens: " + imageHandler.getNumberOfScreens());
+    }
+    */
 }
 
 

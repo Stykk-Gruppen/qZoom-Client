@@ -13,7 +13,6 @@
 #include <QBuffer>
 #include "camerahandler.h"
 #include "videohandler.h"
-#include "filetest.h"
 #include "audiohandler.h"
 #include <QCameraViewfinder>
 #include <QVariant>
@@ -40,8 +39,9 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
-#include <testing.h>
 #include "audioplaybackhandler.h"
+#include "handlers/sessionhandler.h"
+#include "core/database.h"
 
 
 int main(int argc, char *argv[])
@@ -50,16 +50,14 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    const QUrl url(QStringLiteral("qrc:/view/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-
     int buffer_size = 4 * 1024;
-
     ImageHandler* imageHandlerObject = new ImageHandler();
     std::mutex *audioUdpBufferLock = new std::mutex;
     std::mutex *videoUdpBufferLock = new std::mutex;
@@ -68,18 +66,20 @@ int main(int argc, char *argv[])
     int64_t *lastVideoPacketTime = new int64_t(-1);
     int64_t *lastAudioPacketTime = new int64_t(-1);
 
-
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size));
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
+    Database* databaseObject = new Database();
+    QScopedPointer<SessionHandler> sessionHandler(new SessionHandler(databaseObject));
 
 
-
-    streamHandler->record();
+    //streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
+    engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
+    engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 
 
