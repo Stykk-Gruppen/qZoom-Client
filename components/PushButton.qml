@@ -45,6 +45,7 @@ T.Button {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: control.clicked()
+        onDoubleClicked: control.doubleClicked()
     }
 
     states: [

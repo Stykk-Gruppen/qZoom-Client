@@ -95,8 +95,16 @@ Rectangle {
             //visible: false
             font.pixelSize: 32
             onClicked: joinSession()
+            onDoubleClicked: changePage("session")
         }
 
+        Text {
+            id: errorText
+            text: " "
+            //visible: true
+            font.pixelSize: 18
+            color: "red"
+        }
     }
 
     C.PushButton {
@@ -107,21 +115,18 @@ Rectangle {
         onClicked: {
             joinSessionColumn.visible = false
             optionRow.visible = true
-            visible = false
+            errorText.text = " "
         }
     }
 
-
-
-
     function joinSession() {
         if (sessionHandler.joinSession(roomIdField.text, roomPasswordField.text)) {
-            changePage("session");
+            changePage("session")
         }
         else {
-            changePage("session");
+            console.log("no such session")
+            errorText.text = "Failed to join session"
         }
-
     }
 
     Component.onCompleted: {
