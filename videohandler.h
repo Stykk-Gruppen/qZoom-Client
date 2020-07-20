@@ -49,6 +49,7 @@ public:
     VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent = 0);
     int init();
     void grabFrames();
+    void close();
     bool writeToFile = true;
     int numberOfFrames;
     const char* filename = "nyTest.ismv";
