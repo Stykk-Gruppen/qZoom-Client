@@ -50,6 +50,7 @@ public:
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
 
 private:
+    int64_t mTime;
     SocketHandler* mSocketHandler;
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;

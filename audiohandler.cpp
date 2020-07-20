@@ -744,7 +744,7 @@ void AudioHandler::cleanup()
 int AudioHandler::init()
 {
     int ret = AVERROR_EXIT;
-
+    qDebug() << "audio init";
     /* Open the input file for reading. */
     if (openInputFile())
     {

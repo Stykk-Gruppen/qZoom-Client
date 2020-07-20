@@ -2,7 +2,7 @@
 
 StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent) : QObject(parent)
 {
-    int64_t time = av_gettime();
+    int64_t mTime = av_gettime();
     mVideoDevice = "/dev/video0";
     mAudioDevice = "default";
     mImageHandler = _imageHandler;
@@ -43,11 +43,12 @@ void StreamHandler::record()
 void StreamHandler::enableAudio()
 {
     mAudioEnabled = true;
+    qDebug() << "enabling audio";
     if (mAudioHandler == nullptr)
     {
         qDebug() << "creating mAudioHandler";
-        int64_t time = av_gettime();
-        mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock, time, mSocketHandler);
+        //int64_t time = av_gettime();
+        mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock, mTime, mSocketHandler);
 
         int error = mAudioHandler->init();
         if(error<0)
@@ -65,19 +66,21 @@ void StreamHandler::enableAudio()
 void StreamHandler::disableAudio()
 {
     mAudioEnabled = false;
-    //delete mAudioHandler;
+
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
+    //delete mAudioHandler;
     qDebug() << "audio disabled";
 }
 
 void StreamHandler::enableVideo()
 {
     mVideoEnabled = true;
+    qDebug() << "enabling video";
     if (mVideoHandler == nullptr)
     {
         qDebug() << "new videohandler";
-        int64_t time = av_gettime();
-        mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock, time, mImageHandler, mSocketHandler);
+        //int64_t time = av_gettime();
+        mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock, mTime, mImageHandler, mSocketHandler);
 
         int error = mVideoHandler->init();
         if(error < 0)
