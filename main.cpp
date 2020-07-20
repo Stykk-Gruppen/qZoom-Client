@@ -13,7 +13,6 @@
 #include <QBuffer>
 #include "camerahandler.h"
 #include "videohandler.h"
-#include "filetest.h"
 #include "audiohandler.h"
 #include <QCameraViewfinder>
 #include <QVariant>
@@ -40,7 +39,6 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
-#include <testing.h>
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "core/database.h"

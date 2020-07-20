@@ -67,6 +67,7 @@ void StreamHandler::disableAudio()
     mAudioEnabled = false;
     //delete mAudioHandler;
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
+    qDebug() << "audio disabled";
 }
 
 void StreamHandler::enableVideo()
@@ -95,6 +96,7 @@ void StreamHandler::disableVideo()
     mVideoEnabled = false;
     //delete mVideoHandler;
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
+    qDebug() << "video disabled";
 }
 
 QVariantList StreamHandler::getAudioInputDevices()

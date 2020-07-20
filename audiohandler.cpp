@@ -1,7 +1,4 @@
 #include "audiohandler.h"
-#define OUTPUT_BIT_RATE 96000
-/* The number of output channels */
-#define OUTPUT_CHANNELS 2
 AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler)/*, QObject* parent): QObject(parent)*/
 {
     mSocketHandler = _socketHandler;
@@ -171,11 +168,11 @@ int AudioHandler::openOutputFile()
 
     /* Set the basic encoder parameters.
      * The input file's sample rate is used to avoid a sample rate conversion. */
-    avctx->channels       = OUTPUT_CHANNELS;
-    avctx->channel_layout = av_get_default_channel_layout(OUTPUT_CHANNELS);
+    avctx->channels       = 2;
+    avctx->channel_layout = av_get_default_channel_layout(2);
     avctx->sample_rate    = inputCodecContext->sample_rate;
     avctx->sample_fmt     = output_codec->sample_fmts[0];
-    avctx->bit_rate       = OUTPUT_BIT_RATE;
+    avctx->bit_rate       = 48000;
 
     /* Allow the use of the experimental AAC encoder. */
     avctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
@@ -858,6 +855,7 @@ int AudioHandler::grabFrames()
             break;
         }
     }
+    cleanup();
     return 0;
     /**
      * Write the trailer of the output file container.

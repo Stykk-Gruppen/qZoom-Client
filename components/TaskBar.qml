@@ -55,7 +55,7 @@ Rectangle {
                     streamHandler.disableAudio()
                 } else {
                     state = "normal"
-                    streamHandler.enableVideo()
+                    streamHandler.enableAudio()
                 }
                 toggled = !toggled
             }
