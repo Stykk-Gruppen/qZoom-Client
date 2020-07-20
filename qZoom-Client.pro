@@ -21,13 +21,11 @@ SOURCES += \
         camerahandler.cpp \
         config.cpp \
         core/database.cpp \
-        filetest.cpp \
         handlers/sessionhandler.cpp \
         imagehandler.cpp \
         main.cpp \
         sockethandler.cpp \
         streamhandler.cpp \
-        testing.cpp \
         videohandler.cpp \
         videoplaybackhandler.cpp
 
@@ -55,11 +53,9 @@ HEADERS += \
     audioplaybackhandler.h \
     camerahandler.h \
     core/database.h \
-    filetest.h \
     handlers/sessionhandler.h \
     imagehandler.h \
     sockethandler.h \
     streamhandler.h \
-    testing.h \
     videohandler.h \
     videoplaybackhandler.h
