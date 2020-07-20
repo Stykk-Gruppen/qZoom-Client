@@ -2,8 +2,9 @@
 #define OUTPUT_BIT_RATE 96000
 /* The number of output channels */
 #define OUTPUT_CHANNELS 2
-AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
 {
+    mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     time = _time;
     cDeviceName = _cDeviceName;
@@ -127,7 +128,7 @@ int AudioHandler::openOutputFile()
         fprintf(stderr, "Could not alloc output context");
         exit(1);
     }
-    int avio_buffer_size = 4 * 1024;
+    int avio_buffer_size = mBufferSize;
     void* avio_buffer = av_malloc(avio_buffer_size);
     AVIOContext* custom_io = avio_alloc_context (
                 (unsigned char*)avio_buffer, avio_buffer_size,
@@ -786,6 +787,7 @@ int AudioHandler::init()
     // int looping = 0;
     return 0;
 }
+
 int AudioHandler::grabFrames()
 {
     int count = 0;

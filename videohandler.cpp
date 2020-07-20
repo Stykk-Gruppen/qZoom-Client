@@ -1,8 +1,9 @@
 #include "videohandler.h"
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
-VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent): QObject(parent)
+VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject* parent): QObject(parent)
 {
+    mBufferSize = bufferSize;
     writeToFile = false;
     socketHandler = _socketHandler;
     time = _time;
@@ -138,7 +139,7 @@ int VideoHandler::init()
     }
 
     AVDictionary *options = NULL;
-    int avio_buffer_size = 4* 1024;
+    int avio_buffer_size = mBufferSize;
     void* avio_buffer = av_malloc(avio_buffer_size);
     AVIOContext* custom_io = avio_alloc_context (
                 (unsigned char*)avio_buffer, avio_buffer_size,

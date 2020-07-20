@@ -37,7 +37,7 @@ class StreamHandler : public QObject
 {
     Q_OBJECT
 public:
-    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
+    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, QObject *parent = nullptr);
     VideoHandler* videoHandler;
     AudioHandler* audioHandler;
     void record();
@@ -48,8 +48,9 @@ public:
 
 private:
     SocketHandler* mSocketHandler;
-    bool mAudioEnabled = false;
+    bool mAudioEnabled = true;
     bool mVideoEnabled = true;
+    int mBufferSize;
     std::mutex mUDPSendDatagramMutexLock;
 };
 

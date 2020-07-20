@@ -1,7 +1,8 @@
 #include "audioplaybackhandler.h"
 
-AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent)
+AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent)
 {
+    mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     mImageHandler = _imageHandler;
     initAudio(parent);
@@ -82,7 +83,7 @@ int AudioPlaybackHandler::start()
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
         uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = 4*1024;
+        size_t buffer_size = 0, avio_ctx_buffer_size = mBufferSize;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();

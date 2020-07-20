@@ -59,11 +59,12 @@ class AudioHandler //: public QObject
 {
     //Q_OBJECT
 public:
-    AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*);
+    AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*, int bufferSize);
     int grabFrames();
     int init();
 
 private:
+    int mBufferSize;
     int64_t time;
     QString aDeviceName;
     QString cDeviceName;

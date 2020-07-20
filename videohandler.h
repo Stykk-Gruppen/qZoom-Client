@@ -46,7 +46,7 @@ class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject* parent = 0);
     int init();
     void grabFrames();
     void close();
@@ -64,6 +64,7 @@ public:
 
 private:
     int64_t time;
+    int mBufferSize;
     int skipped_frames = 0;
     std::ofstream outfile;
     AVCodecContext* inputVideoCodecContext;

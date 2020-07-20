@@ -42,7 +42,7 @@ class VideoPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, QObject *parent = nullptr);
+    VideoPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     int start();
@@ -54,6 +54,7 @@ private:
         int id;
         std::mutex *writeLock;
     };
+    int mBufferSize;
     SocketAndIDStruct* mStruct;
     SocketHandler* mSocketHandler;
     QByteArray mBuffer;
