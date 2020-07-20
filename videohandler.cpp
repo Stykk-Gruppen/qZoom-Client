@@ -38,6 +38,8 @@ int VideoHandler::init()
         fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
         return -1;
     }
+
+
     //Get stream information
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0) {
         fprintf(stderr, "Failed to retrieve input stream information");
@@ -399,6 +401,11 @@ void VideoHandler::grabFrames() {
     }
     qDebug() << "Ferdig med grabFrames!!!\n";
 
+}
+
+void VideoHandler::close()
+{
+    avformat_close_input(&ifmt_ctx);
 }
 
 int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)

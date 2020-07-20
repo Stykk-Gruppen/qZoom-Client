@@ -19,6 +19,7 @@ SOURCES += \
         audiohandler.cpp \
         audioplaybackhandler.cpp \
         camerahandler.cpp \
+        config.cpp \
         filetest.cpp \
         imagehandler.cpp \
         main.cpp \
