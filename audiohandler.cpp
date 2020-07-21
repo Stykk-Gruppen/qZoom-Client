@@ -1,10 +1,10 @@
 #include "audiohandler.h"
-AudioHandler::AudioHandler(QString _cDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time,SocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
 {
     mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     time = _time;
-    cDeviceName = _cDeviceName;
+    mAudioDeviceName = _audioDeviceName;
     writeLock = _writeLock;
     inputFormatContext = NULL;
     inputCodecContext = NULL;
@@ -31,7 +31,7 @@ int AudioHandler::openInputFile()
 
 
     /* Open the input file to read from it. */
-    if ((error = avformat_open_input(&inputFormatContext, cDeviceName.toUtf8().data(), audioInputFormat,
+    if ((error = avformat_open_input(&inputFormatContext, mAudioDeviceName.toUtf8().data(), audioInputFormat,
                                      NULL)) < 0) {
         fprintf(stderr, "Could not open audio input context");
         inputFormatContext = NULL;
@@ -891,8 +891,8 @@ QVariantList AudioHandler::getAudioInputDevices()
 
 void AudioHandler::changeAudioInputDevice(QString deviceName)
 {
-    qDebug() << deviceName;
-    //todo. må vel kanskje kjøre init på nytt?
+    mAudioDeviceName = deviceName;
+    qDebug() << "Changed audio device";
 }
 int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size)
 {

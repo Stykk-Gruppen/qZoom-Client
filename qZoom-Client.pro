@@ -18,7 +18,6 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 SOURCES += \
         audiohandler.cpp \
         audioplaybackhandler.cpp \
-        camerahandler.cpp \
         config.cpp \
         core/database.cpp \
         handlers/sessionhandler.cpp \
@@ -52,7 +51,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     audiohandler.h \
     audioplaybackhandler.h \
-    camerahandler.h \
     core/database.h \
     handlers/sessionhandler.h \
     handlers/userhandler.h \

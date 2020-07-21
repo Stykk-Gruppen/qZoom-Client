@@ -15,11 +15,11 @@ SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWrite
 void SocketHandler::initSocket()
 {
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
+    //udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
 
     //Connects readyRead to readPendingDatagram function,
     //which means when the socket recieves a packet the function will run.
-    connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
+    //connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
 
 }
 
