@@ -5,7 +5,7 @@
 
 class TcpSocketHandler
 {
-    Q_OBJECT
+    //Q_OBJECT
 public:
     TcpSocketHandler();
 };

@@ -15,13 +15,13 @@ public:
     Q_INVOKABLE QString getErrorMessage();
     bool isGuest();
     int getUserId();
-
+    QString mStreamId;
 private:
     bool mIsGuest;
     int mUserId;
     Database* mDb;
     QString mErrorMessage;
-    QString mStreamId;
+
     QString mUsername;
     QString mPassword;
     QString mTimeCreated;
