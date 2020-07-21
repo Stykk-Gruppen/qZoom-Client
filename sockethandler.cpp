@@ -1,8 +1,8 @@
 #include "sockethandler.h"
 
-SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWriteLock,UserHandler* _userHandler,QObject *parent) : QObject(parent)
+SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWriteLock,SessionHandler* _sessionHandler,QObject *parent) : QObject(parent)
 {
-    mUserHandler = _userHandler;
+    mSessionHandler = _sessionHandler;
     mAudioWriteLock = _audioWriteLock;
     mVideoWriteLock = _videoWriteLock;
     address = QHostAddress::LocalHost;
@@ -72,7 +72,9 @@ void SocketHandler::readPendingDatagrams()
 int SocketHandler::sendDatagram(QByteArray arr)
 {
    // arr.prepend()
-    arr.prepend(mUserHandler->mStreamId.toLocal8Bit().data());
+    arr.prepend(mSessionHandler->getRoomId().toLocal8Bit().data());
+    arr.prepend(mSessionHandler->getUser()->getStreamId().toLocal8Bit().data());
+
     int ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
     qDebug() << ret;
     if(ret<0){

@@ -16,7 +16,7 @@ public:
     Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool leaveSession();
     Q_INVOKABLE QString getRoomId();
-
+    UserHandler* getUser();
 private:
     QString mRoomId;
     QString mIpAddress;

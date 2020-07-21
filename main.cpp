@@ -62,10 +62,11 @@ int main(int argc, char *argv[])
     int buffer_size = 4 * 1024;
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject);
+    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
     ImageHandler* imageHandlerObject = new ImageHandler();
     std::mutex *audioUdpBufferLock = new std::mutex;
     std::mutex *videoUdpBufferLock = new std::mutex;
-    SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock,userHandlerObject);
+    SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock,sessionHandlerObject);
 
 
     int64_t *lastVideoPacketTime = new int64_t(-1);
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
-    QScopedPointer<SessionHandler> sessionHandler(new SessionHandler(databaseObject, userHandlerObject));
+    QScopedPointer<SessionHandler> sessionHandler(sessionHandlerObject);
 
 
     //streamHandler->record();
