@@ -81,6 +81,26 @@ Rectangle {
                 }
             }
         }
+
+        Rectangle {
+            width: 200
+            height: 200
+            color: "#141414"
+            radius: 10
+            Text {
+                text: "Settings"
+                color: "white"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    showSettings();
+                }
+            }
+        }
     }
 
     Column {
