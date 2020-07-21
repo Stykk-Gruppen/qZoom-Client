@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QTcpSocket>
 #include <QNetworkDatagram>
 #include <QProcess>
 #include <mutex>
@@ -13,7 +14,7 @@ class SocketHandler : public QObject
 public:
     explicit SocketHandler(std::mutex*,std::mutex*,QObject *parent = nullptr);
     void initSocket();
-
+    QTcpSocket* mTCPSocket;
     QUdpSocket* udpSocket;
     int sendDatagram(QByteArray arr);
     QHostAddress address;

@@ -27,6 +27,7 @@ SOURCES += \
         main.cpp \
         sockethandler.cpp \
         streamhandler.cpp \
+        tcpsockethandler.cpp \
         videohandler.cpp \
         videoplaybackhandler.cpp
 
@@ -59,5 +60,6 @@ HEADERS += \
     imagehandler.h \
     sockethandler.h \
     streamhandler.h \
+    tcpsockethandler.h \
     videohandler.h \
     videoplaybackhandler.h

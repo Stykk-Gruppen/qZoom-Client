@@ -11,6 +11,7 @@ public:
     Database();
     bool connectDatabase();
     QSqlDatabase mDb;
+private:
 };
 
 #endif // DATABASE_H

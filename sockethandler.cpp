@@ -5,7 +5,7 @@ SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWrite
     mAudioWriteLock = _audioWriteLock;
     mVideoWriteLock = _videoWriteLock;
     address = QHostAddress::LocalHost;
-    //158.36.165.235
+    //address = QHostAddress("46.250.220.57"); tarves.no
     //address = QHostAddress("158.36.165.235"); Tarald
     //address = QHostAddress("79.160.58.120"); Kent
     port = 1337;
@@ -16,7 +16,6 @@ void SocketHandler::initSocket()
 {
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
-
     //Connects readyRead to readPendingDatagram function,
     //which means when the socket recieves a packet the function will run.
     connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
@@ -72,6 +71,7 @@ void SocketHandler::readPendingDatagrams()
 int SocketHandler::sendDatagram(QByteArray arr)
 {
     int ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
+    qDebug() << ret;
     if(ret<0){
         qDebug() << udpSocket->error();
     }

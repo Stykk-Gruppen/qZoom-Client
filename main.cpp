@@ -39,6 +39,7 @@ extern "C"
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
 
+#include "tcpsockethandler.h"
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
