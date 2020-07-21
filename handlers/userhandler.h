@@ -15,7 +15,7 @@ public:
     Q_INVOKABLE QString getErrorMessage();
     bool isGuest();
     int getUserId();
-
+    QString getStreamId();
 private:
     bool mIsGuest;
     int mUserId;

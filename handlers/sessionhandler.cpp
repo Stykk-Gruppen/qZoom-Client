@@ -17,6 +17,11 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     }
 }
 
+UserHandler* SessionHandler::getUser()
+{
+    return mUser;
+}
+
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 {
     QSqlQuery q(mDb->mDb);

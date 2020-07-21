@@ -3,17 +3,19 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QTcpSocket>
 #include <QNetworkDatagram>
 #include <QProcess>
 #include <mutex>
+#include "handlers/sessionhandler.h"
 
 class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(std::mutex*,std::mutex*,QObject *parent = nullptr);
+    explicit SocketHandler(std::mutex*,std::mutex*,SessionHandler*,QObject *parent = nullptr);
     void initSocket();
-
+    QTcpSocket* mTCPSocket;
     QUdpSocket* udpSocket;
     int sendDatagram(QByteArray arr);
     QHostAddress address;
@@ -23,6 +25,7 @@ public:
 public slots:
     void readPendingDatagrams();
 private:
+    SessionHandler* mSessionHandler;
     int mInitialBufferSize = 4 * 1024;
     uint signalCount = 0;
     std::mutex *mAudioWriteLock;

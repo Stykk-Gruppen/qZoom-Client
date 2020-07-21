@@ -82,3 +82,8 @@ int UserHandler::getUserId()
 {
     return mUserId;
 }
+
+QString UserHandler::getStreamId()
+{
+    return mStreamId;
+}
