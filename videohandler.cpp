@@ -437,15 +437,15 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     //qDebug() << "Inne i custom io write";
 
     SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
-
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
-    //qDebug() << "written to socket";
+    //Debug() << "written to socket";
 
+    //Prepends the video header byte needed by socketHandler
     send.prepend(int(1));
-    //delete cptr;
+
     return socketHandler->sendDatagram(send);
 }
 

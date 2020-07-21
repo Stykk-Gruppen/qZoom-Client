@@ -4,10 +4,7 @@ ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
 {
     mDefaultImage = QImage("0.png");
     this->blockSignals(false);
-
-    addPeer(1);
-    //addPeer(2);
-
+    addPeer(0);
 }
 
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
@@ -46,6 +43,7 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 
 void ImageHandler::addPeer(uint8_t index)
 {
+    qDebug() << "added peer: "<< index;
     mImageMap[index] = mDefaultImage;
 }
 

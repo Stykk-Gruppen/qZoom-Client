@@ -36,32 +36,26 @@ extern "C" {
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include "imagehandler.h"
-#include "sockethandler.h"
 
 class AudioPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    AudioPlaybackHandler(std::mutex*,ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime, QObject *parent = nullptr);
+    AudioPlaybackHandler(std::mutex* writeLock, QByteArray*, int, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
-    int start();
+    void start();
     int decodeAndPlay();
-    int mVideoStreamIndex = -1;
     int mAudioStreamIndex = -1;
 private:
-    struct SocketAndIDStruct {
-        SocketHandler* socketHandler;
-        int id;
-        std::mutex *writeLock;
+    int mVectorIndex;
+    struct mBufferAndLockStruct {
+        QByteArray* buffer;
+        std::mutex* writeLock;
     };
-    void sync();
-    int64_t* mLastVideoPacketTime;
-    int64_t* mLastAudioPacketTime;
     int mBufferSize;
-    SocketAndIDStruct* mStruct;
+    mBufferAndLockStruct* mStruct;
     void initAudio(QObject *parent);
-    SocketHandler* mSocketHandler;
     QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
