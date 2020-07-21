@@ -32,6 +32,7 @@ bool UserHandler::login(QString username, QString password)
             if (fillUser(userId))
             {
                 mIsGuest = false;
+                mHasRoom = getPersonalRoom();
                 return true;
             }
             else
@@ -73,6 +74,31 @@ bool UserHandler::fillUser(int userId)
     }
 }
 
+bool UserHandler::getPersonalRoom()
+{
+    QSqlQuery q(mDb->mDb);
+    q.prepare("SELECT id, password FROM room WHERE host = :userId");
+    q.bindValue(":userId", mUserId);
+    if (q.exec())
+    {
+        if (q.size() > 0)
+        {
+            mPersonalRoomId = q.value(0).toString();
+            mPersonalRoomPassword = q.value(1).toString();
+            return true;
+        }
+        else
+        {
+            qDebug() << "User doesn't have a personal room";
+        }
+    }
+    else
+    {
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
+    }
+    return false;
+}
+
 QString UserHandler::getErrorMessage()
 {
     return mErrorMessage;
@@ -86,4 +112,19 @@ int UserHandler::getUserId()
 QString UserHandler::getStreamId()
 {
     return mStreamId;
+}
+
+QString UserHandler::getPersonalRoomId()
+{
+    return mPersonalRoomId;
+}
+
+QString UserHandler::getPersonalRoomPassword()
+{
+    return mPersonalRoomPassword;
+}
+
+bool UserHandler::hasRoom()
+{
+    return mHasRoom;
 }

@@ -34,6 +34,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
         {
             q.next();
             mRoomId = q.value(0).toString();
+            mRoomPassword = q.value(1).toString();
             addUser();
             return true;
         }
@@ -52,6 +53,11 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 QString SessionHandler::getRoomId()
 {
     return mRoomId;
+}
+
+QString SessionHandler::getRoomPassword()
+{
+    return mRoomPassword;
 }
 
 void SessionHandler::addUser()
@@ -102,3 +108,38 @@ bool SessionHandler::leaveSession()
     }
     return false;
 }
+
+bool SessionHandler::createSession(QString roomId, QString roomPassword)
+{
+    if (!mUser->isGuest())
+    {
+        if (!mUser->hasRoom())
+        {
+            QSqlQuery q(mDb->mDb);
+            q.prepare("INSERT INTO room (id, host, password) VALUES (:id, :host, :password)");
+            q.bindValue(":id", roomId);
+            q.bindValue(":host", mUser->getUserId());
+            q.bindValue(":password", roomPassword);
+            if (q.exec())
+            {
+                qDebug() << "Added room :" << roomId << "to the database";
+                return joinSession(roomId, roomPassword);
+            }
+            else
+            {
+                qDebug() << "Failed Query" << Q_FUNC_INFO;
+            }
+        }
+        else
+        {
+            qDebug() << "User already has a room";
+        }
+    }
+    return false;
+}
+
+bool SessionHandler::isGuest()
+{
+    return mUser->isGuest();
+}
+

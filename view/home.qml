@@ -29,11 +29,13 @@ Rectangle {
                     optionRow.visible = false;
                     joinSessionColumn.visible = true
                     backButton.visible = true
+                    joinSessionButton.visible = true
                 }
             }
         }
 
         Rectangle {
+            id: hostRectangle
             width: 200
             height: 200
             color: "#141414"
@@ -43,6 +45,18 @@ Rectangle {
                 color: "white"
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
+            }
+            MouseArea {
+                id: hostMouseArea
+                anchors.fill: parent
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                enabled: !sessionHandler.isGuest()
+                onClicked: {
+                    optionRow.visible = false;
+                    joinSessionColumn.visible = true
+                    backButton.visible = true
+                    createSessionButton.visible = true
+                }
             }
         }
 
@@ -101,10 +115,18 @@ Rectangle {
             id: joinSessionButton
             text: qsTr("Join Session")
             //anchors.verticalCenterOffset: 64
-            //visible: false
+            visible: false
             font.pixelSize: 32
             onClicked: joinSession()
             onDoubleClicked: changePage("session")
+        }
+
+        C.PushButton {
+            id: createSessionButton
+            text: qsTr("Create Session")
+            visible: false
+            font.pixelSize: 32
+            onClicked: createSession()
         }
 
         Text {
@@ -177,10 +199,24 @@ Rectangle {
         if (userHandler.login(loginUsernameField.text, loginPasswordField.text)) {
             console.log("Successfully logged in!")
             clear()
+            hostMouseArea.enabled = true;
+            hostMouseArea.cursorShape = Qt.PointingHandCursor
+
         }
         else {
             console.log("Failed to login")
             errorText.text = "Failed to login"
+        }
+    }
+
+    function createSession() {
+        if (sessionHandler.createSession(roomIdField.text, roomPasswordField.text)) {
+            console.log("Successfully created session.")
+            changePage("session")
+        }
+        else {
+            console.log("Failed to create session")
+            errorText.text = "Failed to create session"
         }
     }
 
@@ -190,6 +226,8 @@ Rectangle {
         optionRow.visible = true
         errorText.text = " "
         backButton.visible = false
+        joinSessionButton.visible = false
+        createSessionButton.visible = false
     }
 
     Component.onCompleted: {

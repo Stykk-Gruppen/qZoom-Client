@@ -14,19 +14,27 @@ public:
     Q_INVOKABLE bool login(QString username, QString password);
     Q_INVOKABLE QString getErrorMessage();
     bool isGuest();
+    bool hasRoom();
     int getUserId();
     QString getStreamId();
+    QString getPersonalRoomId();
+    QString getPersonalRoomPassword();
+
 private:
+    bool fillUser(int userId);
+    bool getPersonalRoom();
+
     bool mIsGuest;
-    int mUserId;
-    Database* mDb;
+    bool mHasRoom;
+    QString mPersonalRoomId;
+    QString mPersonalRoomPassword;
     QString mErrorMessage;
     QString mStreamId;
     QString mUsername;
     QString mPassword;
     QString mTimeCreated;
-
-    bool fillUser(int userId);
+    int mUserId;
+    Database* mDb;
 
 signals:
 

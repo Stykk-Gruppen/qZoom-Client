@@ -73,17 +73,21 @@ int SocketHandler::sendDatagram(QByteArray arr)
 {
     QString streamId = mSessionHandler->getUser()->getStreamId();
     QString roomId = mSessionHandler->getRoomId();
-    if(streamId.size()>5 || roomId.size()>5)
-    {
-        qDebug() << "streamId or roomId exceeds max length of 5 in socketHandler::sendDatagram";
-        exit(1);
-    }
+    //
+
+    //Puts the streamId and its size at the front of the array,
+    //so the server knows where to send the stream
     arr.prepend(streamId.toLocal8Bit().data());
+    arr.prepend(streamId.size());
+
+    //Puts the roomId and its size at the front of the array
     arr.prepend(roomId.toLocal8Bit().data());
+    arr.prepend(roomId.size());
 
     int ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
-    //qDebug() << ret;
-    if(ret<0){
+    //qDebug() << ret << " size: " << arr.size();
+    if(ret < 0)
+    {
         qDebug() << udpSocket->error();
     }
     return ret;
