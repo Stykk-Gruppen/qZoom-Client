@@ -12,6 +12,11 @@ ApplicationWindow {
     minimumWidth: 400
     title: qsTr("qZoom")
 
+    Settings {
+        id: settings
+    }
+
+
     StackView{
         id: stackView
         focus: true
@@ -65,5 +70,11 @@ ApplicationWindow {
 
     function setTitle(title) {
         rootWindow.title = title;
+    }
+
+    function showSettings() {
+        settings.loadSettings();
+        console.log("Loaded Settings");
+        settings.open();
     }
 }

@@ -23,6 +23,7 @@
 #include <QTimer>
 #include "streamhandler.h"
 #include "videoplaybackhandler.h"
+#include "settings.h"
 #include "imagehandler.h"
 #include <QQuickView>
 extern "C"
@@ -33,17 +34,14 @@ extern "C"
 #include <libavdevice/avdevice.h>
 #include <ao/ao.h>
 }
-
 #include <QtCore/QCoreApplication>
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
-
 #include "tcpsockethandler.h"
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
 #include "core/database.h"
-
 
 int main(int argc, char *argv[])
 {
@@ -57,6 +55,10 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
+
+
+    QScopedPointer<Settings> settings(new Settings());
 
     int buffer_size = 4 * 1024;
     Database* databaseObject = new Database();
@@ -72,7 +74,7 @@ int main(int argc, char *argv[])
     int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size, settings.data()));
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
@@ -85,6 +87,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
     engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
+    engine.rootContext()->setContextProperty("backendSettings", settings.data());
+
     engine.rootContext()->setContextProperty("userHandler", userHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 

@@ -6,5 +6,6 @@
         <file>view/home.qml</file>
         <file>components/PushButton.qml</file>
         <file>components/Screen.qml</file>
+        <file>view/Settings.qml</file>
     </qresource>
 </RCC>
