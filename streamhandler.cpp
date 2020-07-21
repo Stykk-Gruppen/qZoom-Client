@@ -37,13 +37,13 @@ void StreamHandler::enableAudio()
         //int64_t time = av_gettime();
         mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mSocketHandler,mBufferSize);
+    }
 
-        int error = mAudioHandler->init();
-        if(error<0)
-        {
-            fprintf(stderr, "Could not init audiohandler");
-            exit(1);
-        }
+    int error = mAudioHandler->init();
+    if(error<0)
+    {
+        fprintf(stderr, "Could not init audiohandler");
+        exit(1);
     }
 
     mAudioHandler->toggleGrabFrames(mAudioEnabled);

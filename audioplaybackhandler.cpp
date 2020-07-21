@@ -227,7 +227,8 @@ int AudioPlaybackHandler::start()
                     char* errbuff = (char *)malloc((1000)*sizeof(char));
                     av_strerror(ret,errbuff,1000);
                     qDebug() << "Failed udp input avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
-                    exit(1);
+                    //exit(1);
+                    continue;
 
                 }
                 ret = avcodec_receive_frame(audioDecoderCodecContext, frame);

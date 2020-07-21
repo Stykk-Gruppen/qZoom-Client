@@ -857,7 +857,9 @@ int AudioHandler::grabFrames()
             break;
         }
     }
-    cleanup();
+    avformat_close_input(&inputFormatContext);
+
+    //cleanup();
     return 0;
     /**
      * Write the trailer of the output file container.
