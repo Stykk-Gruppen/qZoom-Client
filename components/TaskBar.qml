@@ -3,6 +3,7 @@ import QtQuick.Controls 1.4
 import "../components" as C
 
 Rectangle {
+
     color: "#141414"
     height: 64
     width: parent.width
@@ -115,6 +116,21 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        t.getAudioTypes()
+        t.getAudioTypes();
+        if(!backendSettings.getAudioOn())
+        {
+            muteAudioButton.toggled = false;
+            muteAudioButton.state = "red";
+        }
+        if(!backendSettings.getVideoOn())
+        {
+            muteVideoButton.toggled = false;
+            muteVideoButton.state = "red";
+        }
+
+
+
+
+
     }
 }

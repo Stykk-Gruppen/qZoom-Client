@@ -16,7 +16,7 @@ void Settings::loadSettings()
         //QJsonDocument settings =
         QJsonObject settings = QJsonDocument::fromJson(file.readAll()).object();
         mAudioOn = settings.value("audioOn").toBool();
-        mVideoOn = settings.value("audioOn").toBool();
+        mVideoOn = settings.value("videoOn").toBool();
         mDisplayName = settings.value("displayName").toString();
         mDefaultAudioInput = settings.value("defaultAudioInput").toString();
         qDebug() << mAudioOn;

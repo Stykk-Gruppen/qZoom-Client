@@ -29,7 +29,6 @@ private:
     QString mDisplayName;
     QString mDefaultAudioInput;
     QString settingsFile = "./settings.json";
-
 };
 
 #endif // SETTINGS_H

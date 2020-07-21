@@ -35,11 +35,9 @@ extern "C"
 #include <libavdevice/avdevice.h>
 #include <ao/ao.h>
 }
-
 #include <QtCore/QCoreApplication>
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
-
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
@@ -74,7 +72,7 @@ int main(int argc, char *argv[])
     int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size, settings.data()));
     QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);

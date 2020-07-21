@@ -1,15 +1,14 @@
 #include "streamhandler.h"
 
 
-StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject *parent) : QObject(parent)
+StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, Settings* settings, QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
     mTime = av_gettime();
     mVideoDevice = "/dev/video0";
-    mAudioDevice = "default";
+    mAudioDevice = settings->getDefaultAudioInput();
     mImageHandler = _imageHandler;
     mSocketHandler = _socketHandler;
-
 }
 
 void StreamHandler::record()
@@ -53,11 +52,15 @@ void StreamHandler::enableAudio()
 
 void StreamHandler::disableAudio()
 {
-    mAudioEnabled = false;
+    if(mAudioHandler != nullptr)
+    {
+        mAudioEnabled = false;
 
-    mAudioHandler->toggleGrabFrames(mAudioEnabled);
-    //delete mAudioHandler;
-    qDebug() << "audio disabled";
+        mAudioHandler->toggleGrabFrames(mAudioEnabled);
+        //delete mAudioHandler;
+        qDebug() << "audio disabled";
+    }
+
 }
 
 void StreamHandler::enableVideo()
@@ -86,10 +89,13 @@ void StreamHandler::enableVideo()
 
 void StreamHandler::disableVideo()
 {
-    mVideoEnabled = false;
-    //delete mVideoHandler;
-    mVideoHandler->toggleGrabFrames(mVideoEnabled);
-    qDebug() << "video disabled";
+    if(mVideoHandler != nullptr)
+    {
+        mVideoEnabled = false;
+        //delete mVideoHandler;
+        mVideoHandler->toggleGrabFrames(mVideoEnabled);
+        qDebug() << "video disabled";
+    }
 }
 
 QVariantList StreamHandler::getAudioInputDevices()

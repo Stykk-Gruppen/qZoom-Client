@@ -74,6 +74,7 @@ ApplicationWindow {
 
     function showSettings() {
         settings.loadSettings();
+        console.log("Loaded Settings");
         settings.open();
     }
 }
