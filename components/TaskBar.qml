@@ -92,6 +92,16 @@ Rectangle {
         }
 
         C.PushButton {
+            id: settingsButton
+            text: "Settings"
+            font.pixelSize: 32
+            property var toggled: true
+            onClicked: {
+                showSettings();
+            }
+        }
+
+        C.PushButton {
             id: leaveSessionButton
             text: "Leave Session"
             font.pixelSize: 32

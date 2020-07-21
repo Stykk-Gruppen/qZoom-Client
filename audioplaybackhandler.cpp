@@ -227,6 +227,8 @@ int AudioPlaybackHandler::start()
                     char* errbuff = (char *)malloc((1000)*sizeof(char));
                     av_strerror(ret,errbuff,1000);
                     qDebug() << "Failed udp input avcodec_send_packet: code "<<ret<< " meaning: " << errbuff;
+                    //Endret fra exit til continue for å få mute audio til å fungere.
+                    //Antakelig fordi den må få lov til å lese ut litt piss før den klarer å finne ny header.
                     //exit(1);
                     continue;
 

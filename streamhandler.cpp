@@ -103,6 +103,11 @@ void StreamHandler::changeAudioInputDevice(QString deviceName)
     mAudioDevice = deviceName;
 }
 
+QString StreamHandler::getDefaultAudioInputDevice()
+{
+    return "default";
+}
+
 void StreamHandler::stopRecording()
 {
     disableAudio();

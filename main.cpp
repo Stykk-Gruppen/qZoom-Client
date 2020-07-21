@@ -24,6 +24,7 @@
 #include <QTimer>
 #include "streamhandler.h"
 #include "videoplaybackhandler.h"
+#include "settings.h"
 #include "imagehandler.h"
 #include <QQuickView>
 extern "C"
@@ -44,7 +45,6 @@ extern "C"
 #include "handlers/userhandler.h"
 #include "core/database.h"
 
-
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -57,6 +57,10 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
+
+
+    QScopedPointer<Settings> settings(new Settings());
 
     int buffer_size = 4 * 1024;
     Database* databaseObject = new Database();
@@ -83,6 +87,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
     engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
+    engine.rootContext()->setContextProperty("backendSettings", settings.data());
+
     engine.rootContext()->setContextProperty("userHandler", userHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 

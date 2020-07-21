@@ -17,7 +17,7 @@ Rectangle {
         width: window.width
         height: (window.height - taskBar.height)
         color: "dimgray"
-        Grid{
+        GridLayout {
             id: gridId
             function calcColumns() { //Disse to funksjonene kan nok gjøres mye bedre. Hvis man klarer å se mønsteret :P
                 var a = imageHandler.getNumberOfScreens()
@@ -51,6 +51,7 @@ Rectangle {
 
             columnSpacing: 0
             rowSpacing: 0
+
 
             Repeater {
                 id: repeaterId
@@ -108,6 +109,8 @@ Rectangle {
         setTitle("qZoom :: Session (" + roomId + ")");
         streamHandler.enableVideo();
         streamHandler.enableAudio();
+
+
         streamHandler.record();
     }
 

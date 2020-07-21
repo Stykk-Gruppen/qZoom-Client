@@ -49,6 +49,7 @@ public:
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE QVariantList getAudioInputDevices();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
+    Q_INVOKABLE QString getDefaultAudioInputDevice();
 
 private:
     int64_t mTime;
