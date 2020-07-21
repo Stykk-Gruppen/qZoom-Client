@@ -42,7 +42,6 @@ Rectangle {
                     cb.visible = false
                 }
             }
-
         }
 
         C.PushButton {

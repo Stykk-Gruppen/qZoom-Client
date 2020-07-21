@@ -14,15 +14,24 @@ class SessionHandler : public QObject
 public:
     explicit SessionHandler(Database* _db, UserHandler* _user, QObject *parent = nullptr);
     Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
+    Q_INVOKABLE bool createSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool leaveSession();
+    Q_INVOKABLE bool isGuest();
     Q_INVOKABLE QString getRoomId();
+    Q_INVOKABLE QString getRoomPassword();
     UserHandler* getUser();
+
 private:
+    void addUser();
+
     QString mRoomId;
+    QString mRoomPassword;
     QString mIpAddress;
     Database* mDb;
     UserHandler* mUser;
-    void addUser();
+    bool mUserHasRoom;
+    void getUserRoom();
+
 
 signals:
 

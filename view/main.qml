@@ -7,7 +7,7 @@ ApplicationWindow {
     id: rootWindow
     visible: true
     width: 1280
-    height: 720
+    height: 784
     minimumHeight: 400
     minimumWidth: 400
     title: qsTr("qZoom")
@@ -27,7 +27,7 @@ ApplicationWindow {
                 PropertyAnimation {
                     property: "opacity"
                     from: 0
-                    to:1
+                    to: 1
                     duration: 0
                 }
             }
