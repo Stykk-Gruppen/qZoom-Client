@@ -70,15 +70,17 @@ void StreamHandler::enableVideo()
         //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mImageHandler, mSocketHandler,mBufferSize);
-
-        int error = mVideoHandler->init();
-        if(error < 0)
-        {
-            fprintf(stderr, "Could not init videohandler");
-            exit(1);
-        }
     }
+
+    int error = mVideoHandler->init();
+    if(error < 0)
+    {
+        fprintf(stderr, "Could not init videohandler");
+        exit(1);
+    }
+
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
+
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
 }
 

@@ -402,6 +402,8 @@ void VideoHandler::grabFrames() {
         //if(count > numberOfFrames) break;
         //count++;
     }
+    close();
+
 
     /*
     qDebug() << "About to write trailer from video";
