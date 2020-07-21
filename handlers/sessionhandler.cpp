@@ -8,12 +8,28 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     mRoomId = "Debug";
 
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+    const QNetworkInterface qi = QNetworkInterface();
+    //qDebug() << localhost;
+    //const QHostAddress &localhost = QHostAddress();
+    for(const QNetworkInterface &interface: QNetworkInterface::allInterfaces())
+    {
+        if(!interface.flags().testFlag(QNetworkInterface::IsLoopBack) && interface.type() == QNetworkInterface::Ethernet){
+            foreach (QNetworkAddressEntry entry, interface.addressEntries())
+            {
+               // qDebug() << entry.ip();
+                /*if ( interface.hardwareAddress() != "00:00:00:00:00:00" && entry.ip().toString().contains(".") && !interface.humanReadableName().contains("VM"))
+                    qDebug() << interface.name() + " "+ entry.ip().toString() +" " + interface.hardwareAddress();*/
+            }
+        }
+    }
     for (const QHostAddress &address: QNetworkInterface::allAddresses())
     {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
+        //qDebug() << address.toString();
+        /*if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
         {
              mIpAddress = address.toString();
-        }
+             qDebug() << mIpAddress;
+        }*/
     }
 }
 
