@@ -27,7 +27,7 @@ Rectangle {
                 width: 200
                 visible: false
                 model: ListModel {
-                    id: t
+                    id: audioInputModel
                     function getAudioTypes() {
                         var inputList = streamHandler.getAudioInputDevices()
                         clear()
@@ -37,8 +37,8 @@ Rectangle {
                     }
                 }
                 onActivated: {
-                    console.log("switched Audio Input Device to: " + currentValue)
-                    streamHandler.changeAudioInputDevice(currentValue);
+                    console.log("switched Audio Input Device to: " + currentText)
+                    streamHandler.changeAudioInputDevice(currentText);
                     cb.visible = false
                 }
             }
@@ -116,7 +116,8 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        t.getAudioTypes();
+        audioInputModel.getAudioTypes()
+
         if(!backendSettings.getAudioOn())
         {
             muteAudioButton.toggled = false;
@@ -127,10 +128,5 @@ Rectangle {
             muteVideoButton.toggled = false;
             muteVideoButton.state = "red";
         }
-
-
-
-
-
     }
 }

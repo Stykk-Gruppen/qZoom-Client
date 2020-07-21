@@ -1,11 +1,12 @@
 #include "sockethandler.h"
 
-SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWriteLock,QObject *parent) : QObject(parent)
+SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWriteLock,SessionHandler* _sessionHandler,QObject *parent) : QObject(parent)
 {
+    mSessionHandler = _sessionHandler;
     mAudioWriteLock = _audioWriteLock;
     mVideoWriteLock = _videoWriteLock;
     address = QHostAddress::LocalHost;
-    //158.36.165.235
+    //address = QHostAddress("46.250.220.57"); tarves.no
     //address = QHostAddress("158.36.165.235"); Tarald
     //address = QHostAddress("79.160.58.120"); Kent
     port = 1337;
@@ -15,11 +16,10 @@ SocketHandler::SocketHandler(std::mutex* _videoWriteLock,std::mutex* _audioWrite
 void SocketHandler::initSocket()
 {
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
-
+    //udpSocket->bind(address, port,QAbstractSocket::ShareAddress);
     //Connects readyRead to readPendingDatagram function,
     //which means when the socket recieves a packet the function will run.
-    connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
+    //connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
 
 }
 
@@ -71,7 +71,18 @@ void SocketHandler::readPendingDatagrams()
 
 int SocketHandler::sendDatagram(QByteArray arr)
 {
+    QString streamId = mSessionHandler->getUser()->getStreamId();
+    QString roomId = mSessionHandler->getRoomId();
+    if(streamId.size()>5 || roomId.size()>5)
+    {
+        qDebug() << "streamId or roomId exceeds max length of 5 in socketHandler::sendDatagram";
+        exit(1);
+    }
+    arr.prepend(streamId.toLocal8Bit().data());
+    arr.prepend(roomId.toLocal8Bit().data());
+
     int ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
+    //qDebug() << ret;
     if(ret<0){
         qDebug() << udpSocket->error();
     }

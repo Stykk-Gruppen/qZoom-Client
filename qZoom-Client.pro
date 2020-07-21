@@ -18,7 +18,6 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 SOURCES += \
         audiohandler.cpp \
         audioplaybackhandler.cpp \
-        camerahandler.cpp \
         config.cpp \
         core/database.cpp \
         handlers/sessionhandler.cpp \
@@ -28,6 +27,7 @@ SOURCES += \
         settings.cpp \
         sockethandler.cpp \
         streamhandler.cpp \
+        tcpsockethandler.cpp \
         videohandler.cpp \
         videoplaybackhandler.cpp
 
@@ -53,7 +53,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     audiohandler.h \
     audioplaybackhandler.h \
-    camerahandler.h \
     core/database.h \
     handlers/sessionhandler.h \
     handlers/userhandler.h \
@@ -61,5 +60,6 @@ HEADERS += \
     settings.h \
     sockethandler.h \
     streamhandler.h \
+    tcpsockethandler.h \
     videohandler.h \
     videoplaybackhandler.h

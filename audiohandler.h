@@ -69,8 +69,7 @@ public:
 private:
     int mBufferSize;
     int64_t time;
-    QString aDeviceName;
-    QString cDeviceName;
+    QString mAudioDeviceName;
     std::mutex* writeLock;
     void cleanup();
     int openInputFile();

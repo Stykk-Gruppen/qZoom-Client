@@ -107,6 +107,9 @@ void StreamHandler::changeAudioInputDevice(QString deviceName)
 {
     qDebug() << "Changing Audio to: " << deviceName;
     mAudioDevice = deviceName;
+    mAudioHandler->changeAudioInputDevice(mAudioDevice);
+    disableAudio();
+    enableAudio();
 }
 
 QString StreamHandler::getDefaultAudioInputDevice()
