@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     QScopedPointer<Settings> settings(new Settings());
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
-    int bufferSize = 2 * 1024;
+    int bufferSize = 8*1024;
 
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
