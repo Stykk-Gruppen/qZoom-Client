@@ -1,8 +1,9 @@
 #include "userhandler.h"
 
-UserHandler::UserHandler(Database* _db, QObject *parent) : QObject(parent)
+UserHandler::UserHandler(Database* _db, Settings* settings, QObject *parent) : QObject(parent)
 {
     mDb = _db;
+    mSettings = settings;
     mIsGuest = true;
     mErrorMessage = "No error message was set";
 }
@@ -33,6 +34,11 @@ bool UserHandler::login(QString username, QString password)
             {
                 mIsGuest = false;
                 mHasRoom = getPersonalRoom();
+                if(mSettings->getDisplayName().contains("guest", Qt::CaseInsensitive))
+                {
+                    mSettings->setDisplayName(username);
+                    mSettings->saveSettings();
+                }
                 return true;
             }
             else

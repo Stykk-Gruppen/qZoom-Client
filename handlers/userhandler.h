@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QString>
 #include "core/database.h"
-
+#include "settings.h"
 class UserHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit UserHandler(Database* _db, QObject *parent = nullptr);
+    explicit UserHandler(Database* _db, Settings* settings, QObject *parent = nullptr);
     ~UserHandler();
     Q_INVOKABLE bool login(QString username, QString password);
     Q_INVOKABLE QString getErrorMessage();
@@ -35,6 +35,7 @@ private:
     QString mTimeCreated;
     int mUserId;
     Database* mDb;
+    Settings* mSettings;
 
 signals:
 

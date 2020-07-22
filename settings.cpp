@@ -36,7 +36,7 @@ void Settings::loadAndSaveDefaultSettings()
 {
     mAudioOn = false;
     mVideoOn = true;
-    mDisplayName = "Username";
+    mDisplayName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
     mDefaultAudioInput = "default";
 
     saveSettings();

@@ -1,8 +1,9 @@
 #include "imagehandler.h"
 
-ImageHandler::ImageHandler() : QQuickImageProvider(QQuickImageProvider::Image)
+ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImageProvider::Image)
 {
     mDefaultImage = QImage("0.png");
+    mSettings = settings;
     this->blockSignals(false);
     addPeer(0);
 }
@@ -25,7 +26,7 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
     if(result.isNull())
     {
         //result = mDefaultImage;
-        result = generateGenericImage("Kent Odde");
+        result = generateGenericImage(mSettings->getDisplayName());
         //qDebug() << "Default image is null";
     }
 
@@ -96,7 +97,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 {
     if(codecContext == nullptr)
     {
-        emit updateImage(generateGenericImage("Kent Odde"), 0);
+        emit updateImage(generateGenericImage(mSettings->getDisplayName()), 0);
         return;
     }
 
@@ -156,7 +157,7 @@ QImage ImageHandler::generateGenericImage(QString username)
 
     painter.setPen(QPen(Qt::white));
     painter.setFont(QFont("Helvetica [Cronyx]", 26, QFont::Bold));
-    QString text = username + " hat seinen Kamera asgeschaltet";
+    QString text = username + " hat seinen Kamera ausgeschaltet";
     painter.drawText(QRect(400,300,400,300), text);
     return image;
 }

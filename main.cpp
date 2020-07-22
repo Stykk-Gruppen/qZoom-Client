@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
     int bufferSize = 2 * 1024;
 
     Database* databaseObject = new Database();
-    UserHandler* userHandlerObject = new UserHandler(databaseObject);
+    UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
-    ImageHandler* imageHandlerObject = new ImageHandler();
+    ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     //std::mutex *audioUdpBufferLock = new std::mutex;
     //std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject);
