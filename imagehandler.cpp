@@ -134,14 +134,14 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     }
     av_freep(&frameRGB->data[0]);
     av_frame_unref(frameRGB);
-    //sws_freeContext(imgConvertCtx);
+    sws_freeContext(imgConvertCtx);
     //av_frame_free(&frameRGB);
     emit updateImage(img, index);
 
     //av_frame_unref(frameRGB);
     //av_frame_free(&frameRGB);
     //delete frameRGB;
-    sws_freeContext(imgConvertCtx);
+    //sws_freeContext(imgConvertCtx);
     av_freep(&frameRGB->data[0]);
     //av_frame_free(&frame);
 

@@ -6,10 +6,10 @@ SocketHandler::SocketHandler(int bufferSize,ImageHandler* _imageHandler,
     mBufferSize = bufferSize;
     mImageHandler = _imageHandler;
     mSessionHandler = _sessionHandler;
-    address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
-    //address = QHostAddress("158.36.165.235"); Tarald
-    //address = QHostAddress("79.160.58.120"); Kent
+    //address = QHostAddress::LocalHost;
+    address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress("158.36.165.235"); //Tarald
+    //address = QHostAddress("79.160.58.120"); //Kent
     port = 1337;
     initSocket();
 }
@@ -29,10 +29,13 @@ void SocketHandler::readPendingDatagrams()
 
     while (udpSocket->hasPendingDatagrams())
     {
+
+
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
+        if(datagram.senderAddress().toIPv4Address() != address.toIPv4Address()) continue;
         QByteArray data = datagram.data();
 
-        if(1){
+        if(0){
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
             data.remove(0,1);
@@ -76,12 +79,12 @@ void SocketHandler::readPendingDatagrams()
             mVideoMutexVector[index]->lock();
             mVideoBufferVector[index]->append(data);
             mVideoMutexVector[index]->unlock();
-            if(!mVideoPlaybackStartedVector[index] && mVideoBufferVector[index]->size() >= mBufferSize*4)
+            if(!mVideoPlaybackStartedVector[index] && mVideoBufferVector[index]->size() >= mBufferSize)
             {
                 QtConcurrent::run(mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mVideoPlaybackStartedVector[index] = true;
             }
-            //qDebug() << "video buffer size " << mVideoBufferVector[index]->size() << "after signal: " << signalCount;
+            qDebug() << "video buffer size " << mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else
         {
