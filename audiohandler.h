@@ -55,9 +55,8 @@ extern "C" {
 
 
 
-class AudioHandler //: public QObject
+class AudioHandler
 {
-    //Q_OBJECT
 public:
     AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*, int bufferSize);
     int grabFrames();
@@ -67,14 +66,16 @@ public:
     void toggleGrabFrames(bool a);
 
 private:
-    int mBufferSize;
-    int64_t time;
-    QString mAudioDeviceName;
-    std::mutex* writeLock;
+    void initPacket(AVPacket *packet);
     void cleanup();
+    int mBufferSize;
+    int64_t mTime;
+    QString mAudioDeviceName;
+    std::mutex* mWriteLock;
+
     int openInputFile();
     int openOutputFile();
-    void initPacket(AVPacket *packet);
+
     int loadEncodeAndWrite();
     int encodeAudioFrame(AVFrame*,int*);
     int initOutputFrame(AVFrame **,int);
@@ -87,15 +88,15 @@ private:
     int initFifo();
     int initResampler();
     SocketHandler *mSocketHandler;
-    AVFormatContext *inputFormatContext;
-    AVFormatContext *outputFormatContext;
-    AVCodecContext *inputCodecContext;
-    AVCodecContext *outputCodecContext;
-    SwrContext *resampleContext;
-    AVAudioFifo *fifo;
+    AVFormatContext *mInputFormatContext;
+    AVFormatContext *mOutputFormatContext;
+    AVCodecContext *mInputCodecContext;
+    AVCodecContext *mOutputCodecContext;
+    SwrContext *mResampleContext;
+    AVAudioFifo *mFifo;
 
     static int audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size);
-    AVDictionary *options = NULL;
+    AVDictionary *mOptions = NULL;
     bool mAbortGrabFrames = false;
 };
 

@@ -1,21 +1,17 @@
 #include "audioplaybackhandler.h"
 
-AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* writeLock,ImageHandler* _imageHandler,
-                                           SocketHandler* _socketHandler, int bufferSize,
-                                           int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime,
-                                           QObject *parent)
+AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer, int bufferSize,
+                                           QObject *parent) : QObject(parent)
 {
-    mLastVideoPacketTime = lastVideoPacketTime;
-    mLastAudioPacketTime = lastAudioPacketTime;
+   // mLastVideoPacketTime = lastVideoPacketTime;
+    //mLastAudioPacketTime = lastAudioPacketTime;
     mBufferSize = bufferSize;
-    mSocketHandler = _socketHandler;
-    mImageHandler = _imageHandler;
-    initAudio(parent);
-    mStruct = new SocketAndIDStruct();
-    mStruct->socketHandler = _socketHandler;
-    mStruct->writeLock = writeLock;
+   // mSocketHandler = _socketHandler;
 
-    connect(mSocketHandler, &SocketHandler::startAudioPlayback, this, &AudioPlaybackHandler::start);
+    initAudio(parent);
+    mStruct = new mBufferAndLockStruct();
+    mStruct->buffer = buffer;
+    mStruct->writeLock = _writeLock;
 }
 
 void AudioPlaybackHandler::initAudio(QObject *parent)
@@ -48,23 +44,23 @@ void PlaybackHandler::changeSpeaker()
 int AudioPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     //qDebug() << buf_size;
-    SocketAndIDStruct *s = reinterpret_cast<SocketAndIDStruct*>(opaque);
+    mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
 
-    while (s->socketHandler->mAudioBuffer.size() <= buf_size)
+    while (s->buffer->size() <= buf_size)
     {
-        int ms = 5;
-        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+        //int ms = 5;
+        //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         //qDebug() << "sleeping";
         //nanosleep(&ts, NULL);
     }
 
     s->writeLock->lock();
 
-    QByteArray tempBuffer = QByteArray(s->socketHandler->mAudioBuffer.data(), buf_size);
-    s->socketHandler->mAudioBuffer.remove(0,buf_size);
+    QByteArray tempBuffer = QByteArray(s->buffer->data(), buf_size);
+    s->buffer->remove(0,buf_size);
 
     s->writeLock->unlock();
     //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
@@ -77,18 +73,17 @@ int AudioPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
     return buf_size;
 }
 
-int AudioPlaybackHandler::start()
+void AudioPlaybackHandler::start()
 {
-    QtConcurrent::run([this]()
-    {
+
         //int ms = 10000;
         // struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         //nanosleep(&ts, NULL);
 
         AVFormatContext *fmt_ctx = nullptr;
         AVIOContext *avio_ctx = nullptr;
-        uint8_t *buffer = nullptr, *avio_ctx_buffer = nullptr;
-        size_t buffer_size = 0, avio_ctx_buffer_size = mBufferSize;
+        uint8_t /**buffer = nullptr, */*avio_ctx_buffer = nullptr;
+        size_t /*buffer_size = 0,*/ avio_ctx_buffer_size = mBufferSize;
 
         int ret = 0;
         fmt_ctx = avformat_alloc_context();
@@ -246,9 +241,9 @@ int AudioPlaybackHandler::start()
                     exit(1);
                 }
 
-                *mLastAudioPacketTime = frame->pts;
+                //*mLastAudioPacketTime = frame->pts;
                 //qDebug() << "AudioPacketTime: " << *mLastAudioPacketTime;
-                sync();
+                //sync();
 
                 if (!resampled)
                 {
@@ -289,10 +284,10 @@ int AudioPlaybackHandler::start()
             av_packet_unref(&packet);
 
         }
-    });
+
 }
 
-void AudioPlaybackHandler::sync()
+/*void AudioPlaybackHandler::sync()
 {
     if(*mLastAudioPacketTime != -1)
     {
@@ -308,4 +303,4 @@ void AudioPlaybackHandler::sync()
             nanosleep(&ts, NULL);
         }
     }
-}
+}*/

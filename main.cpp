@@ -59,23 +59,25 @@ int main(int argc, char *argv[])
 
     QScopedPointer<Settings> settings(new Settings());
 
-    int buffer_size = 4 * 1024;
+    //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
+    int bufferSize = 2 * 1024;
+
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject);
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
     ImageHandler* imageHandlerObject = new ImageHandler();
-    std::mutex *audioUdpBufferLock = new std::mutex;
-    std::mutex *videoUdpBufferLock = new std::mutex;
-    SocketHandler* socketHandlerObject = new SocketHandler(videoUdpBufferLock,audioUdpBufferLock,sessionHandlerObject);
+    //std::mutex *audioUdpBufferLock = new std::mutex;
+    //std::mutex *videoUdpBufferLock = new std::mutex;
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject);
 
 
-    int64_t *lastVideoPacketTime = new int64_t(-1);
-    int64_t *lastAudioPacketTime = new int64_t(-1);
+    //int64_t *lastVideoPacketTime = new int64_t(-1);
+    //int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, buffer_size, settings.data()));
-    QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(videoUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
-    QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(audioUdpBufferLock,imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data()));
+    //QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
+    //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
     QScopedPointer<SessionHandler> sessionHandler(sessionHandlerObject);
 
