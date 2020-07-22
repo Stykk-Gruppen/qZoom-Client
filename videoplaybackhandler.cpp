@@ -24,10 +24,10 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     while (s->buffer->size() <= buf_size)
     {
-        //int ms = 5;
-        //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        //qDebug() << "sleeping";
-        //nanosleep(&ts, NULL);
+        int ms = 50;
+        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+        qDebug() << "sleeping";
+        nanosleep(&ts, NULL);
     }
 
     s->writeLock->lock();
@@ -178,6 +178,7 @@ void VideoPlaybackHandler::start()
                 //sync();
 
                 //qDebug() << frame->data[0];
+                qDebug() << mIndex;
                 mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
             }
             else
