@@ -9,6 +9,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mAudioDevice = settings->getDefaultAudioInput();
     mImageHandler = _imageHandler;
     mSocketHandler = _socketHandler;
+    if(!mVideoEnabled) mImageHandler->readImage(nullptr, nullptr, 0);
 }
 
 void StreamHandler::record()

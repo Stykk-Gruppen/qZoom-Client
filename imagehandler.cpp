@@ -27,7 +27,8 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 
     if(result.isNull())
     {
-        result = mDefaultImage;
+        //result = mDefaultImage;
+        result = generateGenericImage("Kent Odde");
         //qDebug() << "Default image is null";
     }
 
@@ -95,6 +96,12 @@ void ImageHandler::veryFunStianLoop()
 
 void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8_t index)
 {
+    if(codecContext == nullptr)
+    {
+        emit updateImage(generateGenericImage("Kent Odde"), 0);
+        return;
+    }
+
     QImage img(frame->width, frame->height, QImage::Format_RGB888);
 
 
@@ -139,6 +146,21 @@ int ImageHandler::getNumberOfScreens()
 {
     return mImageMap.size();
     //return 5;
+}
+
+QImage ImageHandler::generateGenericImage(QString username)
+{
+    QImage image(QSize(1200,900),QImage::Format_RGB32);
+    QPainter painter(&image);
+    painter.setBrush(QBrush(Qt::green));
+    painter.fillRect(QRectF(0,0,1200,900),Qt::black);
+    painter.fillRect(QRectF(200,150,800,600), Qt::blue);
+
+    painter.setPen(QPen(Qt::white));
+    painter.setFont(QFont("Helvetica [Cronyx]", 26, QFont::Bold));
+    QString text = username + " hat seinen Kamera asgeschaltet";
+    painter.drawText(QRect(400,300,400,300), text);
+    return image;
 }
 
 /*

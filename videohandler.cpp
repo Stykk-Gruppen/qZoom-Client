@@ -403,6 +403,7 @@ void VideoHandler::grabFrames() {
         //count++;
     }
     close();
+    imageHandler->readImage(nullptr, nullptr, 0);
 
 
     /*

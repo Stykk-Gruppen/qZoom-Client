@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-
     QScopedPointer<Settings> settings(new Settings());
 
     int buffer_size = 4 * 1024;

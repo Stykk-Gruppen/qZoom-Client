@@ -76,13 +76,8 @@ Dialog {
                 ComboBox {
                     id: defaultAudioInput
                     editable: true
-                    //model: streamHandler.getAudioInputDevices()
-                    //displayText: streamHandler.getDefaultAudioInputDevice();ListModel {
-                        /*id: inputAudioDevices
-                        Component.onCompleted: {
-                            getAudioInputDevices();
-                        }
-                    }*/
+
+
                 }
             }
         }

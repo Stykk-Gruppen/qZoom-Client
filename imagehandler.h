@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QImage>
+#include <QBrush>
+#include <QPainter>
 #include <QQuickImageProvider>
 #include <QtConcurrent/QtConcurrent>
 extern "C" {
@@ -33,6 +35,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+
 class ImageHandler : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
@@ -52,6 +55,7 @@ signals:
     void imageChanged();
 
 private:
+    QImage generateGenericImage(QString username);
     QMap<uint8_t, QImage> mImageMap;
     QImage mDefaultImage;
     SwsContext *imgConvertCtx = nullptr;
