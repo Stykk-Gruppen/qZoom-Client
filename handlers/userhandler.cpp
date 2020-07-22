@@ -83,6 +83,7 @@ bool UserHandler::getPersonalRoom()
     {
         if (q.size() > 0)
         {
+            q.next();
             mPersonalRoomId = q.value(0).toString();
             mPersonalRoomPassword = q.value(1).toString();
             return true;
@@ -91,6 +92,30 @@ bool UserHandler::getPersonalRoom()
         {
             qDebug() << "User doesn't have a personal room";
         }
+    }
+    else
+    {
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
+    }
+    return false;
+}
+
+bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
+{
+    if (roomId.length() == 0 || roomPassword.length() == 0)
+    {
+        return false;
+    }
+    QSqlQuery q(mDb->mDb);
+    q.prepare("UPDATE room SET id = :roomId, password = :roomPassword WHERE host = :host");
+    q.bindValue(":roomId", roomId);
+    q.bindValue(":roomPassword", roomPassword);
+    q.bindValue(":host", mUserId);
+    if (q.exec())
+    {
+        mPersonalRoomId = roomId;
+        mPersonalRoomPassword = roomPassword;
+        return true;
     }
     else
     {
@@ -117,6 +142,7 @@ QString UserHandler::getStreamId()
 QString UserHandler::getPersonalRoomId()
 {
     return mPersonalRoomId;
+    qDebug() << "personal room id" << mPersonalRoomId;
 }
 
 QString UserHandler::getPersonalRoomPassword()

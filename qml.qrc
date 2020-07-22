@@ -7,5 +7,6 @@
         <file>components/PushButton.qml</file>
         <file>components/Screen.qml</file>
         <file>view/Settings.qml</file>
+        <file>view/host.qml</file>
     </qresource>
 </RCC>
