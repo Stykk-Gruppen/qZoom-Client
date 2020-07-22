@@ -17,8 +17,11 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
         QStringList idIndex = onlyId[1].split("&");
         if(idIndex.size() >= 2)
         {
-            //qDebug() << idIndex[1];
+
             index = idIndex[1].toInt();
+            if(index>0){
+                qDebug() << index;
+            }
         }
     }
     QImage result = mImageMap[index];
@@ -51,8 +54,12 @@ void ImageHandler::addPeer(uint8_t index)
 
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
+    if(index>0){
+        qDebug() << index;
+    }
     if(mImageMap[index] != image)
     {
+
         mImageMap[index] = image;
     }
 }
