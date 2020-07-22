@@ -13,12 +13,13 @@ public:
     ~UserHandler();
     Q_INVOKABLE bool login(QString username, QString password);
     Q_INVOKABLE QString getErrorMessage();
+    Q_INVOKABLE QString getPersonalRoomId();
+    Q_INVOKABLE QString getPersonalRoomPassword();
+    Q_INVOKABLE bool hasRoom();
+    Q_INVOKABLE bool updatePersonalRoom(QString roomId, QString roomPassword);
     bool isGuest();
-    bool hasRoom();
     int getUserId();
     QString getStreamId();
-    QString getPersonalRoomId();
-    QString getPersonalRoomPassword();
 
 private:
     bool fillUser(int userId);

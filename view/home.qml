@@ -52,10 +52,15 @@ Rectangle {
                 cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 enabled: !sessionHandler.isGuest()
                 onClicked: {
-                    optionRow.visible = false;
-                    joinSessionColumn.visible = true
-                    backButton.visible = true
-                    createSessionButton.visible = true
+                    if (userHandler.hasRoom()) {
+                        changePage("host")
+                    }
+                    else {
+                        optionRow.visible = false;
+                        joinSessionColumn.visible = true
+                        backButton.visible = true
+                        createSessionButton.visible = true
+                    }
                 }
             }
         }
