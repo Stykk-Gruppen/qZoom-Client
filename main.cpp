@@ -60,12 +60,12 @@ int main(int argc, char *argv[])
     QScopedPointer<Settings> settings(new Settings());
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
-    int bufferSize = 2 * 1024;
+    int bufferSize = 8*1024;
 
     Database* databaseObject = new Database();
-    UserHandler* userHandlerObject = new UserHandler(databaseObject);
+    UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
-    ImageHandler* imageHandlerObject = new ImageHandler();
+    ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     //std::mutex *audioUdpBufferLock = new std::mutex;
     //std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject);

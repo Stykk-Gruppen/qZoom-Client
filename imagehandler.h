@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QQuickImageProvider>
 #include <QtConcurrent/QtConcurrent>
+#include "settings.h"
 extern "C" {
 #include <libavutil/avassert.h>
 #include <libavutil/channel_layout.h>
@@ -40,7 +41,7 @@ class ImageHandler : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
 public:
-    explicit ImageHandler();
+    explicit ImageHandler(Settings* settings);
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
     void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
@@ -60,6 +61,7 @@ private:
     QImage mDefaultImage;
     SwsContext *imgConvertCtx = nullptr;
     AVFrame	*frameRGB = av_frame_alloc();
+    Settings* mSettings;
 };
 
 #endif // IMAGEHANDLER_H
