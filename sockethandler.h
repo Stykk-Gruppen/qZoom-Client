@@ -16,12 +16,12 @@ class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(int, ImageHandler*,SessionHandler*,QObject *parent = nullptr);
+    explicit SocketHandler(int, ImageHandler*,SessionHandler*, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     QTcpSocket* mTCPSocket;
     QUdpSocket* udpSocket;
     int sendDatagram(QByteArray arr);
-    QHostAddress address;
+    QHostAddress mAddress;
     int port;
 public slots:
     void readPendingDatagrams();

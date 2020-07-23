@@ -1,23 +1,46 @@
 #include "videoplaybackhandler.h"
 
 VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* _imageHandler,
-                                           QByteArray* buffer, int bufferSize, int index,
+                                           QByteArray* buffer, int bufferSize, int index, QHostAddress address, QString streamId, QString roomId,
                                            //int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime,
                                            QObject *parent) : QObject(parent)
 {
     mIndex = index;
-     mBufferSize = bufferSize;
-     mImageHandler = _imageHandler;
-     mStruct = new mBufferAndLockStruct();
-     mStruct->buffer = buffer;
-     mStruct->writeLock = _writeLock;
+    mBufferSize = bufferSize;
+    mImageHandler = _imageHandler;
+    mStruct = new mBufferAndLockStruct();
+    mStruct->buffer = buffer;
+    mStruct->writeLock = _writeLock;
+    mStruct->headerReceived = false;
+    mStruct->address = address;
+    mStruct->streamId = streamId;
+    mStruct->roomId = roomId;
+
 
 }
 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     //qDebug() << buf_size;
+
+
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
+
+    if(!s->headerReceived)
+    {
+        QByteArray request = "ReqHead";
+        request.append(s->roomId.size());
+        request.append(s->roomId.toLocal8Bit().data());
+        request.append(s->streamId.size());
+        request.append(s->streamId.toLocal8Bit().data());
+        TcpSocketHandler tcp(s->address, request);
+
+        tcp.wait();
+        QByteArray reply = tcp.getReply();
+
+        memcpy(buf, reply.constData(), buf_size);
+        return buf_size;
+    }
 
     //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
 
@@ -65,6 +88,7 @@ void VideoPlaybackHandler::start()
 
         fmt_ctx->pb = avio_ctx;
         ret = avformat_open_input(&fmt_ctx, nullptr, nullptr, nullptr);
+        mStruct->headerReceived = true;
         if(ret < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));

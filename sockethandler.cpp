@@ -1,15 +1,13 @@
 #include "sockethandler.h"
 
 SocketHandler::SocketHandler(int bufferSize,ImageHandler* _imageHandler,
-                             SessionHandler* _sessionHandler,QObject *parent) : QObject(parent)
+                             SessionHandler* _sessionHandler, QHostAddress address,QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
     mImageHandler = _imageHandler;
     mSessionHandler = _sessionHandler;
     //address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
-    //address = QHostAddress("158.36.165.235"); //Tarald
-    //address = QHostAddress("79.160.58.120"); //Kent
+    mAddress = address;
     port = 1337;
     initSocket();
 }
@@ -32,10 +30,10 @@ void SocketHandler::readPendingDatagrams()
 
 
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
-        if(datagram.senderAddress().toIPv4Address() != address.toIPv4Address()) continue;
+        if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
 
-        if(0){
+        if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address()){
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
             data.remove(0,1);
@@ -132,7 +130,7 @@ void SocketHandler::addStreamToVector(QString streamId,int index)
     mAudioMutexVector.push_back(tempAudioLock);
     mVideoMutexVector.push_back(tempVideoLock);
     mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock,tempAudioBuffer,mBufferSize));
-    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1));
+    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1, mAddress, streamId, ""));
     mStreamIdVector.push_back(streamId);
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
@@ -166,12 +164,12 @@ int SocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr,512-arrToPrepend.size());
             temp.prepend(arrToPrepend);
             arr.remove(0,512-arrToPrepend.size());
-            ret = udpSocket->writeDatagram(temp, temp.size(), address, port);
+            ret = udpSocket->writeDatagram(temp, temp.size(), mAddress, port);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
+            ret = udpSocket->writeDatagram(arr, arr.size(), mAddress, port);
             break;
         }
         //qDebug() << ret << " size: " << arr.size();

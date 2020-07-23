@@ -45,6 +45,12 @@ extern "C"
 
 int main(int argc, char *argv[])
 {
+    QHostAddress address;
+    address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress("158.36.165.235"); //Tarald
+    //address = QHostAddress("79.160.58.120"); //Kent
+
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
@@ -56,7 +62,11 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
+    TcpSocketHandler* tcp = new TcpSocketHandler(QHostAddress("172.217.21.174"), "HEAD / HTTP/1.0\r\n\r\n\r\n\r\n", 80);
+    tcp->wait();
+    QString reply = tcp->getReply();
 
+    qDebug() << reply;
     QScopedPointer<Settings> settings(new Settings());
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
@@ -68,7 +78,7 @@ int main(int argc, char *argv[])
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     //std::mutex *audioUdpBufferLock = new std::mutex;
     //std::mutex *videoUdpBufferLock = new std::mutex;
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject);
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject, address);
 
 
     //int64_t *lastVideoPacketTime = new int64_t(-1);
