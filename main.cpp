@@ -46,7 +46,8 @@ extern "C"
 int main(int argc, char *argv[])
 {
     QHostAddress address;
-    address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress::LocalHost;
+    //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("79.160.58.120"); //Kent
 
@@ -62,11 +63,11 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    TcpSocketHandler* tcp = new TcpSocketHandler(QHostAddress("172.217.21.174"), "HEAD / HTTP/1.0\r\n\r\n\r\n\r\n", 80);
-    tcp->wait();
-    QString reply = tcp->getReply();
+    //TcpSocketHandler* tcp = new TcpSocketHandler(QHostAddress("172.217.21.174"), "HEAD / HTTP/1.0\r\n\r\n\r\n\r\n", 80);
+    //tcp->wait();
+    //QString reply = tcp->getReply();
 
-    qDebug() << reply;
+    //qDebug() << reply;
     QScopedPointer<Settings> settings(new Settings());
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)

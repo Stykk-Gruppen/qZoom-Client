@@ -63,6 +63,14 @@ public:
     void toggleGrabFrames(bool a);
 
 private:
+    //Trenger kanskje ikke denne likevel?
+    struct mSocketStruct {
+        SocketHandler* udpSocket;
+        TcpSocketHandler* tcpSocket;
+        bool headerSent;
+    };
+    mSocketStruct* mStruct;
+
     int64_t time;
     int mBufferSize;
     int skipped_frames = 0;

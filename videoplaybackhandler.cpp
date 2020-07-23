@@ -11,11 +11,11 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct = new mBufferAndLockStruct();
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
+    //Lagt til disse for å kunne få header via tcp
     mStruct->headerReceived = false;
     mStruct->address = address;
     mStruct->streamId = streamId;
     mStruct->roomId = roomId;
-
 
 }
 
@@ -26,6 +26,7 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
+    //Kaller server for å få header via tcp
     if(!s->headerReceived)
     {
         QByteArray request = "ReqHead";

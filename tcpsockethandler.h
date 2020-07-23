@@ -15,6 +15,7 @@ public:
     QByteArray getReply();
     bool isReady();
     void wait();
+    int getBytesWritten();
 
 public slots:
     void connected();
@@ -24,6 +25,7 @@ public slots:
 private:
     QHostAddress mAddress;
     int mPort;
+    int mBytesWritten;
     QTcpSocket* mSocket;
     QByteArray mRequest;
     QByteArray mReply;

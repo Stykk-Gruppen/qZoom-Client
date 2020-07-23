@@ -22,7 +22,7 @@ void TcpSocketHandler::init()
 
     qDebug() << "Connecting tcp socket..";
 
-    mSocket->connectToHost("google.com", mPort);
+    mSocket->connectToHost(mAddress, mPort);
 
     if(!mSocket->waitForConnected(3000))
     {
@@ -34,7 +34,7 @@ void TcpSocketHandler::connected()
 {
     qDebug() << "Tcp socket connected to " << mAddress << "on port " << mPort;
     qDebug() << "TCP Request: " << mRequest;
-    mSocket->write(mRequest);
+    //mSocket->write(mRequest);
 }
 
 void TcpSocketHandler::disconnected()
@@ -45,11 +45,17 @@ void TcpSocketHandler::disconnected()
 void TcpSocketHandler::bytesWritten(qint64 bytes)
 {
     qDebug() << "Tcpsocket wrote " << bytes << " bytes";
+    mBytesWritten = bytes;
 }
 
 void TcpSocketHandler::wait()
 {
     while (mSocket->waitForReadyRead(1000));
+}
+
+int TcpSocketHandler::getBytesWritten()
+{
+    return mBytesWritten;
 }
 
 void TcpSocketHandler::readyRead()
