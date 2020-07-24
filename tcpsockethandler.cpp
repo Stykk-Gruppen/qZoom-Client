@@ -1,12 +1,13 @@
 #include "tcpsockethandler.h"
 
 
-TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QHostAddress address, int port, QObject* parent): QObject(parent)
+TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, SessionHandler* sessionHandler, QHostAddress address, int port, QObject* parent): QObject(parent)
 {
     mAddress = address;
     mPort = port;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
+    mSessionHandler = sessionHandler;
 }
 
 void TcpSocketHandler::init()
@@ -14,9 +15,9 @@ void TcpSocketHandler::init()
     mSocket = new QTcpSocket(this);
     /*connect(mSocket, SIGNAL(connected()), this, SLOT(connected()));
     connect(mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
     connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 */
+    connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
 
 
 
@@ -28,6 +29,7 @@ void TcpSocketHandler::init()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
+    static bool firstRound = true;
     //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
     qDebug() << "After ConnectToHost";
@@ -36,12 +38,32 @@ void TcpSocketHandler::writeHeader()
         qDebug() << "TcpSocketError: " << mSocket->errorString();
     }
 
+    if(firstRound)
+    {
+        QString streamId = mSessionHandler->getUser()->getStreamId();
+        QString roomId = mSessionHandler->getRoomId();
+
+        myHeader.prepend(streamId.toLocal8Bit().data());
+        myHeader.prepend(streamId.size());
+
+        //Puts the roomId and its size at the front of the array
+        myHeader.prepend(roomId.toLocal8Bit().data());
+        myHeader.prepend(roomId.size());
+
+        firstRound = false;
+    }
+
+
+
+    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+
+
     mSocket->write(myHeader);
     //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
-    while (mSocket->waitForReadyRead(1000));
+    while (mSocket->waitForReadyRead(5000));
 
     QByteArray reply = mSocket->readAll();
-    qDebug() << reply;
+    qDebug() << "Reply from Server: \n" << reply;
 
     int numOfHeaders = reply[0];
     reply.remove(0,1);

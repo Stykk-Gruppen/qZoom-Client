@@ -6,6 +6,7 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     mUser = _user;
     //Set default room id
     mRoomId = "Debug";
+    mIpAddress = "8.8.8.8";
 
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
     const QNetworkInterface qi = QNetworkInterface();
@@ -24,6 +25,7 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     }
     for (const QHostAddress &address: QNetworkInterface::allAddresses())
     {
+
         //qDebug() << address.toString();
         /*if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
         {

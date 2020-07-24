@@ -15,7 +15,7 @@ class TcpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QHostAddress address, int port = 1338, QObject* parent = nullptr);
+    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, SessionHandler* sessionHandler, QHostAddress address, int port = 1338, QObject* parent = nullptr);
     void init();
     QByteArray getReply();
     bool isReady();
@@ -36,7 +36,7 @@ private:
     QByteArray mRequest;
     QByteArray mReply;
     bool mReady;
-
+    SessionHandler* mSessionHandler;
 
     InputStreamHandler* mInputStreamHandler;
     std::vector<QByteArray> videoHeaders;
