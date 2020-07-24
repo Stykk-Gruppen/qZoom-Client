@@ -8,5 +8,6 @@
         <file>components/Screen.qml</file>
         <file>view/Settings.qml</file>
         <file>view/host.qml</file>
+        <file>view/RoomInfo.qml</file>
     </qresource>
 </RCC>

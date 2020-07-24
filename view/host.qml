@@ -84,9 +84,7 @@ Rectangle {
 
 
     Component.onCompleted: {
-
-
-
+        setTitle("qZoom :: Host")
     }
 }
 

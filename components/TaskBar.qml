@@ -13,6 +13,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 32
 
+        /*
         C.PushButton {
             id: changeAudioInputButton
             text: "Change Audio"
@@ -42,6 +43,14 @@ Rectangle {
                     cb.visible = false
                 }
             }
+        }
+        */
+
+        C.PushButton {
+            id: roomInfoButton
+            text: "Room Info"
+            font.pixelSize: 32
+            onClicked: roomInfo.open()
         }
 
         C.PushButton {

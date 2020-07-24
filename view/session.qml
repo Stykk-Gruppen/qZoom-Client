@@ -12,6 +12,10 @@ Rectangle {
     property var focusScreen: false;
     property var selectedScreenIndex: 0
 
+    RoomInfo {
+        id: roomInfo
+    }
+
     Rectangle {
         id: screenGridArea
         width: window.width

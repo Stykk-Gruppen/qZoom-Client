@@ -57,15 +57,16 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
 
 
-    QScopedPointer<Settings> settings(new Settings());
+
+    Settings* settingsObject = new Settings();
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
     int bufferSize = 8*1024;
 
     Database* databaseObject = new Database();
-    UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
+    UserHandler* userHandlerObject = new UserHandler(databaseObject, settingsObject);
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
-    ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
+    ImageHandler* imageHandlerObject = new ImageHandler(settingsObject);
     //std::mutex *audioUdpBufferLock = new std::mutex;
     //std::mutex *videoUdpBufferLock = new std::mutex;
     SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject);
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
     //int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
+    QScopedPointer<Settings> settings(settingsObject);
     QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data()));
     //QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));

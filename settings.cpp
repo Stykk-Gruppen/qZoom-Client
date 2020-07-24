@@ -60,3 +60,43 @@ void Settings::saveSettings()
     file.close();
     qDebug() << "Saved Settings to file";
 }
+
+bool Settings::getAudioOn()
+{
+    return mAudioOn;
+}
+
+bool Settings::getVideoOn()
+{
+    return mVideoOn;
+}
+
+QString Settings::getDisplayName()
+{
+    return mDisplayName;
+}
+
+QString Settings::getDefaultAudioInput()
+{
+    return mDefaultAudioInput;
+}
+
+void Settings::setAudioOn(bool val)
+{
+    mAudioOn = val;
+}
+
+void Settings::setVideoOn(bool val)
+{
+    mVideoOn = val;
+}
+
+void Settings::setDisplayName(QString val)
+{
+    mDisplayName = val;
+}
+
+void Settings::setDefaultAudioInput(QString val)
+{
+    mDefaultAudioInput = val;
+}

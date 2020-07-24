@@ -6,6 +6,7 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     mUser = _user;
     //Set default room id
     mRoomId = "Debug";
+    mIpAddress = "Ipaddress";
 
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
     const QNetworkInterface qi = QNetworkInterface();
@@ -41,7 +42,7 @@ UserHandler* SessionHandler::getUser()
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 {
     QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT id, password FROM room WHERE id = :roomId AND password = :roomPassword");
+    q.prepare("SELECT r.id, r.password, u.username FROM room AS r, user AS u WHERE r.host = u.id AND r.id = :roomId AND r.password = :roomPassword");
     q.bindValue(":roomId", _roomId);
     q.bindValue(":roomPassword", _roomPassword);
     if (q.exec() && q.size() > 0)
@@ -51,6 +52,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             q.next();
             mRoomId = q.value(0).toString();
             mRoomPassword = q.value(1).toString();
+            mRoomHostUsername = q.value(2).toString();
             addUser();
             return true;
         }
@@ -78,11 +80,7 @@ QString SessionHandler::getRoomPassword()
 
 void SessionHandler::addUser()
 {
-    if (mUser->isGuest())
-    {
-        qDebug() << QHostInfo::localHostName() << QHostInfo::localDomainName();
-    }
-    else
+    if (!mUser->isGuest())
     {
         QSqlQuery q(mDb->mDb);
         q.prepare("INSERT INTO roomSession (roomId, userId, ipAddress) VALUES (:roomId, :userId, :ipAddress)");
@@ -97,6 +95,26 @@ void SessionHandler::addUser()
         {
             qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
+
+    }
+    else
+    {
+        if (addGuestUserToDatabase())
+        {
+            QSqlQuery q(mDb->mDb);
+            q.prepare("INSERT INTO roomSession (roomId, userId, ipAddress) VALUES (:roomId, :userId, :ipAddress)");
+            q.bindValue(":roomId", mRoomId);
+            q.bindValue(":userId", mUser->getGuestId());
+            q.bindValue(":ipAddress", mIpAddress);
+            if (q.exec())
+            {
+                qDebug() << "Added guest to the session";
+            }
+            else
+            {
+                qDebug() << "Failed Query" << Q_FUNC_INFO;
+            }
+        }
     }
 }
 
@@ -104,7 +122,19 @@ bool SessionHandler::leaveSession()
 {
     if (mUser->isGuest())
     {
-
+        QSqlQuery q(mDb->mDb);
+        q.prepare("DELETE FROM roomSession WHERE roomId = :roomId AND userId = :userId");
+        q.bindValue(":roomId", mRoomId);
+        q.bindValue(":userId", mUser->getGuestId());
+        if (q.exec())
+        {
+            qDebug() << "Removed guest from the session";
+            return true;
+        }
+        else
+        {
+            qDebug() << "Failed Query" << Q_FUNC_INFO;
+        }
     }
     else
     {
@@ -159,3 +189,25 @@ bool SessionHandler::isGuest()
     return mUser->isGuest();
 }
 
+QString SessionHandler::getRoomHostUsername()
+{
+    return mRoomHostUsername;
+}
+
+bool SessionHandler::addGuestUserToDatabase()
+{
+    qDebug() << mUser->getGuestName();
+    QSqlQuery q(mDb->mDb);
+    q.prepare("INSERT INTO user (streamId, username, password) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16))");
+    q.bindValue(":username", mUser->getGuestName());
+    if (q.exec())
+    {
+        qDebug() << "Added guest :" << mUser->getGuestName() << "to the database";
+        return true;
+    }
+    else
+    {
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
+    }
+    return false;
+}

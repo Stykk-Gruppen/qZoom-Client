@@ -143,7 +143,15 @@ Rectangle {
             visible: false
             font.pixelSize: 32
             onClicked: joinSession()
-            onDoubleClicked: changePage("session")
+            onDoubleClicked: {
+                if (sessionHandler.joinSession("Debug", "123")) {
+                    changePage("session")
+                }
+                else {
+                    console.log("no such session")
+                    changePage("session")
+                }
+            }
         }
 
         C.PushButton {

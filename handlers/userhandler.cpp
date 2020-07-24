@@ -6,6 +6,7 @@ UserHandler::UserHandler(Database* _db, Settings* settings, QObject *parent) : Q
     mSettings = settings;
     mIsGuest = true;
     mErrorMessage = "No error message was set";
+    mGuestName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
 UserHandler::~UserHandler()
@@ -159,4 +160,27 @@ QString UserHandler::getPersonalRoomPassword()
 bool UserHandler::hasRoom()
 {
     return mHasRoom;
+}
+
+QString UserHandler::getGuestName()
+{
+    return mGuestName;
+}
+
+int UserHandler::getGuestId()
+{
+    int ret = -1;
+    QSqlQuery q(mDb->mDb);
+    q.prepare("SELECT id FROM user WHERE username = :username");
+    q.bindValue(":username", mGuestName);
+    if (q.exec())
+    {
+        q.next();
+        ret = q.value(0).toInt();
+    }
+    else
+    {
+        qDebug() << "Failed Query" << Q_FUNC_INFO;
+    }
+    return ret;
 }

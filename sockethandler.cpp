@@ -7,8 +7,8 @@ SocketHandler::SocketHandler(int bufferSize,ImageHandler* _imageHandler,
     mImageHandler = _imageHandler;
     mSessionHandler = _sessionHandler;
     //address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
-    //address = QHostAddress("158.36.165.235"); //Tarald
+    //address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("79.160.58.120"); //Kent
     port = 1337;
     initSocket();
@@ -35,7 +35,8 @@ void SocketHandler::readPendingDatagrams()
         if(datagram.senderAddress().toIPv4Address() != address.toIPv4Address()) continue;
         QByteArray data = datagram.data();
 
-        if(0){
+        if(1)
+        {
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
             data.remove(0,1);

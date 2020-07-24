@@ -3,7 +3,7 @@
 
 Database::Database()
 {
-    std::string str = connectDatabase() ? "yes" : "no";
+    std::string str = connectDatabase() ? "Connected to Database" : "Failed to connect to Database";
     qDebug() << str.c_str();
 }
 
@@ -14,6 +14,6 @@ bool Database::connectDatabase()
     mDb.setDatabaseName(dbDatabaseName);
     mDb.setUserName(dbUserName);
     mDb.setPassword(dbPassword);
-    qDebug() << mDb.lastError();
+    //qDebug() << mDb.lastError();
     return mDb.open();
 }

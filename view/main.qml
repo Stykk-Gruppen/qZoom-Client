@@ -17,7 +17,8 @@ ApplicationWindow {
     }
 
 
-    StackView{
+
+    StackView {
         id: stackView
         focus: true
         anchors.fill: parent
@@ -36,7 +37,7 @@ ApplicationWindow {
                     property: "opacity"
                     duration: 0
                     from: 1
-                    to:0
+                    to: 0
 
                 }
             }

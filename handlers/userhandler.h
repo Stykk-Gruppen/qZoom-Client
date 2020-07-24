@@ -20,6 +20,8 @@ public:
     bool isGuest();
     int getUserId();
     QString getStreamId();
+    QString getGuestName();
+    int getGuestId();
 
 private:
     bool fillUser(int userId);
@@ -34,6 +36,8 @@ private:
     QString mUsername;
     QString mPassword;
     QString mTimeCreated;
+    QString mGuestName;
+    QString mGuestId;
     int mUserId;
     Database* mDb;
     Settings* mSettings;

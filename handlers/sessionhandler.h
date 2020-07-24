@@ -19,6 +19,7 @@ public:
     Q_INVOKABLE bool isGuest();
     Q_INVOKABLE QString getRoomId();
     Q_INVOKABLE QString getRoomPassword();
+    Q_INVOKABLE QString getRoomHostUsername();
     UserHandler* getUser();
 
 private:
@@ -26,11 +27,13 @@ private:
 
     QString mRoomId;
     QString mRoomPassword;
+    QString mRoomHostUsername;
     QString mIpAddress;
     Database* mDb;
     UserHandler* mUser;
     bool mUserHasRoom;
     void getUserRoom();
+    bool addGuestUserToDatabase();
 
 
 signals:

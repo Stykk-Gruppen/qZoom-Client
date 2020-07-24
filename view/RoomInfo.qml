@@ -16,6 +16,17 @@ Dialog {
     //anchors.centerIn: parent
     standardButtons: Dialog.Close
 
+    /*
+    function updateValues() {
+        roomIdText.text = sessionHandler.getRoomId()
+        roomPasswordText.text = sessionHandler.getRoomPassword()
+
+
+    }
+    */
+
+
+
     Rectangle{
 
         ColumnLayout {
@@ -25,6 +36,7 @@ Dialog {
                     text: qsTr("Room ID:")
                 }
                 Text {
+                    id: roomIdText
                     text: sessionHandler.getRoomId()
                 }
             }
@@ -32,6 +44,7 @@ Dialog {
             RowLayout {
                 spacing: 10
                 Text {
+                    id: roomPasswordText
                     text: qsTr("Room Password:");
                 }
                 Text {
@@ -42,10 +55,11 @@ Dialog {
             RowLayout {
                 spacing: 10
                 Text {
+                    id: roomHostText
                     text: qsTr("Room Host:");
                 }
                 Text {
-                    text: sessionHandler.getRoomHost()
+                    text: sessionHandler.getRoomHostUsername()
                 }
             }
         }
