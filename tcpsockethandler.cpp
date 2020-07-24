@@ -5,6 +5,7 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QHost
 {
     mAddress = address;
     mPort = port;
+    qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
 }
 
@@ -27,17 +28,20 @@ void TcpSocketHandler::init()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
+    //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
+    qDebug() << "After ConnectToHost";
     if(!mSocket->waitForConnected(3000))
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
     }
 
     mSocket->write(myHeader);
-
+    //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
     while (mSocket->waitForReadyRead(1000));
 
     QByteArray reply = mSocket->readAll();
+    qDebug() << reply;
 
     int numOfHeaders = reply[0];
     reply.remove(0,1);

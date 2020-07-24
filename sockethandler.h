@@ -14,12 +14,12 @@
 
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
-
+class InputStreamHandler;
 class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(int, ImageHandler*,SessionHandler*, QHostAddress address, QObject *parent = nullptr);
+    explicit SocketHandler(int, ImageHandler*, InputStreamHandler* inputStreamHandler, SessionHandler*, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     QTcpSocket* mTCPSocket;
     QUdpSocket* udpSocket;
@@ -31,7 +31,7 @@ public slots:
 private:
     void addStreamToVector(QString,int);
     int findStreamIdIndex(QString);
-    std::vector<QString> mStreamIdVector;
+    /*std::vector<QString> mStreamIdVector;
     std::vector<QByteArray*> mAudioBufferVector;
     std::vector<QByteArray*> mVideoBufferVector;
     std::vector<std::mutex*> mAudioMutexVector;
@@ -39,10 +39,11 @@ private:
     std::vector<AudioPlaybackHandler*> mAudioPlaybackHandlerVector;
     std::vector<VideoPlaybackHandler*> mVideoPlaybackHandlerVector;
     std::vector<bool> mVideoPlaybackStartedVector;
-    std::vector<bool> mAudioPlaybackStartedVector;
+    std::vector<bool> mAudioPlaybackStartedVector;*/
     SessionHandler* mSessionHandler;
-    ImageHandler* mImageHandler;
+    //ImageHandler* mImageHandler;
     int mBufferSize;
+    InputStreamHandler* mInputStreamHandler;
     uint signalCount = 0;
     struct mBufferAndLockStruct {
         QByteArray* buffer;

@@ -84,8 +84,9 @@ int main(int argc, char *argv[])
 
     InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
 
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject, address);
-    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, address);
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,inputStreamHandler, sessionHandlerObject, address);
+    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, address, 1337);
+    tcpSocketHandler->init();
 
     //int64_t *lastVideoPacketTime = new int64_t(-1);
     //int64_t *lastAudioPacketTime = new int64_t(-1);
