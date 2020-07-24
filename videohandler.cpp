@@ -466,8 +466,7 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
 
-    //Prepends the video header byte needed by socketHandler
-    send.prepend(int(1));
+
 
     if(!s->headerSent)
     {
@@ -476,6 +475,8 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     }
     else
     {
+        //Prepends the video header byte needed by socketHandler
+        send.prepend(int(1));
         return s->udpSocket->sendDatagram(send);
 
     }

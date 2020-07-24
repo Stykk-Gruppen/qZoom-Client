@@ -76,7 +76,6 @@ void SocketHandler::readPendingDatagrams()
             mInputStreamHandler->mVideoMutexVector[index]->unlock();
             if(!mInputStreamHandler->mVideoPlaybackStartedVector[index] && mInputStreamHandler->mVideoBufferVector[index]->size() >= mBufferSize)
             {
-                qDebug() << "Starting VideoPlaybackhandler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1";
 
                 QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;

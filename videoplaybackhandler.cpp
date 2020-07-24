@@ -26,6 +26,7 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
     //Kaller server for å få header via tcp
     QByteArray tempBuffer;
 
+    qDebug() << s->headerReceived;
     if(!s->headerReceived)
     {
         //while(s->headerBuffer->size() <= buf_size);
@@ -70,7 +71,7 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
         memcpy(buf, tempBuffer.constData(), buf_size);
 
         //mSenderId = something;
-        //qDebug() << "Reading packet";
+        qDebug() << "Reading packet";
         return buf_size;
 
     }
@@ -164,7 +165,7 @@ void VideoPlaybackHandler::start()
             {
                 char* errbuff = (char *)malloc((1000)*sizeof(char));
                 av_strerror(ret,errbuff,1000);
-                qDebug() << "Failed av_read_frame: code " << ret << " meaning: " << errbuff;
+                qDebug() << "Failed av_read_frame in videoplaybackhandler: code " << ret << " meaning: " << errbuff;
                 int ms = 1000;
                 struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
                 nanosleep(&ts, NULL);
