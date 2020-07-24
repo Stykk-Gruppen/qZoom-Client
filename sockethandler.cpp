@@ -31,7 +31,7 @@ void SocketHandler::readPendingDatagrams()
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
-
+        //qDebug() << "DatagramUDP: \n" << data;
         if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address()){
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
@@ -76,6 +76,7 @@ void SocketHandler::readPendingDatagrams()
             mInputStreamHandler->mVideoMutexVector[index]->unlock();
             if(!mInputStreamHandler->mVideoPlaybackStartedVector[index] && mInputStreamHandler->mVideoBufferVector[index]->size() >= mBufferSize)
             {
+                qDebug() << "Starting VideoPlaybackhandler!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1";
 
                 QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;
@@ -105,7 +106,7 @@ int SocketHandler::findStreamIdIndex(QString streamId)
             }
         }
     }
-    qDebug() << "Vi er fucked2";
+    qDebug() << "Vi er fucked2" << streamId;
     exit(1);
 }
 

@@ -173,10 +173,12 @@ int VideoHandler::init()
         exit(1);
     }
 
-    qDebug() << "After writing header videoHandler";
-    mStruct->headerSent = true;
-    mStruct->tcpSocket->writeHeader();
-    qDebug() << "After tcp writeHeader";
+    //if(!mStruct->headerSent)
+    {
+        mStruct->headerSent = true;
+        mStruct->tcpSocket->writeHeader();
+        qDebug() << "After tcp writeHeader";
+    }
 
 }
 
@@ -390,8 +392,13 @@ void VideoHandler::grabFrames() {
             writeLock->lock();
             //qDebug() << "Writing Video Packet";
             int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
-            //qDebug() << "Wrote video packet ret = " << ret;
             writeLock->unlock();
+
+
+
+
+
+            //qDebug() << "Wrote video packet ret = " << ret;
             //int ret = av_write_frame(ofmt_ctx, outPacket);
 
             //int ret = av_write_frame(ofmt_ctx, pkt);
@@ -465,10 +472,14 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     if(!s->headerSent)
     {
         s->tcpSocket->myHeader.append(send);
-        return send.length();
+        return 0;
+    }
+    else
+    {
+        return s->udpSocket->sendDatagram(send);
+
     }
 
-    return s->udpSocket->sendDatagram(send);
 }
 
 void VideoHandler::toggleGrabFrames(bool a)

@@ -28,11 +28,24 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
     if(!s->headerReceived)
     {
-        while(s->headerBuffer->size() <= buf_size);
-
+        //while(s->headerBuffer->size() <= buf_size);
+        buf_size = FFMIN(buf_size, s->headerBuffer->size());
+        if(!buf_size)return AVERROR_EOF;
         s->writeLock->lock();
         tempBuffer = QByteArray(s->headerBuffer->data(), buf_size);
+        qDebug() << s->headerBuffer->length();
+        qDebug() << buf_size;
+        qDebug() << "HeaderBuffer: " << tempBuffer;
+
         s->headerBuffer->remove(0, buf_size);
+
+        s->writeLock->unlock();
+
+        memcpy(buf, tempBuffer.constData(), buf_size);
+
+        //mSenderId = something;
+        //qDebug() << "Reading packet";
+        return buf_size;
     }
     else
     {
@@ -52,14 +65,16 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
         s->buffer->remove(0,buf_size);
         //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
 
+        s->writeLock->unlock();
+
+        memcpy(buf, tempBuffer.constData(), buf_size);
+
+        //mSenderId = something;
+        //qDebug() << "Reading packet";
+        return buf_size;
+
     }
-    s->writeLock->unlock();
 
-    memcpy(buf, tempBuffer.constData(), buf_size);
-
-    //mSenderId = something;
-    //qDebug() << "Reading packet";
-    return buf_size;
 }
 
 void VideoPlaybackHandler::start()
@@ -81,6 +96,7 @@ void VideoPlaybackHandler::start()
 
         fmt_ctx->pb = avio_ctx;
         ret = avformat_open_input(&fmt_ctx, nullptr, nullptr, nullptr);
+        qDebug() << "HEADER RECEIVED";
         mStruct->headerReceived = true;
         if(ret < 0)
         {

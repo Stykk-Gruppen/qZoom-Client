@@ -19,6 +19,8 @@ void InputStreamHandler::handleHeader(QByteArray data)
 
     int index = findStreamIdIndex(streamId);
 
+    data.remove(0,1);
+
     mVideoMutexVector[index]->lock();
     mVideoHeaderVector[index]->append(data);
     mVideoMutexVector[index]->unlock();
@@ -27,8 +29,6 @@ void InputStreamHandler::handleHeader(QByteArray data)
 void InputStreamHandler::addStreamToVector(QString streamId,int index)
 {
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
-    QByteArray* tempAudioHeaderBuffer = new QByteArray();
-
     mVideoHeaderVector.push_back(tempVideoHeaderBuffer);
     QByteArray* tempAudioBuffer = new QByteArray();
     QByteArray* tempVideoBuffer = new QByteArray();

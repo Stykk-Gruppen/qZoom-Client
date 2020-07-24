@@ -5,6 +5,7 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, Sessi
 {
     mAddress = address;
     mPort = port;
+    qDebug() << mAddress;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
     mSessionHandler = sessionHandler;
@@ -55,30 +56,35 @@ void TcpSocketHandler::writeHeader()
 
 
 
-    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+    //qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
 
 
     mSocket->write(myHeader);
     //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
-    while (mSocket->waitForReadyRead(5000));
+    while (mSocket->waitForReadyRead(3000));
 
     QByteArray reply = mSocket->readAll();
-    qDebug() << "Reply from Server: \n" << reply;
+    //qDebug() << "Reply from Server: \n" << reply;
 
     int numOfHeaders = reply[0];
+    qDebug() << numOfHeaders;
     reply.remove(0,1);
+    //QString data(reply);
 
-    QString data(reply);
-    QStringList headers = data.split('\n');
 
-    if(numOfHeaders != headers.size()) qDebug() << "Something strange occured with headers received";
+    //qDebug() << "DataString: " << data;
+    //qDebug() << reply.indexOf(27);
 
-    for(QString header : headers)
+
+    for(int i = 0; i < numOfHeaders; i++)
     {
-        mInputStreamHandler->handleHeader(header.toLocal8Bit());
+        QByteArray temp = QByteArray(reply, reply.indexOf(27));
+        //qDebug() << "Temp: " << temp;
+        mInputStreamHandler->handleHeader(temp);
+        reply.remove(0, reply.indexOf(27));
     }
 
-    mSocket->write("0");
+    //mSocket->write("0");
 
 }
 

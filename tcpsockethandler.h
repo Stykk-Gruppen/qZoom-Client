@@ -8,6 +8,8 @@
 #include "videohandler.h"
 #include <vector>
 #include "inputstreamhandler.h"
+#include <QString>
+#include <QByteArray>
 
 class InputStreamHandler;
 
