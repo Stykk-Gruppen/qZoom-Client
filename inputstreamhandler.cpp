@@ -19,40 +19,9 @@ void InputStreamHandler::handleHeader(QByteArray data)
 
     int index = findStreamIdIndex(streamId);
 
-    //Checks the first byte in the datagram to determine if the datagram is audio or video
-    int audioOrVideoInt = data[0];
-    data.remove(0,1);
-
-    if(audioOrVideoInt == 0)
-    {
-        mAudioMutexVector[index]->lock();
-        mAudioBufferVector[index]->append(data);
-        mAudioMutexVector[index]->unlock();
-        if(!mAudioPlaybackStartedVector[index] && mAudioBufferVector[index]->size() >= mBufferSize)
-        {
-            QtConcurrent::run(mAudioPlaybackHandlerVector[index], &AudioPlaybackHandler::start);
-            mAudioPlaybackStartedVector[index] = true;
-        }
-        // qDebug() << "audio buffer size " << mAudioBufferVector[index].size() << "after signal: " << signalCount;
-    }
-    else if (audioOrVideoInt ==1)
-    {
-        mVideoMutexVector[index]->lock();
-        mVideoHeaderVector[index]->append(data);
-        mVideoMutexVector[index]->unlock();
-        if(!mVideoPlaybackStartedVector[index] && mVideoBufferVector[index]->size() >= mBufferSize)
-        {
-
-            QtConcurrent::run(mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
-            mVideoPlaybackStartedVector[index] = true;
-        }
-        //qDebug() << "video buffer size " << mVideoBufferVector[index]->size() << "after signal: " << signalCount;
-    }
-    else
-    {
-        qDebug() << "UDP Header byte was not 1 or 0 in socketHandler, stopping program";
-        exit(-1);
-    }
+    mVideoMutexVector[index]->lock();
+    mVideoHeaderVector[index]->append(data);
+    mVideoMutexVector[index]->unlock();
 }
 
 void InputStreamHandler::addStreamToVector(QString streamId,int index)

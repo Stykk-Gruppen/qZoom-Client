@@ -51,6 +51,9 @@ void TcpSocketHandler::writeHeader()
     {
         mInputStreamHandler->handleHeader(header.toLocal8Bit());
     }
+
+    mSocket->write("0");
+
 }
 
 

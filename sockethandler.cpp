@@ -27,8 +27,6 @@ void SocketHandler::readPendingDatagrams()
 
     while (udpSocket->hasPendingDatagrams())
     {
-
-
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
@@ -46,8 +44,6 @@ void SocketHandler::readPendingDatagrams()
 
         int streamIdLength = data[0];
         data.remove(0,1);
-
-
 
         //Finds the streamId header, stores it and removes it;
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
@@ -107,38 +103,10 @@ int SocketHandler::findStreamIdIndex(QString streamId)
                 return i;
             }
         }
-        //If the streamId does not exist, push it and buffers/locks
-        //addStreamToVector(streamId,mStreamIdVector.size());
-        return mStreamIdVector.size();
     }
-    else
-    {
-        //If this stream is the first to join, push it and buffer/locks
-        //addStreamToVector(streamId,0);
-        return 0;
-    }
-
+    qDebug() << "Vi er fucked2";
+    exit(1);
 }
-
-/*void SocketHandler::addStreamToVector(QString streamId,int index)
-{
-    QByteArray* tempAudioBuffer = new QByteArray();
-    QByteArray* tempVideoBuffer = new QByteArray();
-    mAudioBufferVector.push_back(tempAudioBuffer);
-    mVideoBufferVector.push_back(tempVideoBuffer);
-    std::mutex* tempAudioLock = new std::mutex;
-    std::mutex* tempVideoLock = new std::mutex;
-    mAudioMutexVector.push_back(tempAudioLock);
-    mVideoMutexVector.push_back(tempVideoLock);
-    mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock,tempAudioBuffer,mBufferSize));
-    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1));
-    mStreamIdVector.push_back(streamId);
-    mAudioPlaybackStartedVector.push_back(false);
-    mVideoPlaybackStartedVector.push_back(false);
-
-    //Your own image is at 0, so we add 1 here and in videoPlayback constructor
-    mImageHandler->addPeer(index+1);
-}*/
 
 int SocketHandler::sendDatagram(QByteArray arr)
 {

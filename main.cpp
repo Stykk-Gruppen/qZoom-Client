@@ -48,8 +48,8 @@ extern "C"
 int main(int argc, char *argv[])
 {
     QHostAddress address;
-    address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress::LocalHost;
+    address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("79.160.58.120"); //Kent
 
