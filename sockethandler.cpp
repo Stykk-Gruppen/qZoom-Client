@@ -79,6 +79,7 @@ void SocketHandler::readPendingDatagrams()
             mVideoMutexVector[index]->unlock();
             if(!mVideoPlaybackStartedVector[index] && mVideoBufferVector[index]->size() >= mBufferSize)
             {
+
                 QtConcurrent::run(mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mVideoPlaybackStartedVector[index] = true;
             }
@@ -107,19 +108,19 @@ int SocketHandler::findStreamIdIndex(QString streamId)
             }
         }
         //If the streamId does not exist, push it and buffers/locks
-        addStreamToVector(streamId,mStreamIdVector.size());
+        //addStreamToVector(streamId,mStreamIdVector.size());
         return mStreamIdVector.size();
     }
     else
     {
         //If this stream is the first to join, push it and buffer/locks
-        addStreamToVector(streamId,0);
+        //addStreamToVector(streamId,0);
         return 0;
     }
 
 }
 
-void SocketHandler::addStreamToVector(QString streamId,int index)
+/*void SocketHandler::addStreamToVector(QString streamId,int index)
 {
     QByteArray* tempAudioBuffer = new QByteArray();
     QByteArray* tempVideoBuffer = new QByteArray();
@@ -130,14 +131,14 @@ void SocketHandler::addStreamToVector(QString streamId,int index)
     mAudioMutexVector.push_back(tempAudioLock);
     mVideoMutexVector.push_back(tempVideoLock);
     mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock,tempAudioBuffer,mBufferSize));
-    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1, mAddress, streamId, ""));
+    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1));
     mStreamIdVector.push_back(streamId);
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
 
     //Your own image is at 0, so we add 1 here and in videoPlayback constructor
     mImageHandler->addPeer(index+1);
-}
+}*/
 
 int SocketHandler::sendDatagram(QByteArray arr)
 {

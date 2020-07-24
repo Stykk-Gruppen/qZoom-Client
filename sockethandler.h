@@ -12,6 +12,9 @@
 #include "videoplaybackhandler.h"
 #include "audioplaybackhandler.h"
 
+class VideoPlaybackHandler;
+class AudioPlaybackHandler;
+
 class SocketHandler : public QObject
 {
     Q_OBJECT

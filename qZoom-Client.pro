@@ -23,6 +23,7 @@ SOURCES += \
         handlers/sessionhandler.cpp \
         handlers/userhandler.cpp \
         imagehandler.cpp \
+        inputstreamhandler.cpp \
         main.cpp \
         settings.cpp \
         sockethandler.cpp \
@@ -58,6 +59,7 @@ HEADERS += \
     handlers/sessionhandler.h \
     handlers/userhandler.h \
     imagehandler.h \
+    inputstreamhandler.h \
     settings.h \
     sockethandler.h \
     streamhandler.h \

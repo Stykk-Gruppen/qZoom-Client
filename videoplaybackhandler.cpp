@@ -1,7 +1,7 @@
 #include "videoplaybackhandler.h"
 
-VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* _imageHandler,
-                                           QByteArray* buffer, int bufferSize, int index, QHostAddress address, QString streamId, QString roomId,
+VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* _imageHandler, QByteArray* headerBuffer,
+                                           QByteArray* buffer, int bufferSize, int index,
                                            //int64_t* lastVideoPacketTime, int64_t* lastAudioPacketTime,
                                            QObject *parent) : QObject(parent)
 {
@@ -13,9 +13,7 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct->writeLock = _writeLock;
     //Lagt til disse for å kunne få header via tcp
     mStruct->headerReceived = false;
-    mStruct->address = address;
-    mStruct->streamId = streamId;
-    mStruct->roomId = roomId;
+    mStruct->headerBuffer = headerBuffer;
 
 }
 
@@ -23,45 +21,39 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
     //qDebug() << buf_size;
 
-
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
     //Kaller server for å få header via tcp
+    QByteArray tempBuffer;
+
     if(!s->headerReceived)
     {
-        QByteArray request = "ReqHead";
-        request.append(s->roomId.size());
-        request.append(s->roomId.toLocal8Bit().data());
-        request.append(s->streamId.size());
-        request.append(s->streamId.toLocal8Bit().data());
-        TcpSocketHandler tcp(s->address, request);
+        while(s->headerBuffer->size() <= buf_size);
 
-        tcp.wait();
-        QByteArray reply = tcp.getReply();
-
-        memcpy(buf, reply.constData(), buf_size);
-        return buf_size;
+        s->writeLock->lock();
+        tempBuffer = QByteArray(s->headerBuffer->data(), buf_size);
+        s->headerBuffer->remove(0, buf_size);
     }
-
-    //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
-
-
-    while (s->buffer->size() <= buf_size)
+    else
     {
-        /*int ms = 50;
-        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        qDebug() << "sleeping";
-        nanosleep(&ts, NULL);*/
+        //buf_size = FFMIN(buf_size, s->socketHandler->mBuffer.size());
+
+        while (s->buffer->size() <= buf_size)
+        {
+            /*int ms = 50;
+            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+            qDebug() << "sleeping";
+            nanosleep(&ts, NULL);*/
+        }
+
+        s->writeLock->lock();
+
+        tempBuffer = QByteArray(s->buffer->data(), buf_size);
+        s->buffer->remove(0,buf_size);
+        //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
+
     }
-
-    s->writeLock->lock();
-
-    QByteArray tempBuffer = QByteArray(s->buffer->data(), buf_size);
-    s->buffer->remove(0,buf_size);
-
     s->writeLock->unlock();
-    //qDebug() << " buffer after removal: " << s->socketHandler->mBuffer.size();
-
 
     memcpy(buf, tempBuffer.constData(), buf_size);
 

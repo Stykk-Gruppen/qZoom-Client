@@ -5,18 +5,24 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QHostAddress>
+#include "videohandler.h"
+#include <vector>
+#include "inputstreamhandler.h"
+
+class InputStreamHandler;
 
 class TcpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpSocketHandler(QHostAddress address, QByteArray request, int port = 1338, QObject* parent = nullptr);
+    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QHostAddress address, int port = 1338, QObject* parent = nullptr);
     void init();
     QByteArray getReply();
     bool isReady();
     void wait();
     int getBytesWritten();
-
+    void writeHeader();
+    QByteArray myHeader;
 public slots:
     void connected();
     void disconnected();
@@ -30,5 +36,13 @@ private:
     QByteArray mRequest;
     QByteArray mReply;
     bool mReady;
+
+
+    InputStreamHandler* mInputStreamHandler;
+    std::vector<QByteArray> videoHeaders;
+
+
+    void addStream();
+
 };
 #endif // TCPSOCKETHANDLER_H

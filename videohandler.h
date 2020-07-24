@@ -39,14 +39,15 @@ extern "C" {
 #include "libavutil/time.h"
 #include "libavutil/imgutils.h"
 }
-
 #include "imagehandler.h"
+class SocketHandler;
+class TcpSocketHandler;
 
 class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent = 0);
     int init();
     void grabFrames();
     void close();

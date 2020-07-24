@@ -37,12 +37,15 @@ extern "C" {
 #include <QAudioOutput>
 #include "imagehandler.h"
 #include <tcpsockethandler.h>
+#include <tcpserverhandler.h>
+
+
 
 class VideoPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlaybackHandler(std::mutex*, ImageHandler*, QByteArray*, int, int, QHostAddress address, QString streamId, QString roomId, QObject *parent = nullptr);
+    VideoPlaybackHandler(std::mutex*, ImageHandler*, QByteArray* headerBuffer, QByteArray*, int, int, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     void start();
@@ -53,9 +56,7 @@ private:
         QByteArray* buffer;
         std::mutex* writeLock;
         bool headerReceived;
-        QHostAddress address;
-        QString streamId;
-        QString roomId;
+        QByteArray* headerBuffer;
 
     };
     int mBufferSize;

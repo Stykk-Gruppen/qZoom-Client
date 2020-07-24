@@ -39,7 +39,7 @@ class StreamHandler : public QObject
     Q_OBJECT
 public:
 
-    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, Settings* settings, QObject *parent = nullptr);
+    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void record();
@@ -55,6 +55,7 @@ public:
 private:
     int64_t mTime;
     SocketHandler* mSocketHandler;
+    TcpSocketHandler* mTcpSocketHandler;
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;

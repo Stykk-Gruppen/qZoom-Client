@@ -37,11 +37,13 @@ extern "C"
 #include <QtCore/QCoreApplication>
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
+#include "inputstreamhandler.h"
 #include "tcpsockethandler.h"
 #include "audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
 #include "core/database.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -79,14 +81,17 @@ int main(int argc, char *argv[])
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     //std::mutex *audioUdpBufferLock = new std::mutex;
     //std::mutex *videoUdpBufferLock = new std::mutex;
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject, address);
 
+    InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
+
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,sessionHandlerObject, address);
+    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, address);
 
     //int64_t *lastVideoPacketTime = new int64_t(-1);
     //int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data()));
+    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data(), tcpSocketHandler));
     //QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);

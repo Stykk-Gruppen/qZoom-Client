@@ -4,7 +4,7 @@
 
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
                            ImageHandler* imageHandler, SocketHandler* _socketHandler,
-                           int bufferSize, QObject* parent): QObject(parent)
+                           int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent): QObject(parent)
 {
     mBufferSize = bufferSize;
     writeToFile = false;
@@ -21,6 +21,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
     mStruct = new mSocketStruct;
     mStruct->udpSocket = socketHandler;
+    mStruct->tcpSocket = tcpSocketHandler;
     mStruct->headerSent = false;
 }
 
@@ -171,7 +172,11 @@ int VideoHandler::init()
         fprintf(stderr, "Could not open write header");
         exit(1);
     }
+
+
     mStruct->headerSent = true;
+    mStruct->tcpSocket->writeHeader();
+
 }
 
 static int64_t pts = 0;
@@ -458,8 +463,8 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
 
     if(!s->headerSent)
     {
-        TcpSocketHandler tcp(s->udpSocket->mAddress, send, 1338);
-        return tcp.getBytesWritten();
+        s->tcpSocket->myHeader.append(send);
+        return send.length();
     }
 
     return s->udpSocket->sendDatagram(send);
