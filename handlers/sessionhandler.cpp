@@ -87,17 +87,16 @@ void SessionHandler::addUser()
     else
     {
         QSqlQuery q(mDb->mDb);
-        q.prepare("INSERT INTO roomSession (roomId, userId, ipAddress) VALUES (:roomId, :userId, :ipAddress)");
+        q.prepare("INSERT INTO roomSession (roomId, userId) VALUES (:roomId, :userId)");
         q.bindValue(":roomId", mRoomId);
         q.bindValue(":userId", mUser->getUserId());
-        q.bindValue(":ipAddress", mIpAddress);
         if (q.exec())
         {
             qDebug() << "Added user to the session";
         }
         else
         {
-            qDebug() << "Failed Query" << Q_FUNC_INFO;
+            qDebug() << "Failed Query" << Q_FUNC_INFO << " reason: " << q.lastError();
         }
     }
 }

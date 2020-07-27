@@ -33,7 +33,7 @@ void TcpSocketHandler::writeHeader()
     static bool firstRound = true;
     //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
-    qDebug() << "After ConnectToHost";
+    qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
     if(!mSocket->waitForConnected(3000))
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
@@ -64,10 +64,35 @@ void TcpSocketHandler::writeHeader()
     while (mSocket->waitForReadyRead(3000));
 
     QByteArray reply = mSocket->readAll();
-    //qDebug() << "Reply from Server: \n" << reply;
+
+    qDebug() << "Reply from Server: \n" << reply;
+    if(reply.size() <= 0)
+    {
+        qDebug() << "Reply from tcp request was empty, should not happen @ " << Q_FUNC_INFO;
+        return;
+    }
+    else if(reply.size()==1)
+    {
+        int returnCode = reply[0];
+        switch(returnCode)
+        {
+        case mTcpReturnValues::SESSION_STARTED:
+            //TODO how to handle session started and nothing returned from server
+            return;
+        case mTcpReturnValues::ROOM_ID_NOT_FOUND:
+            //TODO handle wrong roomId
+            return;
+        case mTcpReturnValues::STREAM_ID_NOT_FOUND:
+            //TODO handle wrong streamId
+            return;
+        default:
+            qDebug() << "Unkown return code from tcp server @ " << Q_FUNC_INFO;
+            exit(-1);
+        }
+    }
 
     int numOfHeaders = reply[0];
-    qDebug() << numOfHeaders;
+    qDebug() << "number of headers recieved from server: " << numOfHeaders;
     reply.remove(0,1);
     //QString data(reply);
 

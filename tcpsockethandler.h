@@ -31,6 +31,8 @@ public slots:
     void bytesWritten(qint64 bytes);
     void readyRead();
 private:
+    //Should match enum in Server::TcpServerHandler
+    enum mTcpReturnValues { STREAM_ID_NOT_FOUND, ROOM_ID_NOT_FOUND, SESSION_STARTED };
     QHostAddress mAddress;
     int mPort;
     int mBytesWritten;
