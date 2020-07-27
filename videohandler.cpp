@@ -470,6 +470,7 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
 
     if(!s->headerSent)
     {
+
         s->tcpSocket->myHeader.append(send);
         return 0;
     }

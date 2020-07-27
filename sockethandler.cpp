@@ -31,8 +31,10 @@ void SocketHandler::readPendingDatagrams()
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
+
         //qDebug() << "DatagramUDP: \n" << data;
-        if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address()){
+        if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address() && mAddress.toIPv4Address() != QHostAddress("213.162.241.177").toIPv4Address())
+        {
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
             data.remove(0,1);
@@ -106,6 +108,8 @@ int SocketHandler::findStreamIdIndex(QString streamId)
         }
     }
     qDebug() << "Vi er fucked2" << streamId;
+    qDebug() << "StreamId: " << streamId;
+    qDebug() << "StreamIdVector: " << mInputStreamHandler->mStreamIdVector;
     exit(1);
 }
 

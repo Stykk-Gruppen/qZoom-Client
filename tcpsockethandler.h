@@ -39,10 +39,8 @@ private:
     QByteArray mReply;
     bool mReady;
     SessionHandler* mSessionHandler;
-
     InputStreamHandler* mInputStreamHandler;
     std::vector<QByteArray> videoHeaders;
-
 
     void addStream();
 

@@ -85,7 +85,7 @@ void StreamHandler::enableVideo()
     }
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
-
+    qDebug() << "Before grab frames";
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
 }
 

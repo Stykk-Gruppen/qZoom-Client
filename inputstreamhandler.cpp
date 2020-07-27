@@ -20,12 +20,14 @@ void InputStreamHandler::handleHeader(QByteArray data)
     int index = findStreamIdIndex(streamId);
 
     mVideoMutexVector[index]->lock();
-    mVideoHeaderVector[index]->append(data);
+    //mVideoHeaderVector[index]->append(data);
+    mVideoBufferVector[index]->append(data);
     mVideoMutexVector[index]->unlock();
 }
 
 void InputStreamHandler::addStreamToVector(QString streamId,int index)
 {
+    qDebug() << "Adding streamId: " << streamId;
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
     mVideoHeaderVector.push_back(tempVideoHeaderBuffer);
     QByteArray* tempAudioBuffer = new QByteArray();
@@ -50,6 +52,7 @@ void InputStreamHandler::addStreamToVector(QString streamId,int index)
 //Sockethandler has to put the datagram in the correct buffer when in a room with multiple people, based on the streamId
 int InputStreamHandler::findStreamIdIndex(QString streamId)
 {
+    qDebug() << "InputStreamHandler findStreamId index: " << streamId;
     if(mStreamIdVector.size()>=1)
     {
         for(size_t i=0;i<mStreamIdVector.size();i++)

@@ -55,7 +55,7 @@ private:
     struct mBufferAndLockStruct {
         QByteArray* buffer;
         std::mutex* writeLock;
-        bool headerReceived;
+        bool* headerReceived;
         QByteArray* headerBuffer;
 
     };

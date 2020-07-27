@@ -12,28 +12,33 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
     //Lagt til disse for å kunne få header via tcp
-    mStruct->headerReceived = false;
+    mStruct->headerReceived = new bool(false);
     mStruct->headerBuffer = headerBuffer;
 
 }
 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
-    //qDebug() << buf_size;
+
+    qDebug() << "Inne i read packet";
 
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
     //Kaller server for å få header via tcp
     QByteArray tempBuffer;
 
-    qDebug() << s->headerReceived;
-    if(!s->headerReceived)
+    if(0)//!(*s->headerReceived))
     {
         //while(s->headerBuffer->size() <= buf_size);
         buf_size = FFMIN(buf_size, s->headerBuffer->size());
-        if(!buf_size)return AVERROR_EOF;
+        if(!buf_size)
+        {
+            qDebug() << AVERROR_EXIT;
+            qDebug() << AVERROR_EOF;
+            return AVERROR_EXIT;
+        }
         s->writeLock->lock();
-        tempBuffer = QByteArray(s->headerBuffer->data(), buf_size);
+        //tempBuffer = QByteArray(s->headerBuffer->data(), buf_size);
         qDebug() << s->headerBuffer->length();
         qDebug() << buf_size;
         qDebug() << "HeaderBuffer: " << tempBuffer;
@@ -46,6 +51,7 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 
         //mSenderId = something;
         //qDebug() << "Reading packet";
+        qDebug() << "Returning buf_size" << buf_size;
         return buf_size;
     }
     else
@@ -58,7 +64,10 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
             struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
             qDebug() << "sleeping";
             nanosleep(&ts, NULL);*/
+            //qDebug() << "sleeping";
+
         }
+
 
         s->writeLock->lock();
 
@@ -71,7 +80,6 @@ int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
         memcpy(buf, tempBuffer.constData(), buf_size);
 
         //mSenderId = something;
-        qDebug() << "Reading packet";
         return buf_size;
 
     }
@@ -98,7 +106,7 @@ void VideoPlaybackHandler::start()
         fmt_ctx->pb = avio_ctx;
         ret = avformat_open_input(&fmt_ctx, nullptr, nullptr, nullptr);
         qDebug() << "HEADER RECEIVED";
-        mStruct->headerReceived = true;
+        *mStruct->headerReceived = true;
         if(ret < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -160,15 +168,18 @@ void VideoPlaybackHandler::start()
         //AVFrame* resampled = 0;
 
         while (1) {
+            qDebug() << "About to call av read frame";
+            //av_read_frame(fmt_ctx, NULL);
             ret = av_read_frame(fmt_ctx,&packet);
+            qDebug() << "AVREADFRAME: " << ret;
             if(ret < 0)
             {
                 char* errbuff = (char *)malloc((1000)*sizeof(char));
                 av_strerror(ret,errbuff,1000);
                 qDebug() << "Failed av_read_frame in videoplaybackhandler: code " << ret << " meaning: " << errbuff;
-                int ms = 1000;
-                struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-                nanosleep(&ts, NULL);
+                //int ms = 1000;
+                //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+                //nanosleep(&ts, NULL);
                 continue;
             }
             //qDebug() << "stream: " << packet.stream_index << " mvideostream: " << mVideoStreamIndex;
@@ -213,6 +224,7 @@ void VideoPlaybackHandler::start()
 
                 //qDebug() << frame->data[0];
                 //qDebug() << mIndex;
+                qDebug() << "Sending image to imageHandler";
                 mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
             }
             else

@@ -5,6 +5,7 @@ UserHandler::UserHandler(Database* _db, Settings* settings, QObject *parent) : Q
     mDb = _db;
     mSettings = settings;
     mIsGuest = true;
+    mStreamId = settings->getDisplayName();
     mErrorMessage = "No error message was set";
 }
 

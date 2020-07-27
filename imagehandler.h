@@ -48,6 +48,7 @@ public:
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
     void addPeer(uint8_t index);
     Q_INVOKABLE int getNumberOfScreens();
+    std::mutex imgLock;
 
 public slots:
     void updateImage(const QImage &image, uint8_t index);
@@ -59,8 +60,8 @@ private:
     QImage generateGenericImage(QString username);
     QMap<uint8_t, QImage> mImageMap;
     QImage mDefaultImage;
-    SwsContext *imgConvertCtx = nullptr;
-    AVFrame	*frameRGB = av_frame_alloc();
+    //SwsContext *imgConvertCtx = nullptr;
+    //AVFrame	*frameRGB = av_frame_alloc();
     Settings* mSettings;
 };
 
