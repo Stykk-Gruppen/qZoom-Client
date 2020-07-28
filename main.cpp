@@ -43,18 +43,21 @@ extern "C"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
 #include "core/database.h"
+#include "handlers/errorhandler.h"
 
+ErrorHandler* errorHandler;
 
 int main(int argc, char *argv[])
 {
+    errorHandler = new ErrorHandler;
+
     QHostAddress address;
     //address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
-    address = QHostAddress("213.162.241.177"); //KentServer
-
+    //address = QHostAddress("213.162.241.177"); //KentServer
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
     //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
     QScopedPointer<SessionHandler> sessionHandler(sessionHandlerObject);
-
+    //QScopedPointer<ErrorHandler> errorHandler(errorHandler);
 
     //streamHandler->record();
     //streamHandler->finish();
@@ -112,15 +115,13 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
     engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
     engine.rootContext()->setContextProperty("backendSettings", settings.data());
-
+    engine.rootContext()->setContextProperty("errorHandler", errorHandler);
     engine.rootContext()->setContextProperty("userHandler", userHandler.data());
     engine.addImageProvider("live", imageHandler.data());
-
 
     //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
     //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
-
 
     //videoHandler->init();
     //Denne klassen klarer å lagre audio stream til fil
@@ -141,6 +142,7 @@ int main(int argc, char *argv[])
     //AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
 
 
+    errorHandler->giveErrorDialog("This is a test of the backend error handling");
 
 
     return app.exec();

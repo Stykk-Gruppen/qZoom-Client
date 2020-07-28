@@ -5,7 +5,7 @@ UserHandler::UserHandler(Database* _db, Settings* settings, QObject *parent) : Q
     mDb = _db;
     mSettings = settings;
     mIsGuest = true;
-    mStreamId = settings->getDisplayName();
+    //mStreamId = settings->getDisplayName();
     mErrorMessage = "No error message was set";
     mGuestName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
