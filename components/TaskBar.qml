@@ -124,7 +124,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        audioInputModel.getAudioTypes()
+        //audioInputModel.getAudioTypes()
 
         if(!backendSettings.getAudioOn())
         {

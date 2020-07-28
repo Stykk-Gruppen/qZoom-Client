@@ -68,7 +68,7 @@ void TcpSocketHandler::writeHeader()
     //qDebug() << "Reply from Server: \n" << reply;
     if(reply.size() <= 0)
     {
-        qDebug() << "Reply from tcp request was empty, should not happen @ " << Q_FUNC_INFO;
+        qDebug() << "Reply from tcp request was empty or timeout, should not happen @ " << Q_FUNC_INFO;
         return;
     }
     else if(reply.size()==1)
