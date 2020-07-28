@@ -26,7 +26,6 @@ private:
 
     QString mRoomId;
     QString mRoomPassword;
-    QString mIpAddress;
     Database* mDb;
     UserHandler* mUser;
     bool mUserHasRoom;

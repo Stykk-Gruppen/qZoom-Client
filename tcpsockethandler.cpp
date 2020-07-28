@@ -33,7 +33,7 @@ void TcpSocketHandler::writeHeader()
     static bool firstRound = true;
     //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
-    qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
+    //qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
     if(!mSocket->waitForConnected(3000))
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
@@ -65,7 +65,7 @@ void TcpSocketHandler::writeHeader()
 
     QByteArray reply = mSocket->readAll();
 
-    qDebug() << "Reply from Server: \n" << reply;
+    //qDebug() << "Reply from Server: \n" << reply;
     if(reply.size() <= 0)
     {
         qDebug() << "Reply from tcp request was empty, should not happen @ " << Q_FUNC_INFO;
@@ -78,11 +78,14 @@ void TcpSocketHandler::writeHeader()
         {
         case mTcpReturnValues::SESSION_STARTED:
             //TODO how to handle session started and nothing returned from server
+            qDebug() << "Server responded with session started";
             return;
         case mTcpReturnValues::ROOM_ID_NOT_FOUND:
             //TODO handle wrong roomId
+            qDebug() << "Server did not find roomId";
             return;
         case mTcpReturnValues::STREAM_ID_NOT_FOUND:
+            qDebug() << "Server did not find streamId";
             //TODO handle wrong streamId
             return;
         default:
