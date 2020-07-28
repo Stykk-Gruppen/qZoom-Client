@@ -39,14 +39,15 @@ extern "C" {
 #include "libavutil/time.h"
 #include "libavutil/imgutils.h"
 }
-
 #include "imagehandler.h"
+class SocketHandler;
+class TcpSocketHandler;
 
 class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent = 0);
     int init();
     void grabFrames();
     void close();
@@ -63,6 +64,14 @@ public:
     void toggleGrabFrames(bool a);
 
 private:
+    //Trenger kanskje ikke denne likevel?
+    struct mSocketStruct {
+        SocketHandler* udpSocket;
+        TcpSocketHandler* tcpSocket;
+        bool headerSent;
+    };
+    mSocketStruct* mStruct;
+
     int64_t time;
     int mBufferSize;
     int skipped_frames = 0;

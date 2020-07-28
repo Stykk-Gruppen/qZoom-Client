@@ -1,15 +1,13 @@
 #include "sockethandler.h"
 
-SocketHandler::SocketHandler(int bufferSize,ImageHandler* _imageHandler,
-                             SessionHandler* _sessionHandler,QObject *parent) : QObject(parent)
+SocketHandler::SocketHandler(int bufferSize,ImageHandler* _imageHandler, InputStreamHandler* inputStreamHandler,
+                             SessionHandler* _sessionHandler, QHostAddress address,QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
-    mImageHandler = _imageHandler;
+    //mImageHandler = _imageHandler;
     mSessionHandler = _sessionHandler;
-    //address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
-    address = QHostAddress("158.36.165.235"); //Tarald
-    //address = QHostAddress("79.160.58.120"); //Kent
+    mInputStreamHandler = inputStreamHandler;
+    mAddress = address;
     port = 1337;
     initSocket();
 }
@@ -29,13 +27,13 @@ void SocketHandler::readPendingDatagrams()
 
     while (udpSocket->hasPendingDatagrams())
     {
-
-
         QNetworkDatagram datagram = udpSocket->receiveDatagram();
-        if(datagram.senderAddress().toIPv4Address() != address.toIPv4Address()) continue;
+        if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
 
-        if(1)
+
+        //qDebug() << "DatagramUDP: \n" << data;
+        if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address() && mAddress.toIPv4Address() != QHostAddress("213.162.241.177").toIPv4Address())
         {
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
@@ -50,8 +48,6 @@ void SocketHandler::readPendingDatagrams()
         int streamIdLength = data[0];
         data.remove(0,1);
 
-
-
         //Finds the streamId header, stores it and removes it;
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
         QString streamId(streamIdArray);
@@ -65,27 +61,28 @@ void SocketHandler::readPendingDatagrams()
 
         if(audioOrVideoInt == 0)
         {
-            mAudioMutexVector[index]->lock();
-            mAudioBufferVector[index]->append(data);
-            mAudioMutexVector[index]->unlock();
-            if(!mAudioPlaybackStartedVector[index] && mAudioBufferVector[index]->size() >= mBufferSize)
+            mInputStreamHandler->mAudioMutexVector[index]->lock();
+            mInputStreamHandler->mAudioBufferVector[index]->append(data);
+            mInputStreamHandler->mAudioMutexVector[index]->unlock();
+            if(!mInputStreamHandler->mAudioPlaybackStartedVector[index] && mInputStreamHandler->mAudioBufferVector[index]->size() >= mBufferSize)
             {
-                QtConcurrent::run(mAudioPlaybackHandlerVector[index], &AudioPlaybackHandler::start);
-                mAudioPlaybackStartedVector[index] = true;
+                QtConcurrent::run(mInputStreamHandler->mAudioPlaybackHandlerVector[index], &AudioPlaybackHandler::start);
+                mInputStreamHandler->mAudioPlaybackStartedVector[index] = true;
             }
             // qDebug() << "audio buffer size " << mAudioBufferVector[index].size() << "after signal: " << signalCount;
         }
         else if (audioOrVideoInt ==1)
         {
-            mVideoMutexVector[index]->lock();
-            mVideoBufferVector[index]->append(data);
-            mVideoMutexVector[index]->unlock();
-            if(!mVideoPlaybackStartedVector[index] && mVideoBufferVector[index]->size() >= mBufferSize)
+            mInputStreamHandler->mVideoMutexVector[index]->lock();
+            mInputStreamHandler->mVideoBufferVector[index]->append(data);
+            mInputStreamHandler->mVideoMutexVector[index]->unlock();
+            if(!mInputStreamHandler->mVideoPlaybackStartedVector[index] && mInputStreamHandler->mVideoBufferVector[index]->size() >= mBufferSize)
             {
-                QtConcurrent::run(mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
-                mVideoPlaybackStartedVector[index] = true;
+
+                QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
+                mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;
             }
-            qDebug() << "video buffer size " << mVideoBufferVector[index]->size() << "after signal: " << signalCount;
+            qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else
         {
@@ -100,46 +97,20 @@ void SocketHandler::readPendingDatagrams()
 //Sockethandler has to put the datagram in the correct buffer when in a room with multiple people, based on the streamId
 int SocketHandler::findStreamIdIndex(QString streamId)
 {
-    if(mStreamIdVector.size()>=1)
+    if(mInputStreamHandler->mStreamIdVector.size()>=1)
     {
-        for(size_t i=0;i<mStreamIdVector.size();i++)
+        for(size_t i=0;i<mInputStreamHandler->mStreamIdVector.size();i++)
         {
-            if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive)==0)
+            if(QString::compare(streamId, mInputStreamHandler->mStreamIdVector[i], Qt::CaseSensitive)==0)
             {
                 return i;
             }
         }
-        //If the streamId does not exist, push it and buffers/locks
-        addStreamToVector(streamId,mStreamIdVector.size());
-        return mStreamIdVector.size();
     }
-    else
-    {
-        //If this stream is the first to join, push it and buffer/locks
-        addStreamToVector(streamId,0);
-        return 0;
-    }
-
-}
-
-void SocketHandler::addStreamToVector(QString streamId,int index)
-{
-    QByteArray* tempAudioBuffer = new QByteArray();
-    QByteArray* tempVideoBuffer = new QByteArray();
-    mAudioBufferVector.push_back(tempAudioBuffer);
-    mVideoBufferVector.push_back(tempVideoBuffer);
-    std::mutex* tempAudioLock = new std::mutex;
-    std::mutex* tempVideoLock = new std::mutex;
-    mAudioMutexVector.push_back(tempAudioLock);
-    mVideoMutexVector.push_back(tempVideoLock);
-    mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock,tempAudioBuffer,mBufferSize));
-    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock,mImageHandler,tempVideoBuffer,mBufferSize,index+1));
-    mStreamIdVector.push_back(streamId);
-    mAudioPlaybackStartedVector.push_back(false);
-    mVideoPlaybackStartedVector.push_back(false);
-
-    //Your own image is at 0, so we add 1 here and in videoPlayback constructor
-    mImageHandler->addPeer(index+1);
+    qDebug() << "Vi er fucked2" << streamId;
+    qDebug() << "StreamId: " << streamId;
+    qDebug() << "StreamIdVector: " << mInputStreamHandler->mStreamIdVector;
+    exit(1);
 }
 
 int SocketHandler::sendDatagram(QByteArray arr)
@@ -167,12 +138,12 @@ int SocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr,512-arrToPrepend.size());
             temp.prepend(arrToPrepend);
             arr.remove(0,512-arrToPrepend.size());
-            ret = udpSocket->writeDatagram(temp, temp.size(), address, port);
+            ret = udpSocket->writeDatagram(temp, temp.size(), mAddress, port);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret = udpSocket->writeDatagram(arr, arr.size(), address, port);
+            ret = udpSocket->writeDatagram(arr, arr.size(), mAddress, port);
             break;
         }
         //qDebug() << ret << " size: " << arr.size();

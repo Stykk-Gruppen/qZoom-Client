@@ -54,14 +54,18 @@ void ImageHandler::addPeer(uint8_t index)
 
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
+    imgLock.lock();
+
+
     if(index>0){
         //qDebug() << index;
     }
     if(mImageMap[index] != image)
     {
-
         mImageMap[index] = image;
     }
+
+    imgLock.unlock();
 }
 
 void ImageHandler::veryFunStianLoop()
@@ -102,6 +106,10 @@ void ImageHandler::veryFunStianLoop()
 
 void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8_t index)
 {
+    SwsContext *imgConvertCtx = nullptr;
+    AVFrame	*frameRGB = av_frame_alloc();
+
+
     if(codecContext == nullptr)
     {
         emit updateImage(generateGenericImage(mSettings->getDisplayName()), 0);
@@ -132,18 +140,21 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
             memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0]);
         }
     }
+
     av_freep(&frameRGB->data[0]);
     av_frame_unref(frameRGB);
+
     sws_freeContext(imgConvertCtx);
+
     //av_frame_free(&frameRGB);
     emit updateImage(img, index);
-
     //av_frame_unref(frameRGB);
     //av_frame_free(&frameRGB);
     //delete frameRGB;
     //sws_freeContext(imgConvertCtx);
     av_freep(&frameRGB->data[0]);
-    //av_frame_free(&frame);
+
+    av_frame_free(&frameRGB);
 
     //av_packet_unref(&packet);
 }

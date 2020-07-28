@@ -8,30 +8,6 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     mRoomId = "Debug";
     mIpAddress = "Ipaddress";
 
-    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
-    const QNetworkInterface qi = QNetworkInterface();
-    //qDebug() << localhost;
-    //const QHostAddress &localhost = QHostAddress();
-    for(const QNetworkInterface &interface: QNetworkInterface::allInterfaces())
-    {
-        if(!interface.flags().testFlag(QNetworkInterface::IsLoopBack) && interface.type() == QNetworkInterface::Ethernet){
-            foreach (QNetworkAddressEntry entry, interface.addressEntries())
-            {
-               // qDebug() << entry.ip();
-                /*if ( interface.hardwareAddress() != "00:00:00:00:00:00" && entry.ip().toString().contains(".") && !interface.humanReadableName().contains("VM"))
-                    qDebug() << interface.name() + " "+ entry.ip().toString() +" " + interface.hardwareAddress();*/
-            }
-        }
-    }
-    for (const QHostAddress &address: QNetworkInterface::allAddresses())
-    {
-        //qDebug() << address.toString();
-        /*if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
-        {
-             mIpAddress = address.toString();
-             qDebug() << mIpAddress;
-        }*/
-    }
 }
 
 UserHandler* SessionHandler::getUser()
@@ -83,17 +59,16 @@ void SessionHandler::addUser()
     if (!mUser->isGuest())
     {
         QSqlQuery q(mDb->mDb);
-        q.prepare("INSERT INTO roomSession (roomId, userId, ipAddress) VALUES (:roomId, :userId, :ipAddress)");
+        q.prepare("INSERT INTO roomSession (roomId, userId) VALUES (:roomId, :userId)");
         q.bindValue(":roomId", mRoomId);
         q.bindValue(":userId", mUser->getUserId());
-        q.bindValue(":ipAddress", mIpAddress);
         if (q.exec())
         {
             qDebug() << "Added user to the session";
         }
         else
         {
-            qDebug() << "Failed Query" << Q_FUNC_INFO;
+            qDebug() << "Failed Query" << Q_FUNC_INFO << " reason: " << q.lastError();
         }
 
     }

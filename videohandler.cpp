@@ -4,7 +4,7 @@
 
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
                            ImageHandler* imageHandler, SocketHandler* _socketHandler,
-                           int bufferSize, QObject* parent): QObject(parent)
+                           int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent): QObject(parent)
 {
     mBufferSize = bufferSize;
     writeToFile = false;
@@ -18,6 +18,11 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     this->imageHandler = imageHandler;
     writeLock = _writeLock;
     //ofmt_ctx = _ofmt_ctx;
+
+    mStruct = new mSocketStruct;
+    mStruct->udpSocket = socketHandler;
+    mStruct->tcpSocket = tcpSocketHandler;
+    mStruct->headerSent = false;
 }
 
 int VideoHandler::init()
@@ -153,7 +158,7 @@ int VideoHandler::init()
     void* avio_buffer = av_malloc(avio_buffer_size);
     AVIOContext* custom_io = avio_alloc_context (
                 (unsigned char*)avio_buffer, avio_buffer_size,
-                1, (void*) socketHandler,
+                1, (void*) mStruct,
                 NULL, &custom_io_write, NULL);
     ofmt_ctx->pb = custom_io;
     av_dict_set(&options, "live", "1", 0);
@@ -167,6 +172,14 @@ int VideoHandler::init()
         fprintf(stderr, "Could not open write header");
         exit(1);
     }
+
+    //if(!mStruct->headerSent)
+    {
+        mStruct->headerSent = true;
+        mStruct->tcpSocket->writeHeader();
+        qDebug() << "After tcp writeHeader";
+    }
+
 }
 
 static int64_t pts = 0;
@@ -379,8 +392,13 @@ void VideoHandler::grabFrames() {
             writeLock->lock();
             //qDebug() << "Writing Video Packet";
             int ret = av_interleaved_write_frame(ofmt_ctx, outPacket);
-            //qDebug() << "Wrote video packet ret = " << ret;
             writeLock->unlock();
+
+
+
+
+
+            //qDebug() << "Wrote video packet ret = " << ret;
             //int ret = av_write_frame(ofmt_ctx, outPacket);
 
             //int ret = av_write_frame(ofmt_ctx, pkt);
@@ -437,17 +455,33 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
 {
     //qDebug() << "Inne i custom io write";
 
-    SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
+
+    mSocketStruct *s = reinterpret_cast<mSocketStruct*>(opaque);
+
+
+
+    //SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
 
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
-    //Debug() << "written to socket";
 
-    //Prepends the video header byte needed by socketHandler
-    send.prepend(int(1));
 
-    return socketHandler->sendDatagram(send);
+
+    if(!s->headerSent)
+    {
+
+        s->tcpSocket->myHeader.append(send);
+        return 0;
+    }
+    else
+    {
+        //Prepends the video header byte needed by socketHandler
+        send.prepend(int(1));
+        return s->udpSocket->sendDatagram(send);
+
+    }
+
 }
 
 void VideoHandler::toggleGrabFrames(bool a)

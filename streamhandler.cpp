@@ -1,7 +1,7 @@
 #include "streamhandler.h"
 
 
-StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, Settings* settings, QObject *parent) : QObject(parent)
+StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
     mTime = av_gettime();
@@ -9,6 +9,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mAudioDevice = settings->getDefaultAudioInput();
     mImageHandler = _imageHandler;
     mSocketHandler = _socketHandler;
+    mTcpSocketHandler = tcpSocketHandler;
     if(!mVideoEnabled) mImageHandler->readImage(nullptr, nullptr, 0);
 }
 
@@ -73,7 +74,7 @@ void StreamHandler::enableVideo()
         qDebug() << "new videohandler";
         //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
-                                         mTime, mImageHandler, mSocketHandler,mBufferSize);
+                                         mTime, mImageHandler, mSocketHandler,mBufferSize, mTcpSocketHandler);
     }
 
     int error = mVideoHandler->init();
@@ -84,7 +85,7 @@ void StreamHandler::enableVideo()
     }
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
-
+    qDebug() << "Before grab frames";
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
 }
 
