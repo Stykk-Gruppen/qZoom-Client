@@ -1,6 +1,8 @@
 import QtQuick.Window 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.15
+import QtQuick.Dialogs 1.3
 import "../components" as C
 
 ApplicationWindow {
@@ -16,6 +18,42 @@ ApplicationWindow {
         id: settings
     }
 
+    Dialog {
+        id: errorMessage
+        visible: false
+        width: 400
+        height: 300
+        //modal: true
+        title: "Error"
+        //anchors.centerIn: parent
+        standardButtons: Dialog.Close | Dialog.Help
+
+        property alias text : errorText.text
+
+        Rectangle{
+            anchors.centerIn: parent
+            Text {
+                id: errorText
+                anchors.centerIn: parent
+            }
+
+        }
+
+
+        onRejected: console.log("Close clicked")
+        onHelp: {
+            console.log("Help clicked, opening browser..");
+            Qt.openUrlExternally("https://github.com/Feqzz/qZoom-Client/wiki");
+
+        }
+        Connections {
+            target: errorHandler
+            function onShowError(error) {
+                showErrorMessage(error);
+            }
+        }
+    }
+
 
 
     StackView {
@@ -25,27 +63,33 @@ ApplicationWindow {
 
         replaceEnter: Transition {
 
-                PropertyAnimation {
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: 0
-                }
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 0
             }
-            replaceExit: Transition {
-                PropertyAnimation {
-                    property: "opacity"
-                    duration: 0
-                    from: 1
-                    to: 0
+        }
+        replaceExit: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                duration: 0
+                from: 1
+                to: 0
 
-                }
             }
+        }
+    }
+
+    function showErrorMessage(errorString){
+        errorMessage.text = errorString
+        errorMessage.visible = true;
     }
 
     // After loading show initial Login Page
     Component.onCompleted: {
-        stackView.push("qrc:/view/home.qml")
+        stackView.push("qrc:/view/home.qml");
+
     }
 
     function pushPage(page) {

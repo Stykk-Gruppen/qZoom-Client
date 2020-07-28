@@ -41,7 +41,8 @@ void TcpSocketHandler::writeHeader()
 
     if(firstRound)
     {
-        QString streamId = mSessionHandler->getUser()->getStreamId();
+        QString streamId = (mSessionHandler->isGuest()) ? mSessionHandler->getUser()->getGuestName() : mSessionHandler->getUser()->getStreamId();
+        //QString streamId = mSessionHandler->getUser()->getStreamId();
         QString roomId = mSessionHandler->getRoomId();
 
         myHeader.prepend(streamId.toLocal8Bit().data());

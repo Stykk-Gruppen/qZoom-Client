@@ -47,6 +47,7 @@ void StreamHandler::enableAudio()
         exit(1);
     }
 
+
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
     QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
 
@@ -57,12 +58,10 @@ void StreamHandler::disableAudio()
     if(mAudioHandler != nullptr)
     {
         mAudioEnabled = false;
-
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
         //delete mAudioHandler;
         qDebug() << "audio disabled";
     }
-
 }
 
 void StreamHandler::enableVideo()

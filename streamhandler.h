@@ -33,6 +33,7 @@ extern "C" {
 }
 #include "imagehandler.h"
 #include "settings.h"
+#include "handlers/errorhandler.h"
 
 class StreamHandler : public QObject
 {

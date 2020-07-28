@@ -35,6 +35,7 @@ private:
     bool mUserHasRoom;
     void getUserRoom();
     bool addGuestUserToDatabase();
+    void setDefaultRoomID();
 
 
 signals:
