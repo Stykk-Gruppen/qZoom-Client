@@ -119,7 +119,7 @@ int SocketHandler::sendDatagram(QByteArray arr)
     int audioOrVideIndex = -1;
     audioOrVideIndex = arr[0];
     arr.remove(0,1);
-    QString streamId = mSessionHandler->getUser()->getStreamId();
+    QString streamId = (mSessionHandler->isGuest()) ? mSessionHandler->getUser()->getGuestName() : mSessionHandler->getUser()->getStreamId();
     QString roomId = mSessionHandler->getRoomId();
     QByteArray arrToPrepend = QByteArray(audioOrVideIndex,1);
 

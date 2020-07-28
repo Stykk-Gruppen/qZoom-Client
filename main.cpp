@@ -48,12 +48,12 @@ extern "C"
 int main(int argc, char *argv[])
 {
     QHostAddress address;
-    //address = QHostAddress::LocalHost;
+    address = QHostAddress::LocalHost;
     //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
-    address = QHostAddress("213.162.241.177"); //KentServer
+    //address = QHostAddress("213.162.241.177"); //KentServer
 
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

@@ -63,7 +63,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
             }
         }
         //If the streamId does not exist, push it and buffers/locks
-        addStreamToVector(streamId,mStreamIdVector.size());
+        addStreamToVector(streamId, mStreamIdVector.size());
         return mStreamIdVector.size();
     }
     else

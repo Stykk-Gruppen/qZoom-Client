@@ -5,7 +5,8 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     mDb = _db;
     mUser = _user;
     //Set default room id
-    mRoomId = "Debug";
+    //mRoomId = "Debug";
+    setDefaultRoomID();
     mIpAddress = "Ipaddress";
 
 }
@@ -104,6 +105,7 @@ bool SessionHandler::leaveSession()
         if (q.exec())
         {
             qDebug() << "Removed guest from the session";
+            setDefaultRoomID();
             return true;
         }
         else
@@ -185,4 +187,9 @@ bool SessionHandler::addGuestUserToDatabase()
         qDebug() << "Failed Query" << Q_FUNC_INFO;
     }
     return false;
+}
+
+void SessionHandler::setDefaultRoomID()
+{
+    mRoomId = "Debug";
 }
