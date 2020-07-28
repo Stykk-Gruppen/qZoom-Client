@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "handlers/errorhandler.h"
 
 class Settings : public QObject
 {

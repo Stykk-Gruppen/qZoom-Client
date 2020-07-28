@@ -13,13 +13,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcodec -lavfilter -I/usr/include -lao
-
+TARGET.CAPABILITY += SwEvent
 
 SOURCES += \
         audiohandler.cpp \
         audioplaybackhandler.cpp \
         config.cpp \
         core/database.cpp \
+        handlers/errorhandler.cpp \
         handlers/sessionhandler.cpp \
         handlers/userhandler.cpp \
         imagehandler.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
     audiohandler.h \
     audioplaybackhandler.h \
     core/database.h \
+    handlers/errorhandler.h \
     handlers/sessionhandler.h \
     handlers/userhandler.h \
     imagehandler.h \
