@@ -4,16 +4,17 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-
+#include "inputstreamhandler.h"
 
 //SKal lytte fra server, og opprette nye instanser av videoplaybackhandler og audioplaybackhandler basert på streamId og RoomId?
 class TcpServerHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpServerHandler(QObject *parent = nullptr);
+    explicit TcpServerHandler(InputStreamHandler* inputStreamHandler, int port, QObject *parent = nullptr);
 
     void init();
+    void close();
     void wait();
     QByteArray getMessage();
 signals:
@@ -21,11 +22,13 @@ signals:
 
 private:
     QTcpServer* mTcpServer;
-    QTcpSocket* tcpServerConnection = nullptr;
+    QTcpSocket* mTcpServerConnection = nullptr;
     void readTcpPacket();
     void acceptTcpConnection();
     int mPort;
     QByteArray message;
+    InputStreamHandler* mInputStreamHandler;
+
 };
 
 #endif // TCPSERVERHANDLER_H

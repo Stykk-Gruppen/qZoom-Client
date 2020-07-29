@@ -173,12 +173,10 @@ int VideoHandler::init()
         exit(1);
     }
 
-    if(!mStruct->headerSent)
-    {
-        mStruct->headerSent = true;
-        mStruct->tcpSocket->writeHeader();
-        qDebug() << "After tcp writeHeader";
-    }
+
+    mStruct->headerSent = true;
+
+
 
     return ret;
 }

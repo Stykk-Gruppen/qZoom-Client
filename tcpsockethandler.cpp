@@ -1,14 +1,16 @@
 #include "tcpsockethandler.h"
 
 
-TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, SessionHandler* sessionHandler, QHostAddress address, int port, QObject* parent): QObject(parent)
+TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QHostAddress address, int port, QObject* parent): QObject(parent)
 {
     mAddress = address;
     mPort = port;
     qDebug() << mAddress;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
-    mSessionHandler = sessionHandler;
+    mStreamId = streamId;
+    mRoomId = roomId;
+
 }
 
 void TcpSocketHandler::init()
@@ -19,13 +21,12 @@ void TcpSocketHandler::init()
     connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 */
     connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
+}
 
-
-
-
-
-
-
+void TcpSocketHandler::close()
+{
+    mSocket->close();
+    delete mSocket;
 }
 
 void TcpSocketHandler::writeLeaveSignal()
@@ -41,6 +42,7 @@ void TcpSocketHandler::writeLeaveSignal()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
+    qDebug() << "About to write header";
     static bool firstRound = true;
     //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
@@ -52,23 +54,21 @@ void TcpSocketHandler::writeHeader()
 
     if(firstRound)
     {
-        QString streamId = (mSessionHandler->isGuest()) ? mSessionHandler->getUser()->getGuestName() : mSessionHandler->getUser()->getStreamId();
-        //QString streamId = mSessionHandler->getUser()->getStreamId();
-        QString roomId = mSessionHandler->getRoomId();
 
-        myHeader.prepend(streamId.toLocal8Bit().data());
-        myHeader.prepend(streamId.size());
+
+        myHeader.prepend(mStreamId.toLocal8Bit().data());
+        myHeader.prepend(mStreamId.size());
 
         //Puts the roomId and its size at the front of the array
-        myHeader.prepend(roomId.toLocal8Bit().data());
-        myHeader.prepend(roomId.size());
+        myHeader.prepend(mRoomId.toLocal8Bit().data());
+        myHeader.prepend(mRoomId.size());
 
         firstRound = false;
     }
 
 
 
-    //qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
 
 
     mSocket->write(myHeader);
@@ -107,7 +107,7 @@ void TcpSocketHandler::writeHeader()
         }
     }
 
-    int numOfHeaders = reply[0];
+    /*int numOfHeaders = reply[0];
     qDebug() << "number of headers recieved from server: " << numOfHeaders;
     reply.remove(0,1);
     //QString data(reply);
@@ -124,6 +124,7 @@ void TcpSocketHandler::writeHeader()
         mInputStreamHandler->handleHeader(temp);
         reply.remove(0, reply.indexOf(27));
     }
+    */
 
     //mSocket->write("0");
 

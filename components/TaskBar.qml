@@ -61,10 +61,10 @@ Rectangle {
             onClicked: {
                 if (toggled) {
                     state = "red"
-                    streamHandler.disableAudio()
+                    sessionHandler.disableAudio()
                 } else {
                     state = "normal"
-                    streamHandler.enableAudio()
+                    sessionHandler.enableAudio()
                 }
                 toggled = !toggled
             }
@@ -78,10 +78,10 @@ Rectangle {
             onClicked: {
                 if (toggled) {
                     state = "red"
-                    streamHandler.disableVideo()
+                    sessionHandler.disableVideo()
                 } else {
                     state = "normal"
-                    streamHandler.enableVideo()
+                    sessionHandler.enableVideo()
                 }
                 toggled = !toggled
             }
@@ -116,7 +116,7 @@ Rectangle {
             font.pixelSize: 32
             property var toggled: true
             onClicked: {
-                streamHandler.stopRecording();
+                //streamHandler.stopRecording();
                 sessionHandler.leaveSession();
                 changePage("home");
             }

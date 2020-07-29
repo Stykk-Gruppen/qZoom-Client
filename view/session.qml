@@ -119,8 +119,8 @@ Rectangle {
         {
             streamHandler.enableVideo();
         }*/
-        streamHandler.init();
-        streamHandler.record();
+
+
     }
     /*
     function addScreen() {

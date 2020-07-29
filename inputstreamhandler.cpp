@@ -7,6 +7,13 @@ InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSiz
     mAddress = address;
 }
 
+void InputStreamHandler::init()
+{
+    //new TcpServerHandler();
+    //TcpServerHandler.init();
+
+}
+
 void InputStreamHandler::handleHeader(QByteArray data)
 {
     int streamIdLength = data[0];

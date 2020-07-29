@@ -1,6 +1,6 @@
 #include "sessionhandler.h"
 
-SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *parent) : QObject(parent)
+SessionHandler::SessionHandler(Database* _db, UserHandler* _user, ImageHandler* imageHandler,  Settings* settings, int bufferSize, QHostAddress address, int port,  QObject *parent) : QObject(parent)
 {
     mDb = _db;
     mUser = _user;
@@ -8,6 +8,13 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, QObject *paren
     //mRoomId = "Debug";
     setDefaultRoomID();
     mIpAddress = "Ipaddress";
+    mSettings = settings;
+    mBufferSize = bufferSize;
+    mPort = port;
+    mAddress = address;
+    mImageHandler = imageHandler;
+
+
 
 }
 
@@ -16,8 +23,57 @@ UserHandler* SessionHandler::getUser()
     return mUser;
 }
 
+void SessionHandler::enableVideo()
+{
+   mStreamHandler->enableVideo();
+
+}
+
+void SessionHandler::disableVideo()
+{
+    mStreamHandler->disableVideo();
+}
+
+void SessionHandler::enableAudio()
+{
+    mStreamHandler->enableAudio();
+}
+
+void SessionHandler::disableAudio()
+{
+    mStreamHandler->disableAudio();
+}
+
+void SessionHandler::initOtherStuff()
+{
+    QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
+    QString roomId = getRoomId();
+    mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
+    mSocketHandler = new SocketHandler(mBufferSize, mPort, mInputStreamHandler, streamId, roomId, mAddress);
+    mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
+    mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, mAddress, mPort);
+    mStreamHandler = new StreamHandler(mImageHandler, mSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
+
+    //Init sending of our header, empty or not
+    mTcpSocketHandler->init();
+    mStreamHandler->init();
+
+    //Init tcpServerHandler
+    mTcpServerHandler->init();
+
+
+}
+
+void SessionHandler::closeOtherStuff()
+{
+}
+
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 {
+
+    qDebug() << "RoomId: " << _roomId;
+
+
     QSqlQuery q(mDb->mDb);
     q.prepare("SELECT r.id, r.password, u.username FROM room AS r, user AS u WHERE r.host = u.id AND r.id = :roomId AND r.password = :roomPassword");
     q.bindValue(":roomId", _roomId);
@@ -31,6 +87,14 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             mRoomPassword = q.value(1).toString();
             mRoomHostUsername = q.value(2).toString();
             addUser();
+
+
+            //Init everything that needs init
+            initOtherStuff();
+
+
+
+
             return true;
         }
         else
@@ -57,6 +121,7 @@ QString SessionHandler::getRoomPassword()
 
 void SessionHandler::addUser()
 {
+    qDebug() << "User is guest: " << mUser->isGuest();
     if (!mUser->isGuest())
     {
         QSqlQuery q(mDb->mDb);
@@ -78,10 +143,9 @@ void SessionHandler::addUser()
         if (addGuestUserToDatabase())
         {
             QSqlQuery q(mDb->mDb);
-            q.prepare("INSERT INTO roomSession (roomId, userId, ipAddress) VALUES (:roomId, :userId, :ipAddress)");
+            q.prepare("INSERT INTO roomSession (roomId, userId) VALUES (:roomId, :userId)");
             q.bindValue(":roomId", mRoomId);
             q.bindValue(":userId", mUser->getGuestId());
-            q.bindValue(":ipAddress", mIpAddress);
             if (q.exec())
             {
                 qDebug() << "Added guest to the session";
@@ -96,6 +160,10 @@ void SessionHandler::addUser()
 
 bool SessionHandler::leaveSession()
 {
+    //CLose all that is opened;
+    closeOtherStuff();
+
+
     if (mUser->isGuest())
     {
         QSqlQuery q(mDb->mDb);

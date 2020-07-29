@@ -7,7 +7,6 @@
 #include <QNetworkDatagram>
 #include <QProcess>
 #include <mutex>
-#include "handlers/sessionhandler.h"
 #include "imagehandler.h"
 #include "videoplaybackhandler.h"
 #include "audioplaybackhandler.h"
@@ -19,30 +18,22 @@ class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(int, int, InputStreamHandler* inputStreamHandler, SessionHandler*, QHostAddress address, QObject *parent = nullptr);
+    explicit SocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
+    void closeSocket();
     QTcpSocket* mTCPSocket;
-    QUdpSocket* udpSocket;
+    QUdpSocket* mUdpSocket;
     int sendDatagram(QByteArray arr);
     QHostAddress mAddress;
-    int port;
+    int mPort;
 public slots:
     void readPendingDatagrams();
 private:
     void addStreamToVector(QString,int);
     int findStreamIdIndex(QString);
-    /*std::vector<QString> mStreamIdVector;
-    std::vector<QByteArray*> mAudioBufferVector;
-    std::vector<QByteArray*> mVideoBufferVector;
-    std::vector<std::mutex*> mAudioMutexVector;
-    std::vector<std::mutex*> mVideoMutexVector;
-    std::vector<AudioPlaybackHandler*> mAudioPlaybackHandlerVector;
-    std::vector<VideoPlaybackHandler*> mVideoPlaybackHandlerVector;
-    std::vector<bool> mVideoPlaybackStartedVector;
-    std::vector<bool> mAudioPlaybackStartedVector;*/
-    SessionHandler* mSessionHandler;
-    //ImageHandler* mImageHandler;
     int mBufferSize;
+    QString mRoomId;
+    QString mStreamId;
     InputStreamHandler* mInputStreamHandler;
     uint signalCount = 0;
     struct mBufferAndLockStruct {

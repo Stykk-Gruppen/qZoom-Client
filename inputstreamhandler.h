@@ -19,7 +19,7 @@ public:
     explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent = nullptr);
     void addStreamToVector(QString,int);
     int findStreamIdIndex(QString);
-
+    void init();
     std::vector<QByteArray*> mVideoHeaderVector;
     std::vector<QString> mStreamIdVector;
     std::vector<QByteArray*> mAudioBufferVector;

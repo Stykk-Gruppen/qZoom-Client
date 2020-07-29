@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
-    address = QHostAddress("213.162.241.177"); //KentServer
+    //address = QHostAddress("213.162.241.177"); //KentServer
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
@@ -88,30 +88,47 @@ int main(int argc, char *argv[])
 
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
-    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
-    InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
+    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject, imageHandlerObject, settings.data(), bufferSize, address, port);
 
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandler, sessionHandlerObject, address);
-    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, port);
-    tcpSocketHandler->init();
+    //InputStreamHandler* inputStreamHandlerObject = new InputStreamHandler(imageHandlerObject, bufferSize, address);
+    //SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandlerObject, sessionHandlerObject, address);
+    //TcpServerHandler* tcpServerHandlerObject = new TcpServerHandler(inputStreamHandlerObject, sessionHandlerObject, port);
+    //TcpSocketHandler* tcpSocketHandlerObject = new TcpSocketHandler(inputStreamHandlerObject, sessionHandlerObject, address, port);
+    //tcpSocketHandlerObject->init();
 
-    QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
 
-    QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data(), tcpSocketHandler));
 
     //QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
     //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
+
+
+
+
+
+
+    //QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data(), tcpSocketHandlerObject));
+    QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
     QScopedPointer<SessionHandler> sessionHandler(sessionHandlerObject);
+    //QScopedPointer<SocketHandler> socketHandler(socketHandlerObject);
+    //QScopedPointer<InputStreamHandler> inputStreamHandler(inputStreamHandlerObject);
+    //QScopedPointer<TcpServerHandler> tcpServerHandler(tcpServerHandlerObject);
+    //QScopedPointer<TcpSocketHandler> tcpSocketHandler(tcpSocketHandlerObject);
     //QScopedPointer<ErrorHandler> errorHandler(errorHandler);
+
+
+
+
+
+
 
     //streamHandler->record();
     //streamHandler->finish();
     //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
-    engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
+    //engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
     engine.rootContext()->setContextProperty("backendSettings", settings.data());
     engine.rootContext()->setContextProperty("errorHandler", errorHandler);
     engine.rootContext()->setContextProperty("userHandler", userHandler.data());
@@ -140,7 +157,7 @@ int main(int argc, char *argv[])
     //AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
 
 
-    errorHandler->giveErrorDialog("This is a test of the backend error handling");
+    //errorHandler->giveErrorDialog("This is a test of the backend error handling");
 
 
     return app.exec();

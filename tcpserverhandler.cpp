@@ -1,9 +1,9 @@
 #include "tcpserverhandler.h"
 
-TcpServerHandler::TcpServerHandler(QObject *parent) : QObject(parent)
+TcpServerHandler::TcpServerHandler(InputStreamHandler* inputStreamHandler, int port, QObject *parent) : QObject(parent)
 {
-    mPort = 1338;
-    init();
+    mPort = port;
+    mInputStreamHandler = inputStreamHandler;
 }
 
 void TcpServerHandler::init()
@@ -13,29 +13,71 @@ void TcpServerHandler::init()
     mTcpServer->listen(QHostAddress::Any, mPort);
 }
 
+void TcpServerHandler::close()
+{
+    mTcpServer->close();
+    delete mTcpServer;
+}
+
 void TcpServerHandler::acceptTcpConnection()
 {
-    tcpServerConnection = mTcpServer->nextPendingConnection();
-        if (!tcpServerConnection) {
-            qDebug() << "Error: got invalid pending connection!";
-        }
+    mTcpServerConnection = mTcpServer->nextPendingConnection();
+    if (!mTcpServerConnection) {
+        qDebug() << "Error: got invalid pending connection!";
+    }
 
-    connect(tcpServerConnection, &QIODevice::readyRead, this, &TcpServerHandler::readTcpPacket);
+    connect(mTcpServerConnection, &QIODevice::readyRead, this, &TcpServerHandler::readTcpPacket);
     //connect(tcpServerConnection, &QAbstractSocket::errorOccurred, this, &SocketHandler::displayError);
-    connect(tcpServerConnection, &QTcpSocket::disconnected, tcpServerConnection, &QTcpSocket::deleteLater);
-
-    mTcpServer->close();
+    connect(mTcpServerConnection, &QTcpSocket::disconnected, mTcpServerConnection, &QTcpSocket::deleteLater);
 }
 
 void TcpServerHandler::readTcpPacket()
 {
-    message = tcpServerConnection->readAll();
+    QByteArray data = mTcpServerConnection->readAll();
+    qDebug() << mTcpServerConnection->peerAddress();
+    QByteArray originalData = data;
+    QByteArray header;
+
+
+
+    int code = data[0];
+    data.remove(0, 1);
+    switch(code)
+    {
+    case 0:
+    {
+        //HEADER
+        int numOfHeaders = data[0];
+        qDebug() << "number of headers recieved from server: " << numOfHeaders;
+        data.remove(0,1);
+        //QString data(reply);
+
+
+        //qDebug() << "DataString: " << data;
+        //qDebug() << reply.indexOf(27);
+        for(int i = 0; i < numOfHeaders; i++)
+        {
+            QByteArray temp = QByteArray(data, data.indexOf(27));
+            //qDebug() << "Temp: " << temp;
+            mInputStreamHandler->handleHeader(temp);
+            data.remove(0, data.indexOf(27));
+        }
+        //mSocket->write("0");
+        break;
+    }
+
+    case 1:
+    {
+        //REmove the user with this streamId
+
+    }
+    default:
+        qDebug() << "Dont understand the code sent in beginning of tcp mesasge";
+    }
+
+    ;
 }
 
-void TcpServerHandler::wait()
-{
-    tcpServerConnection->waitForReadyRead(5000);
-}
 
 QByteArray TcpServerHandler::getMessage()
 {

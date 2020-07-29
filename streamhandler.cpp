@@ -19,12 +19,16 @@ void StreamHandler::init()
 {
     mVideoEnabled = mSettings->getVideoOn();
     mAudioEnabled = mSettings->getAudioOn();
-
+    //Setter opp video
     if(mVideoEnabled) enableVideo();
-    else grabVideoHeader();
+    //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
+    mTcpSocketHandler->init();
+    mTcpSocketHandler->writeHeader();//
 
     if(mAudioEnabled) enableAudio();
 }
+
+
 
 void StreamHandler::grabVideoHeader()
 {
@@ -117,6 +121,7 @@ void StreamHandler::enableVideo()
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
     qDebug() << "Before grab frames";
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
+    qDebug() << "Grab frames started";
 }
 
 void StreamHandler::disableVideo()

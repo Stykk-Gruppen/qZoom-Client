@@ -1,13 +1,14 @@
 #include "sockethandler.h"
 
 SocketHandler::SocketHandler(int bufferSize, int _port, InputStreamHandler* inputStreamHandler,
-                             SessionHandler* _sessionHandler, QHostAddress address,QObject *parent) : QObject(parent)
+                             QString streamId, QString roomId, QHostAddress address,QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
-    mSessionHandler = _sessionHandler;
     mInputStreamHandler = inputStreamHandler;
     mAddress = address;
-    port = _port;
+    mPort = _port;
+    mStreamId = streamId;
+    mRoomId = roomId;
     initSocket();
 }
 /**
@@ -17,10 +18,16 @@ SocketHandler::SocketHandler(int bufferSize, int _port, InputStreamHandler* inpu
  */
 void SocketHandler::initSocket()
 {
-    udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::Any, port, QAbstractSocket::ShareAddress);
-    connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
+    mUdpSocket = new QUdpSocket(this);
+    mUdpSocket->bind(QHostAddress::Any, mPort, QAbstractSocket::ShareAddress);
+    connect(mUdpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
 
+}
+
+void SocketHandler::closeSocket()
+{
+    mUdpSocket->close();
+    delete mUdpSocket;
 }
 
 /**
@@ -32,9 +39,9 @@ void SocketHandler::initSocket()
 void SocketHandler::readPendingDatagrams()
 {
 
-    while (udpSocket->hasPendingDatagrams())
+    while (mUdpSocket->hasPendingDatagrams())
     {
-        QNetworkDatagram datagram = udpSocket->receiveDatagram();
+        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address()) continue;
         QByteArray data = datagram.data();
 
@@ -142,8 +149,7 @@ int SocketHandler::sendDatagram(QByteArray arr)
      * In order for the dividing to work, we need to remove the audioOrVideo byte
      * at the start of the arr, and prepend it to the smaller arrays
     */
-    QString streamId = (mSessionHandler->isGuest()) ? mSessionHandler->getUser()->getGuestName() : mSessionHandler->getUser()->getStreamId();
-    QString roomId = mSessionHandler->getRoomId();
+
 
     //Creats a new QByteArray from the first byte in arr, which should be the audioOrVideo byte.
     //Then it removes the byte from arr
@@ -152,12 +158,12 @@ int SocketHandler::sendDatagram(QByteArray arr)
 
     //Puts the streamId and its size at the front of the array,
     //so the server knows where to send the stream
-    arrToPrepend.prepend(streamId.toLocal8Bit().data());
-    arrToPrepend.prepend(streamId.size());
+    arrToPrepend.prepend(mStreamId.toLocal8Bit().data());
+    arrToPrepend.prepend(mStreamId.size());
 
     //Puts the roomId and its size at the front of the array
-    arrToPrepend.prepend(roomId.toLocal8Bit().data());
-    arrToPrepend.prepend(roomId.size());
+    arrToPrepend.prepend(mRoomId.toLocal8Bit().data());
+    arrToPrepend.prepend(mRoomId.size());
 
     while(arr.size()>0){
         if(arr.size()>512-arrToPrepend.size())
@@ -170,16 +176,16 @@ int SocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr,512-arrToPrepend.size());
             temp.prepend(arrToPrepend);
             arr.remove(0,512-arrToPrepend.size());
-            ret += udpSocket->writeDatagram(temp, temp.size(), mAddress, port);
+            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret = udpSocket->writeDatagram(arr, arr.size(), mAddress, port);
+            ret = mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
             break;
         }
         if(ret<0){
-            qDebug() << udpSocket->error();
+            qDebug() << mUdpSocket->error();
             break;
         }
     }
