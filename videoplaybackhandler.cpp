@@ -11,6 +11,7 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct = new mBufferAndLockStruct();
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
+
     //Lagt til disse for å kunne få header via tcp
     mStruct->headerReceived = new bool(false);
     mStruct->headerBuffer = headerBuffer;
@@ -19,6 +20,7 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
+
 
    // qDebug() << "Inne i read packet";
 
@@ -144,7 +146,7 @@ void VideoPlaybackHandler::start()
         AVCodecContext *videoDecoderCodecContext;
         if(video_stream)
         {
-           // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
             AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
             AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);

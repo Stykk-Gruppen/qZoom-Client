@@ -25,6 +25,12 @@ void InputStreamHandler::handleHeader(QByteArray data)
     mVideoMutexVector[index]->unlock();
 }
 
+/**
+ * When recieving a UDP datagram, we need to know who owns the stream.
+ * The index will let readPendingDatagrams know which buffer, mutex and playbackhandler to use for both audio and video.
+ * @param streamId QString to find in mStreamIdVector
+ * @param index int
+ */
 void InputStreamHandler::addStreamToVector(QString streamId,int index)
 {
     qDebug() << "Adding streamId: " << streamId;

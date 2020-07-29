@@ -18,7 +18,7 @@ SocketHandler::SocketHandler(int bufferSize, int _port, InputStreamHandler* inpu
 void SocketHandler::initSocket()
 {
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::Any, port,QAbstractSocket::ShareAddress);
+    udpSocket->bind(QHostAddress::Any, port, QAbstractSocket::ShareAddress);
     connect(udpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
 
 }
@@ -61,6 +61,7 @@ void SocketHandler::readPendingDatagrams()
         data.remove(0, streamIdLength);
 
         int index = findStreamIdIndex(streamId);
+        if(index < 0) continue;
 
         //Checks the first byte in the datagram to determine if the datagram is audio or video
         int audioOrVideoInt = data[0];
@@ -100,6 +101,7 @@ void SocketHandler::readPendingDatagrams()
 
     signalCount++;
 }
+//TODO change this to use inputstreamhandler findStreamIdIndex?
 /**
  * When recieving a UDP datagram, we need to know who owns the stream.
  * The index will let readPendingDatagrams know which buffer, mutex and playbackhandler to use for both audio and video.
@@ -122,7 +124,7 @@ int SocketHandler::findStreamIdIndex(QString streamId)
     qDebug() << Q_FUNC_INFO << " failed to find streamId: " << streamId;
     qDebug() << "This means the server is sending datagrams to people it should not";
     qDebug() << "StreamIdVector: " << mInputStreamHandler->mStreamIdVector;
-    exit(1);
+    return -1;
 }
 /**
  * Send the QByteArray through the current udpSocket,
@@ -134,7 +136,7 @@ int SocketHandler::findStreamIdIndex(QString streamId)
  */
 int SocketHandler::sendDatagram(QByteArray arr)
 {
-    int ret;
+    int ret = 0;
     /*
      * In order for the dividing to work, we need to remove the audioOrVideo byte
      * at the start of the arr, and prepend it to the smaller arrays
@@ -167,12 +169,12 @@ int SocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr,512-arrToPrepend.size());
             temp.prepend(arrToPrepend);
             arr.remove(0,512-arrToPrepend.size());
-            ret = udpSocket->writeDatagram(temp, temp.size(), mAddress, port);
+            ret += udpSocket->writeDatagram(temp, temp.size(), mAddress, port);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret = udpSocket->writeDatagram(arr, arr.size(), mAddress, port);\
+            ret = udpSocket->writeDatagram(arr, arr.size(), mAddress, port);
             break;
         }
         if(ret<0){
