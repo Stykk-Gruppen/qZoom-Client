@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
-    int bufferSize = 8*1024;
+    int bufferSize = 16*1024;
     int port = 1337;
 
     Database* databaseObject = new Database();

@@ -102,8 +102,8 @@ int VideoHandler::init()
            // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
-            //outputVideoCodecContext->width = 160;
-            //outputVideoCodecContext->height = 120;
+            //outputVideoCodecContext->width = 1920;
+           // outputVideoCodecContext->height = 1080;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
             //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
@@ -146,7 +146,7 @@ int VideoHandler::init()
         out_stream->codecpar->codec_tag = 0;
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
         {
-            //out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         }
     }
 
@@ -252,7 +252,7 @@ void VideoHandler::grabFrames() {
             exit(1);
         }
 
-        if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
+        if (inputVideoCodecContext->pix_fmt == STREAM_PIX_FMT)
         {
             int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width,
                                                      outputVideoCodecContext->height, 1);
