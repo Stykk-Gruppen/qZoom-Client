@@ -19,7 +19,6 @@
 #include <libavformat/avformat.h>
 #include <QAudioInput>
 #include <QFile>
-#include "videohandler.h"
 #include <QTimer>
 #include "streamhandler.h"
 #include "videoplaybackhandler.h"
@@ -49,6 +48,13 @@ ErrorHandler* errorHandler;
 
 int main(int argc, char *argv[])
 {
+
+    //Registrer div ting, deprecated, men uten disse så blir det ffmpeg codec errors
+    av_register_all();
+    avcodec_register_all();
+    avdevice_register_all();
+
+
     errorHandler = new ErrorHandler;
 
     QHostAddress address;

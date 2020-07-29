@@ -144,7 +144,7 @@ void VideoPlaybackHandler::start()
         AVCodecContext *videoDecoderCodecContext;
         if(video_stream)
         {
-            //video_stream->codecpar-> |= AV_CODEC_FLAG_GLOBAL_HEADER;
+           // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
             AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
             AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);

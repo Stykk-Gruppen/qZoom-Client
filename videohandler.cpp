@@ -27,10 +27,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 int VideoHandler::init()
 {
-    //Registrer div ting
-   // av_register_all();
-   // avcodec_register_all();
-    avdevice_register_all();
+
     ifmt_ctx = NULL;
     //ofmt_ctx = NULL;
     int ret;

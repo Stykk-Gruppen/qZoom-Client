@@ -14,7 +14,6 @@ AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int6
 }
 int AudioHandler::openInputFile()
 {
-    avdevice_register_all();
     AVCodecContext *avctx;
     AVCodec *input_codec;
     int error;
