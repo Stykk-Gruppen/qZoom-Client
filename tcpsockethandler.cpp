@@ -52,7 +52,8 @@ void TcpSocketHandler::writeHeader()
 
     if(firstRound)
     {
-        QString streamId = mSessionHandler->getUser()->getStreamId();
+        QString streamId = (mSessionHandler->isGuest()) ? mSessionHandler->getUser()->getGuestName() : mSessionHandler->getUser()->getStreamId();
+        //QString streamId = mSessionHandler->getUser()->getStreamId();
         QString roomId = mSessionHandler->getRoomId();
 
         myHeader.prepend(streamId.toLocal8Bit().data());
@@ -80,7 +81,7 @@ void TcpSocketHandler::writeHeader()
     //qDebug() << "Reply from Server: \n" << reply;
     if(reply.size() <= 0)
     {
-        qDebug() << "Reply from tcp request was empty, should not happen @ " << Q_FUNC_INFO;
+        qDebug() << "Reply from tcp request was empty or timeout, should not happen @ " << Q_FUNC_INFO;
         return;
     }
     else if(reply.size()==1)

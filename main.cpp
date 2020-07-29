@@ -19,7 +19,6 @@
 #include <libavformat/avformat.h>
 #include <QAudioInput>
 #include <QFile>
-#include "videohandler.h"
 #include <QTimer>
 #include "streamhandler.h"
 #include "videoplaybackhandler.h"
@@ -49,13 +48,22 @@ ErrorHandler* errorHandler;
 
 int main(int argc, char *argv[])
 {
+
+    //Registrer div ting, deprecated, men uten disse så blir det ffmpeg codec errors
+    av_register_all();
+    avcodec_register_all();
+    avdevice_register_all();
+
+
     errorHandler = new ErrorHandler;
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
     int bufferSize = 8*1024;
+    int port = 1337;
     QHostAddress address;
-    //address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
+
+   // address = QHostAddress::LocalHost;
+    address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
@@ -74,13 +82,18 @@ int main(int argc, char *argv[])
 
 
     QScopedPointer<Settings> settings(new Settings());
+
+
+
+
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,inputStreamHandler, sessionHandlerObject, address);
-    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, 1337);
+
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandler, sessionHandlerObject, address);
+    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, port);
     tcpSocketHandler->init();
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);

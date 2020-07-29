@@ -11,6 +11,7 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct = new mBufferAndLockStruct();
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
+
     //Lagt til disse for å kunne få header via tcp
     mStruct->headerReceived = new bool(false);
     mStruct->headerBuffer = headerBuffer;
@@ -20,7 +21,8 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
 
-    qDebug() << "Inne i read packet";
+
+   // qDebug() << "Inne i read packet";
 
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
@@ -168,10 +170,10 @@ void VideoPlaybackHandler::start()
         //AVFrame* resampled = 0;
 
         while (1) {
-            qDebug() << "About to call av read frame";
+            //qDebug() << "About to call av read frame";
             //av_read_frame(fmt_ctx, NULL);
             ret = av_read_frame(fmt_ctx,&packet);
-            qDebug() << "AVREADFRAME: " << ret;
+            //qDebug() << "AVREADFRAME: " << ret;
             if(ret < 0)
             {
                 char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -224,7 +226,7 @@ void VideoPlaybackHandler::start()
 
                 //qDebug() << frame->data[0];
                 //qDebug() << mIndex;
-                qDebug() << "Sending image to imageHandler";
+               // qDebug() << "Sending image to imageHandler";
                 mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
             }
             else

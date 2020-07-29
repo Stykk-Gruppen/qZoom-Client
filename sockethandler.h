@@ -19,7 +19,7 @@ class SocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(int, ImageHandler*, InputStreamHandler* inputStreamHandler, SessionHandler*, QHostAddress address, QObject *parent = nullptr);
+    explicit SocketHandler(int, int, InputStreamHandler* inputStreamHandler, SessionHandler*, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     QTcpSocket* mTCPSocket;
     QUdpSocket* udpSocket;

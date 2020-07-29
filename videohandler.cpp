@@ -27,10 +27,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 int VideoHandler::init()
 {
-    //Registrer div ting
-    av_register_all();
-    avcodec_register_all();
-    avdevice_register_all();
+
     ifmt_ctx = NULL;
     //ofmt_ctx = NULL;
     int ret;
@@ -82,7 +79,7 @@ int VideoHandler::init()
         AVStream *out_stream;
 
         //Hvis instream er Video
-        if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+        //if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 
             qDebug() << "Input stream framerate: " << in_stream->r_frame_rate.num;
             qDebug() << "Input stream timebase: " << in_stream->time_base.num << "/" << in_stream->time_base.den;
@@ -105,8 +102,11 @@ int VideoHandler::init()
            // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
-            //outputVideoCodecContext->width = 160;
-            //outputVideoCodecContext->height = 120;
+
+            //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
+            outputVideoCodecContext->width = 640;
+            outputVideoCodecContext->height = 360;
+
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
             //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
@@ -139,7 +139,7 @@ int VideoHandler::init()
             //previous_pts = in_stream->start_time;
 
 
-        }
+        //}
         if (!out_stream)
         {
             fprintf(stderr, "Failed allocating output stream\n");
@@ -180,7 +180,7 @@ int VideoHandler::init()
         qDebug() << "After tcp writeHeader";
     }
 
-
+    return ret;
 }
 
 static int64_t pts = 0;
@@ -477,7 +477,6 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     }
     else
     {
-        qDebug() << "Inne i UDP SEND!";
         //Prepends the video header byte needed by socketHandler
         send.prepend(int(1));
         return s->udpSocket->sendDatagram(send);

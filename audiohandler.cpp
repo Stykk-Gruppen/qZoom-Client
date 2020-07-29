@@ -14,10 +14,6 @@ AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int6
 }
 int AudioHandler::openInputFile()
 {
-
-    av_register_all();
-    avcodec_register_all();
-    avdevice_register_all();
     AVCodecContext *avctx;
     AVCodec *input_codec;
     int error;
@@ -107,7 +103,6 @@ int AudioHandler::openInputFile()
 int AudioHandler::openOutputFile()
 {
     AVCodecContext *avctx          = NULL;
-    AVIOContext *output_io_context = NULL;
     AVStream *stream               = NULL;
     AVCodec *output_codec          = NULL;
     int error = 0;
@@ -951,8 +946,7 @@ int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buff
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
     //qDebug() << "written to socket";
-    int audioHeader = 0;
-    send.prepend(audioHeader);
+    send.prepend(int(0));
     return socketHandler->sendDatagram(send);
 }
 
