@@ -26,6 +26,7 @@ public:
     Q_INVOKABLE QString getRoomId();
     Q_INVOKABLE QString getRoomPassword();
     Q_INVOKABLE QString getRoomHostUsername();
+    Q_INVOKABLE QVariantList getAudioInputDevices();
     UserHandler* getUser();
 
     Q_INVOKABLE void enableVideo();

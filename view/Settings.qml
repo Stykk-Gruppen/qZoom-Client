@@ -11,7 +11,7 @@ import "../components" as C
 Dialog {
 
     function loadSettings() {
-        defaultAudioInput.model = streamHandler.getAudioInputDevices();
+        defaultAudioInput.model = sessionHandler.getAudioInputDevices();
         console.log(backendSettings.getDefaultAudioInput());
         var index = defaultAudioInput.find(backendSettings.getDefaultAudioInput())
         console.log(index);
