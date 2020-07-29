@@ -20,7 +20,7 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
 
-    qDebug() << "Inne i read packet";
+   // qDebug() << "Inne i read packet";
 
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
 
@@ -144,7 +144,7 @@ void VideoPlaybackHandler::start()
         AVCodecContext *videoDecoderCodecContext;
         if(video_stream)
         {
-            video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            //video_stream->codecpar-> |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
             AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
             AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
@@ -168,10 +168,10 @@ void VideoPlaybackHandler::start()
         //AVFrame* resampled = 0;
 
         while (1) {
-            qDebug() << "About to call av read frame";
+            //qDebug() << "About to call av read frame";
             //av_read_frame(fmt_ctx, NULL);
             ret = av_read_frame(fmt_ctx,&packet);
-            qDebug() << "AVREADFRAME: " << ret;
+            //qDebug() << "AVREADFRAME: " << ret;
             if(ret < 0)
             {
                 char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -224,7 +224,7 @@ void VideoPlaybackHandler::start()
 
                 //qDebug() << frame->data[0];
                 //qDebug() << mIndex;
-                qDebug() << "Sending image to imageHandler";
+               // qDebug() << "Sending image to imageHandler";
                 mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
             }
             else

@@ -28,8 +28,8 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 int VideoHandler::init()
 {
     //Registrer div ting
-    av_register_all();
-    avcodec_register_all();
+   // av_register_all();
+   // avcodec_register_all();
     avdevice_register_all();
     ifmt_ctx = NULL;
     //ofmt_ctx = NULL;
@@ -82,7 +82,7 @@ int VideoHandler::init()
         AVStream *out_stream;
 
         //Hvis instream er Video
-        if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+        //if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 
             qDebug() << "Input stream framerate: " << in_stream->r_frame_rate.num;
             qDebug() << "Input stream timebase: " << in_stream->time_base.num << "/" << in_stream->time_base.den;
@@ -139,7 +139,7 @@ int VideoHandler::init()
             //previous_pts = in_stream->start_time;
 
 
-        }
+        //}
         if (!out_stream)
         {
             fprintf(stderr, "Failed allocating output stream\n");
@@ -149,7 +149,7 @@ int VideoHandler::init()
         out_stream->codecpar->codec_tag = 0;
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
         {
-            out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            //out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         }
     }
 
@@ -179,7 +179,7 @@ int VideoHandler::init()
         mStruct->tcpSocket->writeHeader();
         qDebug() << "After tcp writeHeader";
     }
-
+    return ret;
 }
 
 static int64_t pts = 0;
