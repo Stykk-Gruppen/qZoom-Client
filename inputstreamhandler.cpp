@@ -7,6 +7,11 @@ InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSiz
     mAddress = address;
 }
 
+/**
+ * Reads the streamId from the data and removes it, then finds the matching index
+ * or creates a new one and appends the header data to the appropriate buffer.
+ * @param data QByteArray header data recieved from the TCP request
+ */
 void InputStreamHandler::handleHeader(QByteArray data)
 {
     int streamIdLength = data[0];
@@ -26,10 +31,10 @@ void InputStreamHandler::handleHeader(QByteArray data)
 }
 
 /**
- * When recieving a UDP datagram, we need to know who owns the stream.
- * The index will let readPendingDatagrams know which buffer, mutex and playbackhandler to use for both audio and video.
- * @param streamId QString to find in mStreamIdVector
- * @param index int
+ * When recieving a TCP request with a header from a unknown streamId,
+ * we need to create new buffers, mutex and playbackhandlers for both video and audio.
+ * @param streamId QString to add to mStreamIdVector
+ * @param index int to add a peer to ImageHandler
  */
 void InputStreamHandler::addStreamToVector(QString streamId,int index)
 {
@@ -55,7 +60,11 @@ void InputStreamHandler::addStreamToVector(QString streamId,int index)
 }
 
 
-//Sockethandler has to put the datagram in the correct buffer when in a room with multiple people, based on the streamId
+/**
+ * When recieving a TCP request we need to know if the streamId already exists in mStreamIdVector.
+ * @param streamId QString to find in mStreamIdVector
+ * @return int index where streamId was found, or 0 if not found
+ */
 int InputStreamHandler::findStreamIdIndex(QString streamId)
 {
     qDebug() << "InputStreamHandler findStreamId index: " << streamId;

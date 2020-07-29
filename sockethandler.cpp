@@ -101,7 +101,7 @@ void SocketHandler::readPendingDatagrams()
 
     signalCount++;
 }
-//TODO change this to use inputstreamhandler findStreamIdIndex?
+
 /**
  * When recieving a UDP datagram, we need to know who owns the stream.
  * The index will let readPendingDatagrams know which buffer, mutex and playbackhandler to use for both audio and video.
