@@ -180,6 +180,7 @@ int SocketHandler::sendDatagram(QByteArray arr)
             break;
         }
     }
+
     return ret;
 }
 

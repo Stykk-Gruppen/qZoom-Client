@@ -102,8 +102,9 @@ int VideoHandler::init()
            // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
             outputVideoCodecContext->width = in_stream->codecpar->width;
             outputVideoCodecContext->height = in_stream->codecpar->height;
-            //outputVideoCodecContext->width = 160;
-            //outputVideoCodecContext->height = 120;
+            //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
+            outputVideoCodecContext->width = 640;
+            outputVideoCodecContext->height = 360;
             outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
             outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
             //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
