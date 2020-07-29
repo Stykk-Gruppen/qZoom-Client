@@ -36,8 +36,8 @@ private:
     QString mAudioDeviceName;
     std::mutex* mWriteLock;
 
-    int openInputFile();
-    int openOutputFile();
+    int openInputStream();
+    int openOutputStream();
 
     int loadEncodeAndWrite();
     int encodeAudioFrame(AVFrame*,int*);
