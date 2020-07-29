@@ -951,8 +951,7 @@ int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buff
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);
     //qDebug() << "written to socket";
-    int audioHeader = 0;
-    send.prepend(audioHeader);
+    send.prepend(int(0));
     return socketHandler->sendDatagram(send);
 }
 

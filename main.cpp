@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
 
     //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
     int bufferSize = 8*1024;
+    int port = 1337;
 
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
@@ -91,8 +92,8 @@ int main(int argc, char *argv[])
 
     InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
 
-    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,inputStreamHandler, sessionHandlerObject, address);
-    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, 1337);
+    SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandler, sessionHandlerObject, address);
+    TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, port);
     tcpSocketHandler->init();
 
     //int64_t *lastVideoPacketTime = new int64_t(-1);
