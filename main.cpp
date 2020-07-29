@@ -51,13 +51,15 @@ int main(int argc, char *argv[])
 {
     errorHandler = new ErrorHandler;
 
+    //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
+    int bufferSize = 8*1024;
     QHostAddress address;
     //address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
-    //address = QHostAddress("213.162.241.177"); //KentServer
+    address = QHostAddress("213.162.241.177"); //KentServer
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
@@ -70,33 +72,16 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    //TcpSocketHandler* tcp = new TcpSocketHandler(QHostAddress("172.217.21.174"), "HEAD / HTTP/1.0\r\n\r\n\r\n\r\n", 80);
-    //tcp->wait();
-    //QString reply = tcp->getReply();
 
-
-    //qDebug() << reply;
     QScopedPointer<Settings> settings(new Settings());
-
-
-    //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
-    int bufferSize = 8*1024;
-
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject);
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
-    //std::mutex *audioUdpBufferLock = new std::mutex;
-    //std::mutex *videoUdpBufferLock = new std::mutex;
-
     InputStreamHandler* inputStreamHandler = new InputStreamHandler(imageHandlerObject, bufferSize, address);
-
     SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,imageHandlerObject,inputStreamHandler, sessionHandlerObject, address);
     TcpSocketHandler* tcpSocketHandler = new TcpSocketHandler(inputStreamHandler, sessionHandlerObject, address, 1337);
     tcpSocketHandler->init();
-
-    //int64_t *lastVideoPacketTime = new int64_t(-1);
-    //int64_t *lastAudioPacketTime = new int64_t(-1);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
 

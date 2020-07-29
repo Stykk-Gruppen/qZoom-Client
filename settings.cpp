@@ -58,7 +58,7 @@ void Settings::saveSettings()
     qDebug() << settings;
     file.write(settings.toJson());
     file.close();
-    qDebug() << "Saved Settings to file";
+    qDebug() << "Saved Settings to file" << settings;
 }
 
 bool Settings::getAudioOn()

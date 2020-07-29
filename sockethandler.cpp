@@ -54,6 +54,7 @@ void SocketHandler::readPendingDatagrams()
         data.remove(0, streamIdLength);
 
         int index = findStreamIdIndex(streamId);
+        if(index < 0) continue;
 
         //Checks the first byte in the datagram to determine if the datagram is audio or video
         int audioOrVideoInt = data[0];
@@ -107,10 +108,9 @@ int SocketHandler::findStreamIdIndex(QString streamId)
             }
         }
     }
-    qDebug() << "Vi er fucked2" << streamId;
-    qDebug() << "StreamId: " << streamId;
-    qDebug() << "StreamIdVector: " << mInputStreamHandler->mStreamIdVector;
-    exit(1);
+    qDebug() << "Could not find StreamId: " << streamId << " in streamIdVector: " << mInputStreamHandler->mStreamIdVector;
+    return -1;
+    //exit(1);
 }
 
 int SocketHandler::sendDatagram(QByteArray arr)

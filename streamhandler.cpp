@@ -3,7 +3,9 @@
 
 StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
+    mSettings = settings;
     mBufferSize = bufferSize;
+
     mTime = av_gettime();
     mVideoDevice = "/dev/video0";
     mAudioDevice = settings->getDefaultAudioInput();
@@ -11,6 +13,35 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mSocketHandler = _socketHandler;
     mTcpSocketHandler = tcpSocketHandler;
     if(!mVideoEnabled) mImageHandler->readImage(nullptr, nullptr, 0);
+}
+
+void StreamHandler::init()
+{
+    mVideoEnabled = mSettings->getVideoOn();
+    mAudioEnabled = mSettings->getAudioOn();
+
+    if(mVideoEnabled) enableVideo();
+    else grabVideoHeader();
+
+    if(mAudioEnabled) enableAudio();
+}
+
+void StreamHandler::grabVideoHeader()
+{
+    if(mVideoHandler == nullptr)
+    {
+        qDebug() << "Creating new VideoHandler";
+        mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
+                                                             mTime, mImageHandler, mSocketHandler,mBufferSize, mTcpSocketHandler);
+    }
+    qDebug() << "Init videoHandler";
+    mVideoHandler->init();
+    qDebug() << "Close VideoHandler";
+    mVideoHandler->close();
+    qDebug() << "Sending generic image to imagehandler";
+    mImageHandler->readImage(nullptr, nullptr, 0);
+    delete mVideoHandler;
+    mVideoHandler = nullptr;
 }
 
 void StreamHandler::record()

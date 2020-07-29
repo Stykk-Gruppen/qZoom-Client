@@ -173,12 +173,13 @@ int VideoHandler::init()
         exit(1);
     }
 
-    //if(!mStruct->headerSent)
+    if(!mStruct->headerSent)
     {
         mStruct->headerSent = true;
         mStruct->tcpSocket->writeHeader();
         qDebug() << "After tcp writeHeader";
     }
+
 
 }
 
@@ -404,7 +405,7 @@ void VideoHandler::grabFrames() {
             //int ret = av_write_frame(ofmt_ctx, pkt);
             if (ret < 0)
             {
-                qDebug() << "Error muxing packet";
+                qDebug() << "Error muxing packet" << Q_FUNC_INFO;
                 //break;
             }
             av_packet_unref(pkt);
@@ -470,12 +471,13 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
 
     if(!s->headerSent)
     {
-
+        qDebug() << "INNE I HEADERSEND";
         s->tcpSocket->myHeader.append(send);
         return 0;
     }
     else
     {
+        qDebug() << "Inne i UDP SEND!";
         //Prepends the video header byte needed by socketHandler
         send.prepend(int(1));
         return s->udpSocket->sendDatagram(send);

@@ -52,8 +52,9 @@ public:
     Q_INVOKABLE QVariantList getAudioInputDevices();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
     Q_INVOKABLE QString getDefaultAudioInputDevice();
-
+    Q_INVOKABLE void init();
 private:
+    void grabVideoHeader();
     int64_t mTime;
     SocketHandler* mSocketHandler;
     TcpSocketHandler* mTcpSocketHandler;
@@ -64,6 +65,7 @@ private:
     std::mutex mUDPSendDatagramMutexLock;
     QString mAudioDevice;
     QString mVideoDevice;
+    Settings* mSettings;
 };
 
 #endif // STREAMHANDLER_H

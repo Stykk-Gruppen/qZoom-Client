@@ -24,6 +24,7 @@ public:
     void wait();
     int getBytesWritten();
     void writeHeader();
+    void writeLeaveSignal();
     QByteArray myHeader;
 public slots:
     void connected();

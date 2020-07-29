@@ -27,6 +27,17 @@ void TcpSocketHandler::init()
 
 
 }
+
+void TcpSocketHandler::writeLeaveSignal()
+{
+    mSocket->connectToHost(mAddress, mPort);
+    if(!mSocket->waitForConnected(3000))
+    {
+        qDebug() << "TcpSocketError: " << mSocket->errorString();
+    }
+    mSocket->write(QByteArray("-1"));
+}
+
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
@@ -60,6 +71,7 @@ void TcpSocketHandler::writeHeader()
 
 
     mSocket->write(myHeader);
+    myHeader.clear();
     //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
     while (mSocket->waitForReadyRead(3000));
 
@@ -114,6 +126,7 @@ void TcpSocketHandler::writeHeader()
 
     //mSocket->write("0");
 
+    mSocket->close();
 }
 
 

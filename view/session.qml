@@ -111,14 +111,15 @@ Rectangle {
         //addScreen();
         var roomId = sessionHandler.getRoomId();
         setTitle("qZoom :: Session (" + roomId + ")");
-        if(backendSettings.getAudioOn())
+        /*if(backendSettings.getAudioOn())
         {
             streamHandler.enableAudio();
         }
         if(backendSettings.getVideoOn())
         {
             streamHandler.enableVideo();
-        }
+        }*/
+        streamHandler.init();
         streamHandler.record();
     }
     /*
