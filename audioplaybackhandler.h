@@ -16,9 +16,10 @@ class AudioPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    AudioPlaybackHandler(std::mutex* writeLock, QByteArray*, int, QObject *parent = nullptr);
+    AudioPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
+                         int bufferSize, QObject *parent = nullptr);
     void getStream();
-    static int read_packet(void *opaque, uint8_t *buf, int buf_size);
+    static int customReadPacket(void *opaque, uint8_t *buf, int buf_size);
     void start();
     int decodeAndPlay();
     int mAudioStreamIndex = -1;

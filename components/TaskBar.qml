@@ -87,12 +87,26 @@ Rectangle {
             }
         }
 
-        C.PushButton {
+        /* C.PushButton {
             id: addScreenButton
             text: "Add Screens"
             font.pixelSize: 32
             property var toggled: true
             onClicked: {
+                repeaterId.model = 0;
+                gridId.columns = gridId.calcColumns();
+                gridId.rows = gridId.calcRows();
+                repeaterId.model = imageHandler.getNumberOfScreens();
+            }
+        }*/
+
+
+        //TODO maybe this function does not need to be here?
+        //Creates a Signal connection to imageHandler,
+        //when the signal addScreen is emitted, this function will run
+        Connections {
+            target: imageHandler
+            function onAddScreen() {
                 repeaterId.model = 0;
                 gridId.columns = gridId.calcColumns();
                 gridId.rows = gridId.calcRows();

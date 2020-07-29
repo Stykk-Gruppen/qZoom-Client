@@ -40,8 +40,16 @@ void PlaybackHandler::changeSpeaker()
 }
 */
 
-
-int AudioPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
+/**
+ * Custom readPacket function for av_read_frame and av_open_input.
+ * Will read and remove bytes from the buffer found in the struct
+ * and copy them to buf.
+ * @param buf_size int how many bytes to read from the buffer
+ * @param[out] buf uint8_t* bytes to send back to ffmpeg
+ * @param opaque void* pointer set by avio_alloc_context
+ * @return buf_size int
+ */
+int AudioPlaybackHandler::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
     //qDebug() << buf_size;
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
@@ -91,7 +99,7 @@ void AudioPlaybackHandler::start()
 
         avio_ctx_buffer = reinterpret_cast<uint8_t*>(av_malloc(avio_ctx_buffer_size));
         Q_ASSERT(avio_ctx_buffer);
-        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, mStruct, &read_packet, nullptr, nullptr);
+        avio_ctx = avio_alloc_context(avio_ctx_buffer, static_cast<int>(avio_ctx_buffer_size), 0, mStruct, &customReadPacket, nullptr, nullptr);
         Q_ASSERT(avio_ctx);
 
         fmt_ctx->pb = avio_ctx;

@@ -12,7 +12,8 @@ class VideoPlaybackHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlaybackHandler(std::mutex*, ImageHandler*, QByteArray* headerBuffer, QByteArray*, int, int, QObject *parent = nullptr);
+    VideoPlaybackHandler(std::mutex* writeLock, ImageHandler* imageHandler, QByteArray* headerBuffer,
+                         QByteArray* buffer, int bufferSize, int index, QObject *parent = nullptr);
     void getStream();
     static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     void start();

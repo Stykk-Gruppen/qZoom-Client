@@ -12,7 +12,14 @@ AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int6
     mResampleContext = NULL;
     mFifo = NULL;
 }
-int AudioHandler::openInputFile()
+
+/**
+ * Open an input stream and the required decoders.
+ * Also set some basic decoders parameters.
+ * Some of these parameters are based on the input stream's parameters.
+ * @return Error code (0 if successful)
+ */
+int AudioHandler::openInputStream()
 {
     AVCodecContext *avctx;
     AVCodec *input_codec;
@@ -91,16 +98,12 @@ int AudioHandler::openInputFile()
 }
 
 /**
- * Open an output file and the required encoder.
+ * Open an output stream and the required encoder.
  * Also set some basic encoder parameters.
- * Some of these parameters are based on the input file's parameters.
- * @param      filename              File to be opened
- * @param      inputCodecContext   Codec context of input file
- * @param[out] outputFormatContext Format context of output file
- * @param[out] outputCodecContext  Codec context of output file
+ * Some of these parameters are based on the input stream's parameters.
  * @return Error code (0 if successful)
  */
-int AudioHandler::openOutputFile()
+int AudioHandler::openOutputStream()
 {
     AVCodecContext *avctx          = NULL;
     AVStream *stream               = NULL;
@@ -228,9 +231,6 @@ void AudioHandler::initPacket(AVPacket *packet)
  * Initialize the audio resampler based on the input and output codec settings.
  * If the input and output sample formats differ, a conversion is required
  * libswresample takes care of this, but requires initialization.
- * @param      inputCodecContext  Codec context of the input file
- * @param      outputCodecContext Codec context of the output file
- * @param[out] resampleContext     Resample context for the required conversion
  * @return Error code (0 if successful)
  */
 int AudioHandler::initResampler()
@@ -276,8 +276,6 @@ int AudioHandler::initResampler()
 
 /**
  * Initialize a FIFO buffer for the audio samples to be encoded.
- * @param[out] fifo                 Sample buffer
- * @param      outputCodecContext Codec context of the output file
  * @return Error code (0 if successful)
  */
 int AudioHandler::initFifo()
@@ -292,26 +290,10 @@ int AudioHandler::initFifo()
     return 0;
 }
 
-/**
- * Write the header of the output file container.
- * @param outputFormatContext Format context of the output file
- * @return Error code (0 if successful)
- */
-/*int AudioHandler::writeOutputFileHeader()
-{
-    int error;
-    if ((error = avformat_write_header(outputFormatContext, NULL)) < 0) {
-        fprintf(stderr, "Could not write output file header");
-        return error;
-    }
-    return 0;
-}*/
 
 /**
  * Decode one audio frame from the input file.
  * @param      frame                Audio frame to be decoded
- * @param      inputFormatContext Format context of the input file
- * @param      inputCodecContext  Codec context of the input file
  * @param[out] data_present         Indicates whether data has been decoded
  * @param[out] finished             Indicates whether the end of file has
  *                                  been reached and all data has been
@@ -391,7 +373,6 @@ cleanup:
  * @param[out] converted_input_samples Array of converted samples. The
  *                                     dimensions are reference, channel
  *                                     (for multi-channel audio), sample.
- * @param      outputCodecContext    Codec context of the output file
  * @param      frame_size              Number of samples to be converted in
  *                                     each round
  * @return Error code (0 if successful)
@@ -434,7 +415,6 @@ int AudioHandler::initConvertedSamples(uint8_t ***converted_input_samples, int f
  * @param[out] converted_data   Converted samples. The dimensions are channel
  *                              (for multi-channel audio), sample.
  * @param      frame_size       Number of samples to be converted
- * @param      resampleContext Resample context for the conversion
  * @return Error code (0 if successful)
  */
 int AudioHandler::convertSamples(const uint8_t **input_data,
@@ -455,7 +435,6 @@ int AudioHandler::convertSamples(const uint8_t **input_data,
 
 /**
  * Add converted input audio samples to the FIFO buffer for later processing.
- * @param fifo                    Buffer to add the samples to
  * @param converted_input_samples Samples to be added. The dimensions are channel
  *                                (for multi-channel audio), sample.
  * @param frame_size              Number of samples to be converted
@@ -485,13 +464,8 @@ int AudioHandler::addSamplesToFifo(uint8_t **converted_input_samples,
 }
 
 /**
- * Read one audio frame from the input file, decode, convert and store
+ * Read one audio frame from the input stream, decode, convert and store
  * it in the FIFO buffer.
- * @param      fifo                 Buffer used for temporary storage
- * @param      inputFormatContext Format context of the input file
- * @param      inputCodecContext  Codec context of the input file
- * @param      outputCodecContext Codec context of the output file
- * @param      resampler_context    Resample context for the conversion
  * @param[out] finished             Indicates whether the end of file has
  *                                  been reached and all data has been
  *                                  decoded. If this flag is false,
@@ -578,7 +552,6 @@ cleanup:
  * Initialize one input frame for writing to the output file.
  * The frame will be exactly frame_size samples large.
  * @param[out] frame                Frame to be initialized
- * @param      outputCodecContext Codec context of the output file
  * @param      frame_size           Size of the frame
  * @return Error code (0 if successful)
  */
@@ -622,16 +595,11 @@ static bool first = true;
 /**
  * Encode one frame worth of audio to the output file.
  * @param      frame                 Samples to be encoded
- * @param      outputFormatContext Format context of the output file
- * @param      outputCodecContext  Codec context of the output file
  * @param[out] data_present          Indicates whether data has been
  *                                   encoded
  * @return Error code (0 if successful)
  */
-int AudioHandler::encodeAudioFrame(AVFrame *frame,
-                                   /*AVFormatContext *outputFormatContext,
-                                                                                                         AVCodecContext *outputCodecContext,*/
-                                   int *data_present)
+int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
 {
     /* Packet used for temporary storage. */
     AVPacket output_packet;
@@ -717,14 +685,9 @@ cleanup:
 /**
  * Load one audio frame from the FIFO buffer, encode and write it to the
  * output file.
- * @param fifo                  Buffer used for temporary storage
- * @param outputFormatContext Format context of the output file
- * @param outputCodecContext  Codec context of the output file
  * @return Error code (0 if successful)
  */
-int AudioHandler::loadEncodeAndWrite(/*AVAudioFifo *fifo,
-                                                                                                               AVFormatContext *outputFormatContext,
-                                                                                                               AVCodecContext *outputCodecContext*/)
+int AudioHandler::loadEncodeAndWrite()
 {
     /* Temporary storage of the output samples of the frame written to the file. */
     AVFrame *output_frame;
@@ -791,13 +754,13 @@ int AudioHandler::init()
     int ret = AVERROR_EXIT;
     qDebug() << "audio init";
     /* Open the input file for reading. */
-    if (openInputFile())
+    if (openInputStream())
     {
         return ret;
     }
     //qDebug() << "Stream opened";
     /* Open the output file for writing. */
-    if (openOutputFile())
+    if (openOutputStream())
     {
         return ret;
     }

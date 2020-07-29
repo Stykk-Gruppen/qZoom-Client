@@ -34,7 +34,7 @@ public slots:
 
 signals:
     void imageChanged();
-
+    void addScreen();
 private:
     QImage generateGenericImage(QString username);
     QMap<uint8_t, QImage> mImageMap;

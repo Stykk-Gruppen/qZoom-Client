@@ -81,62 +81,62 @@ int VideoHandler::init()
         //Hvis instream er Video
         //if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 
-            qDebug() << "Input stream framerate: " << in_stream->r_frame_rate.num;
-            qDebug() << "Input stream timebase: " << in_stream->time_base.num << "/" << in_stream->time_base.den;
+        qDebug() << "Input stream framerate: " << in_stream->r_frame_rate.num;
+        qDebug() << "Input stream timebase: " << in_stream->time_base.num << "/" << in_stream->time_base.den;
 
 
 
-            //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
-            inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
-            inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
-            avcodec_parameters_to_context(inputVideoCodecContext, in_stream->codecpar);
-            ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
-            inputVideoCodecContext->framerate = in_stream->r_frame_rate;
-            inputVideoCodecContext->time_base = in_stream->time_base;
+        //Setter av inputcodec og codeccontext, så vi slipper bruke deprecated codec
+        inputVideoCodec = avcodec_find_decoder((ifmt_ctx)->streams[i]->codecpar->codec_id);
+        inputVideoCodecContext = avcodec_alloc_context3(inputVideoCodec);
+        avcodec_parameters_to_context(inputVideoCodecContext, in_stream->codecpar);
+        ret = avcodec_open2(inputVideoCodecContext, inputVideoCodec, NULL);
+        inputVideoCodecContext->framerate = in_stream->r_frame_rate;
+        inputVideoCodecContext->time_base = in_stream->time_base;
 
-            //Lager ny outputStream
-            out_stream = avformat_new_stream(ofmt_ctx, outputVideoCodec);
-            //Denne trenger vi egentlig ikke lenger
-            videoStream = i;
-            //Setter div parametere.
-           // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
-            outputVideoCodecContext->width = in_stream->codecpar->width;
-            outputVideoCodecContext->height = in_stream->codecpar->height;
+        //Lager ny outputStream
+        out_stream = avformat_new_stream(ofmt_ctx, outputVideoCodec);
+        //Denne trenger vi egentlig ikke lenger
+        videoStream = i;
+        //Setter div parametere.
+        // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
+        outputVideoCodecContext->width = in_stream->codecpar->width;
+        outputVideoCodecContext->height = in_stream->codecpar->height;
 
-            //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
-            outputVideoCodecContext->width = 640;
-            outputVideoCodecContext->height = 360;
+        //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
+        outputVideoCodecContext->width = 640;
+        outputVideoCodecContext->height = 360;
 
-            outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
-            outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
-            //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
-            outputVideoCodecContext->max_b_frames = 2;
-            //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-            outputVideoCodecContext->gop_size = 0;
+        outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
+        outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
+        //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
+        outputVideoCodecContext->max_b_frames = 2;
+        //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
+        outputVideoCodecContext->gop_size = 0;
 
-            av_opt_set(outputVideoCodecContext, "preset", "slow", 0);
-            av_opt_set(outputVideoCodecContext, "crf", "22", 0);
-            //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
+        av_opt_set(outputVideoCodecContext, "preset", "slow", 0);
+        av_opt_set(outputVideoCodecContext, "crf", "22", 0);
+        //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
 
 
-            //Kopierer parametere inn i out_stream
-            avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
-            ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
+        //Kopierer parametere inn i out_stream
+        avcodec_parameters_from_context(out_stream->codecpar, outputVideoCodecContext);
+        ret = avcodec_open2(outputVideoCodecContext, outputVideoCodec, NULL);
 
-            out_stream->time_base = in_stream->time_base;
+        out_stream->time_base = in_stream->time_base;
 
-            //Sett convert context som brukes ved frame conversion senere.
-            img_convert_ctx = sws_getContext(
-                        in_stream->codecpar->width,
-                        in_stream->codecpar->height,
-                        //in_stream->codec->pix_fmt,
-                        (AVPixelFormat)in_stream->codecpar->format,
-                        outputVideoCodecContext->width,
-                        outputVideoCodecContext->height,
-                        outputVideoCodecContext->pix_fmt,
-                        SWS_BICUBIC,
-                        NULL, NULL, NULL);
-            //previous_pts = in_stream->start_time;
+        //Sett convert context som brukes ved frame conversion senere.
+        img_convert_ctx = sws_getContext(
+                    in_stream->codecpar->width,
+                    in_stream->codecpar->height,
+                    //in_stream->codec->pix_fmt,
+                    (AVPixelFormat)in_stream->codecpar->format,
+                    outputVideoCodecContext->width,
+                    outputVideoCodecContext->height,
+                    outputVideoCodecContext->pix_fmt,
+                    SWS_BICUBIC,
+                    NULL, NULL, NULL);
+        //previous_pts = in_stream->start_time;
 
 
         //}
@@ -213,26 +213,26 @@ void VideoHandler::grabFrames() {
     while ((ret = av_read_frame(ifmt_ctx, pkt)) >= 0 && !mAbortGrabFrames)
     {
 
-            //qDebug() << "Input codec framerate: " << inputVideoCodecContext->framerate.num;
-            //qDebug() << "Input codec timebase: " << inputVideoCodecContext->time_base.num << "/" << inputVideoCodecContext->time_base.den;
-            //pkt->pts = av_gettime();
+        //qDebug() << "Input codec framerate: " << inputVideoCodecContext->framerate.num;
+        //qDebug() << "Input codec timebase: " << inputVideoCodecContext->time_base.num << "/" << inputVideoCodecContext->time_base.den;
+        //pkt->pts = av_gettime();
 
 
-            /*if(firstPacket)
+        /*if(firstPacket)
             {
                 start_pts = pkt->pts;
                 start_dts = pkt->dts;
                 firstPacket = false;
             }*/
 
-            //pkt->pts = pkt->pts - start_pts;
-            //int64_t dts = av_gettime();
-            //dts = dts * inputVideoCodecContext->framerate.num;
-            //pkt->dts = pkt->dts - dts - start_dts;
+        //pkt->pts = pkt->pts - start_pts;
+        //int64_t dts = av_gettime();
+        //dts = dts * inputVideoCodecContext->framerate.num;
+        //pkt->dts = pkt->dts - dts - start_dts;
 
 
 
-            //qDebug() << "kommer inn i videoStreamgreiene\n";
+        //qDebug() << "kommer inn i videoStreamgreiene\n";
         if(ret < 0)
         {
             qDebug() << "Input Avcodec open failed: " << ret << "\n";
@@ -253,8 +253,10 @@ void VideoHandler::grabFrames() {
             qDebug() << "Recieve frame error";
             exit(1);
         }
-
-        if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT)
+        //If the input video format is not STREAM_PIX_FMT or if the input w/h does not match output w/h, do rescaling++
+        if (inputVideoCodecContext->pix_fmt != STREAM_PIX_FMT ||
+                outputVideoCodecContext->width != inputVideoCodecContext->width ||
+                outputVideoCodecContext->height != inputVideoCodecContext->height)
         {
             int num_bytes = av_image_get_buffer_size(outputVideoCodecContext->pix_fmt, outputVideoCodecContext->width,
                                                      outputVideoCodecContext->height, 1);
@@ -284,7 +286,7 @@ void VideoHandler::grabFrames() {
             if (scaledFrame)
             {
                 scaledFrame->pts = pts;
-               pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
+                pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
             imageHandler->readImage(outputVideoCodecContext, scaledFrame, 0);
             ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
@@ -374,18 +376,18 @@ void VideoHandler::grabFrames() {
             //out_stream->time_base = AVRational{1, 30};
             AVRational encoderTimebase = outputVideoCodecContext->time_base;//{1, 30};
             AVRational muxerTimebase = out_stream->time_base;
-//                qDebug() << "**********VIDEO*****************";
-//                qDebug() << "Outpacket pts: " << outPacket->pts;
-//                qDebug() << "Outpacket dts: " << outPacket->dts;
-//                qDebug() << outPacket->stream_index;
+            //                qDebug() << "**********VIDEO*****************";
+            //                qDebug() << "Outpacket pts: " << outPacket->pts;
+            //                qDebug() << "Outpacket dts: " << outPacket->dts;
+            //                qDebug() << outPacket->stream_index;
 
             outPacket->pts = av_rescale_q_rnd(outPacket->pts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
             outPacket->dts = av_rescale_q_rnd(outPacket->dts, encoderTimebase, muxerTimebase, (AVRounding) (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
             outPacket->duration = av_rescale_q(outPacket->duration, encoderTimebase, muxerTimebase);
             outPacket->pos = -1;
 
-//                qDebug() << "Outpacket pts: " << outPacket->pts;
-//                qDebug() << "Outpacket dts: " << outPacket->dts;
+            //                qDebug() << "Outpacket pts: " << outPacket->pts;
+            //                qDebug() << "Outpacket dts: " << outPacket->dts;
 
 
             writeLock->lock();
