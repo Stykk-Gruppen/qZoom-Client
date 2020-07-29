@@ -33,6 +33,7 @@ void TcpServerHandler::acceptTcpConnection()
 
 void TcpServerHandler::readTcpPacket()
 {
+    qDebug() << "SOmething happened in the local server";
     QByteArray data = mTcpServerConnection->readAll();
     qDebug() << mTcpServerConnection->peerAddress();
     QByteArray originalData = data;

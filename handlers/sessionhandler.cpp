@@ -53,13 +53,13 @@ void SessionHandler::initOtherStuff()
     mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
     mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, mAddress, mPort);
     mStreamHandler = new StreamHandler(mImageHandler, mSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
-
+    //Init tcpServerHandler
+    mTcpServerHandler->init();
     //Init sending of our header, empty or not
     mTcpSocketHandler->init();
     mStreamHandler->init();
 
-    //Init tcpServerHandler
-    mTcpServerHandler->init();
+
 
 
 }
