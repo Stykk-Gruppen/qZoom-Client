@@ -4,7 +4,7 @@
 TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QHostAddress address, int port, QObject* parent): QObject(parent)
 {
     mAddress = address;
-    mPort = port;
+    mPort = 1338;
     qDebug() << mAddress;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
@@ -117,9 +117,9 @@ void TcpSocketHandler::writeHeader()
     mSocket->write(myHeader);
     myHeader.clear();
     //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
-    while (mSocket->waitForReadyRead(3000));
+    //while (mSocket->waitForReadyRead(3000));
 
-    QByteArray reply = mSocket->readAll();
+    /*QByteArray reply = mSocket->readAll();
 
     //qDebug() << "Reply from Server: \n" << reply;
     if(reply.size() <= 0)
@@ -148,7 +148,7 @@ void TcpSocketHandler::writeHeader()
             qDebug() << "Unkown return code from tcp server @ " << Q_FUNC_INFO;
             exit(-1);
         }
-    }
+    }*/
 
     /*int numOfHeaders = reply[0];
     qDebug() << "number of headers recieved from server: " << numOfHeaders;
