@@ -11,12 +11,76 @@ void InputStreamHandler::init()
 {
     //new TcpServerHandler();
     //TcpServerHandler.init();
+}
 
+void InputStreamHandler::close()
+{
+    for(auto i : mVideoHeaderVector)
+        delete i;
+    mVideoHeaderVector.clear();
+
+    for(auto i : mAudioBufferVector)
+        delete i;
+    mAudioBufferVector.clear();
+
+    for(auto i : mVideoBufferVector)
+        delete i;
+    mVideoBufferVector.clear();
+
+    for(auto i : mAudioMutexVector)
+        delete i;
+    mAudioMutexVector.clear();
+
+    for(auto i : mVideoMutexVector)
+        delete i;
+    mVideoMutexVector.clear();
+
+    for(auto i : mAudioPlaybackHandlerVector)
+        delete i;
+    mAudioPlaybackHandlerVector.clear();
+
+    for(auto i : mVideoPlaybackHandlerVector)
+        delete i;
+    mVideoPlaybackHandlerVector.clear();
 }
 
 void InputStreamHandler::removeStream(QString streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
+    int index = -1;
+
+    for(size_t i=0;i<mStreamIdVector.size();i++)
+    {
+        if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive)==0)
+        {
+            index = i;
+        }
+    }
+    if(index != -1)
+    {
+        delete mVideoHeaderVector.at(index);
+        delete mAudioBufferVector.at(index);
+        delete mVideoBufferVector.at(index);
+        delete mAudioMutexVector.at(index);
+        delete mVideoMutexVector.at(index);
+        delete mAudioPlaybackHandlerVector.at(index);
+        delete mVideoPlaybackHandlerVector.at(index);
+        mVideoHeaderVector.erase(mVideoHeaderVector.begin() + index);
+        mAudioBufferVector.erase(mAudioBufferVector.begin() + index);
+        mVideoBufferVector.erase(mVideoBufferVector.begin() + index);
+        mAudioMutexVector.erase(mAudioMutexVector.begin() + index);
+        mVideoMutexVector.erase(mVideoMutexVector.begin() + index);
+        mAudioPlaybackHandlerVector.erase(mAudioPlaybackHandlerVector.begin() + index);
+        mVideoPlaybackHandlerVector.erase(mVideoPlaybackHandlerVector.begin() + index);
+        mAudioPlaybackStartedVector.erase(mAudioPlaybackStartedVector.begin() + index);
+        mVideoPlaybackStartedVector.erase(mVideoPlaybackStartedVector.begin() + index);
+        mStreamIdVector.erase(mStreamIdVector.begin() + index);
+        qDebug() << "Successfully removed stream with streamId: " << streamId;
+    }
+    else
+    {
+        qDebug() << "Could not find stream with streamId " << streamId << " when trying to remove it";
+    }
 }
 
 /**
@@ -38,8 +102,11 @@ void InputStreamHandler::handleHeader(QByteArray data)
     int index = findStreamIdIndex(streamId);
 
     mVideoMutexVector[index]->lock();
-    //mVideoHeaderVector[index]->append(data);
-    mVideoBufferVector[index]->append(data);
+    if(mVideoHeaderVector[index]->isEmpty())
+    {
+        mVideoHeaderVector[index]->append(data);
+        mVideoBufferVector[index]->append(data);
+    }
     mVideoMutexVector[index]->unlock();
 }
 
@@ -102,3 +169,5 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
     }
 
 }
+
+

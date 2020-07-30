@@ -27,23 +27,39 @@ void StreamHandler::init()
 
     if(mVideoEnabled)
     {
-        enableVideo();
+        if(enableVideo() < 0)
+        {
+
+            mTcpSocketHandler->writeHeader();
+            mVideoEnabled = false;
+        }
     }
     else
     {
         //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
         mTcpSocketHandler->writeHeader();
+        mVideoEnabled = false;
+
     }
 
     if(mAudioEnabled)
     {
-        enableAudio();
+        if(enableAudio() < 0)
+        {
+           mAudioEnabled = false;
+        }
     }
 
     if (!mVideoEnabled && !mAudioEnabled)
     {
-        bumpServer();
+        mStopServerBump = false;
     }
+}
+
+void StreamHandler::close()
+{
+    delete mAudioHandler;
+    delete mVideoHandler;
 }
 
 
@@ -81,7 +97,7 @@ void StreamHandler::record()
     */
 }
 
-void StreamHandler::enableAudio()
+int StreamHandler::enableAudio()
 {
     mAudioEnabled = true;
     mStopServerBump = true;
@@ -98,13 +114,15 @@ void StreamHandler::enableAudio()
     if(error<0)
     {
         fprintf(stderr, "Could not init audiohandler");
-        exit(1);
+        errorHandler->giveErrorDialog("Could not stream audio");
+
+        return error;
     }
 
 
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
     QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
-
+    return 0;
 }
 
 void StreamHandler::disableAudio()
@@ -122,7 +140,7 @@ void StreamHandler::disableAudio()
     }
 }
 
-void StreamHandler::enableVideo()
+int StreamHandler::enableVideo()
 {
     mVideoEnabled = true;
     mStopServerBump = true;
@@ -140,13 +158,15 @@ void StreamHandler::enableVideo()
     if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");
-        exit(1);
+        errorHandler->giveErrorDialog("Could not stream video");
+        return error;
     }
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
     qDebug() << "Before grab frames";
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
     qDebug() << "Grab frames started";
+    return 0;
 }
 
 void StreamHandler::disableVideo()

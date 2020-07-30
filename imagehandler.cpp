@@ -46,19 +46,39 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
     return result;
 }
 
+/**
+ * Adds one default image to the map at the index and sends the signal refreshScreens
+ * which is connected to TaskBar.qml Connections function onRefreshScreens()
+ * @param index uint8_t
+ */
 void ImageHandler::addPeer(uint8_t index)
 {
-    qDebug() << "added peer: "<< index;
+    qDebug() << "Added peer to ImageHandler map: " << index;
     mImageMap[index] = mDefaultImage;
-    emit addScreen();
-    qDebug() << "After add screen emit";
+    emit refreshScreens();
 }
 
+/**
+ * Removes index from mImageMap and sends the signal refreshScreens
+ * which is connected to TaskBar.qml Connections function onRefreshScreens()
+ * @param index uint8_t
+ */
+void ImageHandler::removePeer(uint8_t index)
+{
+    qDebug() << "Removing peer from ImageHandler map: " << index;
+    mImageMap.remove(index);
+    emit refreshScreens();
+}
+
+/**
+ * If input image is not the same QImage already in the mImageMap,
+ * update the mImageMap at index with the new QImage
+ * @param index uint8_t
+ * @param image QImage
+ */
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();
-
-
     if(index>0){
         //qDebug() << index;
     }
@@ -66,7 +86,6 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
     {
         mImageMap[index] = image;
     }
-
     imgLock.unlock();
 }
 
@@ -105,7 +124,13 @@ void ImageHandler::veryFunStianLoop()
         }
     });*/
 }
-
+/**
+ * We need to convert the video frame to RGB24 before turning it into a QImage object.
+ * Then we update the map at said index with the new QImage.
+ * @param codecContext AVCodecContext* the video decoder codec context
+ * @param[in,out] frame AVFrame* which contains data for 1 video frame
+ * @param index uint8_t the index in the map to update the new QImage
+ */
 void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8_t index)
 {
     SwsContext *imgConvertCtx = nullptr;
@@ -160,6 +185,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
     //av_packet_unref(&packet);
 }
+
 
 int ImageHandler::getNumberOfScreens()
 {

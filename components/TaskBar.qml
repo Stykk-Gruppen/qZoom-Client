@@ -59,14 +59,21 @@ Rectangle {
             font.pixelSize: 32
             property var toggled: true
             onClicked: {
-                if (toggled) {
+                if (toggled)
+                {
                     state = "red"
                     sessionHandler.disableAudio()
-                } else {
-                    state = "normal"
-                    sessionHandler.enableAudio()
+                    toggled = !toggled
+
                 }
-                toggled = !toggled
+                else
+                {
+                    if(sessionHandler.enableAudio() >= 0)
+                    {
+                        state = "normal"
+                        toggled = !toggled
+                    }
+                }
             }
         }
 
@@ -76,14 +83,20 @@ Rectangle {
             font.pixelSize: 32
             property var toggled: true
             onClicked: {
-                if (toggled) {
+                if (toggled)
+                {
                     state = "red"
                     sessionHandler.disableVideo()
-                } else {
-                    state = "normal"
-                    sessionHandler.enableVideo()
+                    toggled = !toggled
                 }
-                toggled = !toggled
+                else
+                {
+                    if(sessionHandler.enableVideo() >= 0)
+                    {
+                        state = "normal"
+                        toggled = !toggled
+                    }
+                }
             }
         }
 
@@ -106,7 +119,7 @@ Rectangle {
         //when the signal addScreen is emitted, this function will run
         Connections {
             target: imageHandler
-            function onAddScreen() {
+            function onRefreshScreens() {
                 repeaterId.model = 0;
                 gridId.columns = gridId.calcColumns();
                 gridId.rows = gridId.calcRows();
@@ -140,12 +153,12 @@ Rectangle {
     Component.onCompleted: {
         //audioInputModel.getAudioTypes()
 
-        if(!backendSettings.getAudioOn())
+        if(!sessionHandler.checkAudioEnabled())
         {
             muteAudioButton.toggled = false;
             muteAudioButton.state = "red";
         }
-        if(!backendSettings.getVideoOn())
+        if(!sessionHandler.checkVideoEnabled())
         {
             muteVideoButton.toggled = false;
             muteVideoButton.state = "red";

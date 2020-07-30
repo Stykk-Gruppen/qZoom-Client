@@ -29,18 +29,19 @@ public:
     Q_INVOKABLE QVariantList getAudioInputDevices();
     UserHandler* getUser();
 
-    Q_INVOKABLE void enableVideo();
+    Q_INVOKABLE bool enableVideo();
     Q_INVOKABLE void disableVideo();
-    Q_INVOKABLE void enableAudio();
+    Q_INVOKABLE bool enableAudio();
 
     Q_INVOKABLE void disableAudio();
     Q_INVOKABLE void sendBumpSignal();
 
-
+    Q_INVOKABLE bool checkVideoEnabled() {return mStreamHandler->checkVideoEnabled();}
+    Q_INVOKABLE bool checkAudioEnabled() {return mStreamHandler->checkAudioEnabled();}
 
 private:
     void addUser();
-    void initOtherStuff();
+    std::pair<bool, bool> initOtherStuff();
     void closeOtherStuff();
     QString mRoomId;
     QString mRoomPassword;
@@ -65,9 +66,6 @@ private:
     SocketHandler* mSocketHandler;
     TcpServerHandler* mTcpServerHandler;
     TcpSocketHandler* mTcpSocketHandler;
-
-
-
 
 signals:
 

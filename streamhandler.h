@@ -17,15 +17,18 @@ public:
     AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void record();
     Q_INVOKABLE void stopRecording();
-    Q_INVOKABLE void enableAudio();
-    Q_INVOKABLE void enableVideo();
     Q_INVOKABLE void disableAudio();
     Q_INVOKABLE void disableVideo();
-    Q_INVOKABLE QVariantList getAudioInputDevices();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
-    Q_INVOKABLE QString getDefaultAudioInputDevice();
     Q_INVOKABLE void init();
+    Q_INVOKABLE QVariantList getAudioInputDevices();
+    Q_INVOKABLE QString getDefaultAudioInputDevice();
+    Q_INVOKABLE bool checkVideoEnabled();
+    Q_INVOKABLE bool checkAudioEnabled();
+    Q_INVOKABLE int enableAudio();
+    Q_INVOKABLE int enableVideo();
     void bumpServer();
+    void close();
 
 private:
     void grabVideoHeader();
