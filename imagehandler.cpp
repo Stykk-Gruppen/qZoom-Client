@@ -47,15 +47,22 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 }
 
 /**
- * Adds one default image to the map at the index and sends the signal addScreen
- * which is connected to TaskBar.qml Connections function onAddScreen()
+ * Adds one default image to the map at the index and sends the signal refreshScreens
+ * which is connected to TaskBar.qml Connections function onRefreshScreens()
  * @param index uint8_t
  */
 void ImageHandler::addPeer(uint8_t index)
 {
     qDebug() << "added peer: "<< index;
     mImageMap[index] = mDefaultImage;
-    emit addScreen();
+    emit refreshScreens();
+}
+
+void ImageHandler::removePeer(uint8_t index)
+{
+    qDebug() << "Removing peer from ImageHandler ";
+    mImageMap.remove(index);
+    emit refreshScreens();
 }
 
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
