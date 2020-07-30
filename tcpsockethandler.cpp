@@ -21,6 +21,13 @@ void TcpSocketHandler::init()
 
     connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
+
+    mSocket->connectToHost(mAddress, mPort);
+    //qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
+    if(!mSocket->waitForConnected(3000))
+    {
+        qDebug() << "TcpSocketError: " << mSocket->errorString();
+    }
 }
 
 void TcpSocketHandler::close()
@@ -93,12 +100,7 @@ void TcpSocketHandler::writeHeader()
 {
     qDebug() << "About to write header";
     //mSocket->connectToHost(mAddress, mPort);
-    mSocket->connectToHost(mAddress, mPort);
-    //qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
-    if(!mSocket->waitForConnected(3000))
-    {
-        qDebug() << "TcpSocketError: " << mSocket->errorString();
-    }
+
 
 
     myHeader.prepend(mStreamId.toLocal8Bit().data());

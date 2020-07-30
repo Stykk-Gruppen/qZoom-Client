@@ -20,10 +20,14 @@ void StreamHandler::init()
     mVideoEnabled = mSettings->getVideoOn();
     mAudioEnabled = mSettings->getAudioOn();
     //Setter opp video
+    mTcpSocketHandler->init();
+
     if(mVideoEnabled) enableVideo();
     //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
-    mTcpSocketHandler->init();
-    mTcpSocketHandler->writeHeader();//
+    else
+    {
+        mTcpSocketHandler->writeHeader();
+    }
 
     if(mAudioEnabled) enableAudio();
 }
