@@ -134,6 +134,7 @@ void StreamHandler::disableAudio()
         //delete mAudioHandler;
         qDebug() << "audio disabled";
     }
+
     if (!mVideoEnabled && !mAudioEnabled)
     {
         mStopServerBump = false;
@@ -178,6 +179,7 @@ void StreamHandler::disableVideo()
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
     }
+
     if (!mVideoEnabled && !mAudioEnabled)
     {
         mStopServerBump = false;
@@ -215,4 +217,14 @@ void StreamHandler::bumpServer()
     {
         mTcpSocketHandler->sendBumpSignal();
     }
+}
+
+bool StreamHandler::checkVideoEnabled()
+{
+    return mVideoEnabled;
+}
+
+bool StreamHandler::checkAudioEnabled()
+{
+    return mAudioEnabled;
 }
