@@ -106,18 +106,11 @@ Rectangle {
         //when the signal addScreen is emitted, this function will run
         Connections {
             target: imageHandler
-            function onAddScreen() {
+            function onRefreshScreens() {
                 repeaterId.model = 0;
                 gridId.columns = gridId.calcColumns();
                 gridId.rows = gridId.calcRows();
                 repeaterId.model = imageHandler.getNumberOfScreens();
-            }
-            function onRemoveScreen() {
-                repeaterId.model = 0;
-                gridId.columns = gridId.calcColumns();
-                gridId.rows = gridId.calcRows();
-                repeaterId.model = imageHandler.getNumberOfScreens();
-
             }
         }
 
