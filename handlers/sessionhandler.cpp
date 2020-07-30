@@ -23,9 +23,9 @@ UserHandler* SessionHandler::getUser()
     return mUser;
 }
 
-void SessionHandler::enableVideo()
+bool SessionHandler::enableVideo()
 {
-   mStreamHandler->enableVideo();
+   return mStreamHandler->enableVideo();
 
 }
 
@@ -34,9 +34,9 @@ void SessionHandler::disableVideo()
     mStreamHandler->disableVideo();
 }
 
-void SessionHandler::enableAudio()
+bool SessionHandler::enableAudio()
 {
-    mStreamHandler->enableAudio();
+    return mStreamHandler->enableAudio();
 }
 
 void SessionHandler::disableAudio()
@@ -44,7 +44,7 @@ void SessionHandler::disableAudio()
     mStreamHandler->disableAudio();
 }
 
-void SessionHandler::initOtherStuff()
+std::pair<bool, bool> SessionHandler::initOtherStuff()
 {
     QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
     QString roomId = getRoomId();
@@ -58,10 +58,6 @@ void SessionHandler::initOtherStuff()
     //Init sending of our header, empty or not
     mTcpSocketHandler->init();
     mStreamHandler->init();
-
-
-
-
 }
 
 void SessionHandler::closeOtherStuff()

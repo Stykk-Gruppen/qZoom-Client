@@ -22,14 +22,29 @@ void StreamHandler::init()
     //Setter opp video
     mTcpSocketHandler->init();
 
-    if(mVideoEnabled) enableVideo();
+    if(mVideoEnabled)
+    {
+        if(enableVideo() < 0)
+        {
+
+            mTcpSocketHandler->writeHeader();
+            mVideoEnabled = false;
+        }
+    }
     //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
     else
     {
         mTcpSocketHandler->writeHeader();
+        mVideoEnabled = false;
+
     }
 
-    if(mAudioEnabled) enableAudio();
+    if(mAudioEnabled)
+    {
+        if(enableAudio() >= 0)
+            return;
+    }
+    mAudioEnabled = false;
 }
 
 void StreamHandler::close()
@@ -73,7 +88,7 @@ void StreamHandler::record()
     */
 }
 
-void StreamHandler::enableAudio()
+int StreamHandler::enableAudio()
 {
     mAudioEnabled = true;
     qDebug() << "enabling audio";
@@ -89,13 +104,15 @@ void StreamHandler::enableAudio()
     if(error<0)
     {
         fprintf(stderr, "Could not init audiohandler");
-        exit(1);
+        errorHandler->giveErrorDialog("Could not stream audio");
+
+        return error;
     }
 
 
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
     QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
-
+    return 0;
 }
 
 void StreamHandler::disableAudio()
@@ -109,7 +126,7 @@ void StreamHandler::disableAudio()
     }
 }
 
-void StreamHandler::enableVideo()
+int StreamHandler::enableVideo()
 {
     mVideoEnabled = true;
     qDebug() << "enabling video";
@@ -126,13 +143,15 @@ void StreamHandler::enableVideo()
     if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");
-        exit(1);
+        errorHandler->giveErrorDialog("Could not stream video");
+        return error;
     }
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
     qDebug() << "Before grab frames";
     QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
     qDebug() << "Grab frames started";
+    return 0;
 }
 
 void StreamHandler::disableVideo()
