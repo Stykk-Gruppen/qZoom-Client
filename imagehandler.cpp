@@ -46,12 +46,16 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
     return result;
 }
 
+/**
+ * Adds one default image to the map at the index and sends the signal addScreen
+ * which is connected to TaskBar.qml Connections function onAddScreen()
+ * @param index uint8_t
+ */
 void ImageHandler::addPeer(uint8_t index)
 {
     qDebug() << "added peer: "<< index;
     mImageMap[index] = mDefaultImage;
     emit addScreen();
-    qDebug() << "After add screen emit";
 }
 
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
@@ -105,7 +109,13 @@ void ImageHandler::veryFunStianLoop()
         }
     });*/
 }
-
+/**
+ * We need to convert the video frame to RGB24 before turning it into a QImage object.
+ * Then we update the map at said index with the new QImage.
+ * @param codecContext AVCodecContext* the video decoder codec context
+ * @param[in,out] frame AVFrame* which contains data for 1 video frame
+ * @param index uint8_t the index in the map to update the new QImage
+ */
 void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8_t index)
 {
     SwsContext *imgConvertCtx = nullptr;
@@ -160,6 +170,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
     //av_packet_unref(&packet);
 }
+
 
 int ImageHandler::getNumberOfScreens()
 {
