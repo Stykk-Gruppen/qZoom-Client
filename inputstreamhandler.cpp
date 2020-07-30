@@ -102,8 +102,11 @@ void InputStreamHandler::handleHeader(QByteArray data)
     int index = findStreamIdIndex(streamId);
 
     mVideoMutexVector[index]->lock();
-    //mVideoHeaderVector[index]->append(data);
-    mVideoBufferVector[index]->append(data);
+    if(mVideoHeaderVector[index]->isEmpty())
+    {
+        mVideoHeaderVector[index]->append(data);
+        mVideoBufferVector[index]->append(data);
+    }
     mVideoMutexVector[index]->unlock();
 }
 
