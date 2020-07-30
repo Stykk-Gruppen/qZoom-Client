@@ -26,6 +26,7 @@ public:
     void readPacket(uint8_t *buffer, int buffer_size);
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
     void addPeer(uint8_t index);
+    void removePeer(uint8_t index);
     Q_INVOKABLE int getNumberOfScreens();
     std::mutex imgLock;
 
@@ -35,6 +36,7 @@ public slots:
 signals:
     void imageChanged();
     void addScreen();
+    void removeScreen();
 private:
     QImage generateGenericImage(QString username);
     QMap<uint8_t, QImage> mImageMap;

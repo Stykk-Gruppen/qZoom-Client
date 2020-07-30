@@ -112,6 +112,13 @@ Rectangle {
                 gridId.rows = gridId.calcRows();
                 repeaterId.model = imageHandler.getNumberOfScreens();
             }
+            function onRemoveScreen() {
+                repeaterId.model = 0;
+                gridId.columns = gridId.calcColumns();
+                gridId.rows = gridId.calcRows();
+                repeaterId.model = imageHandler.getNumberOfScreens();
+
+            }
         }
 
         C.PushButton {

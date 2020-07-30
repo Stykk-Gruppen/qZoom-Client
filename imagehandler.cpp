@@ -54,6 +54,13 @@ void ImageHandler::addPeer(uint8_t index)
     qDebug() << "After add screen emit";
 }
 
+void ImageHandler::removePeer(uint8_t index)
+{
+    qDebug() << "Removing peer from ImageHandler ";
+    mImageMap.remove(index);
+    emit removeScreen();
+}
+
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();

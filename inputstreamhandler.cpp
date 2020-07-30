@@ -56,7 +56,6 @@ void InputStreamHandler::removeStream(QString streamId)
             index = i;
         }
     }
-
     if(index != -1)
     {
         delete mVideoHeaderVector.at(index);
@@ -82,7 +81,6 @@ void InputStreamHandler::removeStream(QString streamId)
     {
         qDebug() << "Could not find stream with streamId " << streamId << " when trying to remove it";
     }
-
 }
 
 /**
