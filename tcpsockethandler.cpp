@@ -10,7 +10,6 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QStr
     mInputStreamHandler = inputStreamHandler;
     mStreamId = streamId;
     mRoomId = roomId;
-
 }
 
 void TcpSocketHandler::init()
@@ -18,8 +17,9 @@ void TcpSocketHandler::init()
     mSocket = new QTcpSocket(this);
     /*connect(mSocket, SIGNAL(connected()), this, SLOT(connected()));
     connect(mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 */
+
+    connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
 }
 
@@ -29,15 +29,50 @@ void TcpSocketHandler::close()
     delete mSocket;
 }
 
-void TcpSocketHandler::writeLeaveSignal()
+void TcpSocketHandler::readyRead()
 {
-    mSocket->connectToHost(mAddress, mPort);
-    if(!mSocket->waitForConnected(3000))
+    qDebug() << "TcpSocket reading incoming message";
+
+    //qDebug() << mSocket->readAll();
+    QByteArray data = mSocket->readAll();
+    mReady = true;
+
+    int code = data[0];
+    data.remove(0, 1);
+    switch(code)
     {
-        qDebug() << "TcpSocketError: " << mSocket->errorString();
+    case 0:
+    {
+        //HEADER
+        int numOfHeaders = data[0];
+        qDebug() << "number of headers recieved from server: " << numOfHeaders;
+        data.remove(0,1);
+        //QString data(reply);
+
+
+        //qDebug() << "DataString: " << data;
+        //qDebug() << reply.indexOf(27);
+        for(int i = 0; i < numOfHeaders; i++)
+        {
+            QByteArray temp = QByteArray(data, data.indexOf(27));
+            //qDebug() << "Temp: " << temp;
+            mInputStreamHandler->handleHeader(temp);
+            data.remove(0, data.indexOf(27));
+        }
+        //mSocket->write("0");
+        break;
     }
-    mSocket->write(QByteArray("-1"));
+
+    case 1:
+    {
+        //REmove the user with this streamId
+
+    }
+    default:
+        qDebug() << "Dont understand the code sent in beginning of tcp mesasge";
+    };
 }
+
 
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
@@ -54,8 +89,6 @@ void TcpSocketHandler::writeHeader()
 
     if(firstRound)
     {
-
-
         myHeader.prepend(mStreamId.toLocal8Bit().data());
         myHeader.prepend(mStreamId.size());
 
@@ -128,7 +161,6 @@ void TcpSocketHandler::writeHeader()
 
     //mSocket->write("0");
 
-    mSocket->close();
 }
 
 
@@ -160,14 +192,7 @@ int TcpSocketHandler::getBytesWritten()
     return mBytesWritten;
 }
 
-void TcpSocketHandler::readyRead()
-{
-    qDebug() << "TcpSocket reading...";
 
-    //qDebug() << mSocket->readAll();
-    mReply = mSocket->readAll();
-    mReady = true;
-}
 
 QByteArray TcpSocketHandler::getReply()
 {
