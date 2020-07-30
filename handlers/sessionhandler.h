@@ -34,6 +34,7 @@ public:
     Q_INVOKABLE void enableAudio();
 
     Q_INVOKABLE void disableAudio();
+    Q_INVOKABLE void sendBumpSignal();
 
 
 

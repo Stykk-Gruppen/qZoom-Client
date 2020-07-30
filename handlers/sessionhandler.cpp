@@ -266,3 +266,8 @@ void SessionHandler::setDefaultRoomID()
 {
     mRoomId = "Debug";
 }
+
+void SessionHandler::sendBumpSignal()
+{
+    mStreamHandler->bumpServer();
+}

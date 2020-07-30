@@ -39,8 +39,6 @@ void TcpServerHandler::readTcpPacket()
     QByteArray originalData = data;
     QByteArray header;
 
-
-
     int code = data[0];
     data.remove(0, 1);
     switch(code)

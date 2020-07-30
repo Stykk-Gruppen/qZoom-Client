@@ -25,13 +25,15 @@ public:
     void wait();
     int getBytesWritten();
     void writeHeader();
-    void writeLeaveSignal();
+    void sendBumpSignal();
     QByteArray myHeader;
+
 public slots:
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);
     void readyRead();
+
 private:
     //Should match enum in Server::TcpServerHandler
     enum mTcpReturnValues { STREAM_ID_NOT_FOUND, ROOM_ID_NOT_FOUND, SESSION_STARTED };
@@ -46,7 +48,6 @@ private:
     QString mStreamId;
     InputStreamHandler* mInputStreamHandler;
     std::vector<QByteArray> videoHeaders;
-
     void addStream();
 
 };

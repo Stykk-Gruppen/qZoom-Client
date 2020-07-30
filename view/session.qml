@@ -102,6 +102,13 @@ Rectangle {
         }
     }
 
+    Item {
+        Timer {
+            interval: 3000; running: true; repeat: true
+            onTriggered: sendBump();
+        }
+    }
+
     C.TaskBar {
         id: taskBar
         anchors.bottom: parent.bottom
@@ -122,6 +129,11 @@ Rectangle {
 
 
     }
+
+    function sendBump() {
+        sessionHandler.sendBumpSignal();
+    }
+
     /*
     function addScreen() {
         var width = screenGridArea.width/gridId.calcColumns();

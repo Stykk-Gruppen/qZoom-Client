@@ -12,7 +12,10 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socket
     mImageHandler = _imageHandler;
     mSocketHandler = _socketHandler;
     mTcpSocketHandler = tcpSocketHandler;
-    if(!mVideoEnabled) mImageHandler->readImage(nullptr, nullptr, 0);
+    if(!mVideoEnabled)
+    {
+        mImageHandler->readImage(nullptr, nullptr, 0);
+    }
 }
 
 void StreamHandler::init()
@@ -22,14 +25,25 @@ void StreamHandler::init()
     //Setter opp video
     mTcpSocketHandler->init();
 
-    if(mVideoEnabled) enableVideo();
-    //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
+    if(mVideoEnabled)
+    {
+        enableVideo();
+    }
     else
     {
+        //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
         mTcpSocketHandler->writeHeader();
     }
 
-    if(mAudioEnabled) enableAudio();
+    if(mAudioEnabled)
+    {
+        enableAudio();
+    }
+
+    if (!mVideoEnabled && !mAudioEnabled)
+    {
+        bumpServer();
+    }
 }
 
 
@@ -70,6 +84,7 @@ void StreamHandler::record()
 void StreamHandler::enableAudio()
 {
     mAudioEnabled = true;
+    mStopServerBump = true;
     qDebug() << "enabling audio";
     if (mAudioHandler == nullptr)
     {
@@ -101,11 +116,16 @@ void StreamHandler::disableAudio()
         //delete mAudioHandler;
         qDebug() << "audio disabled";
     }
+    if (!mVideoEnabled && !mAudioEnabled)
+    {
+        mStopServerBump = false;
+    }
 }
 
 void StreamHandler::enableVideo()
 {
     mVideoEnabled = true;
+    mStopServerBump = true;
     qDebug() << "enabling video";
     if (mVideoHandler == nullptr)
     {
@@ -138,6 +158,10 @@ void StreamHandler::disableVideo()
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
     }
+    if (!mVideoEnabled && !mAudioEnabled)
+    {
+        mStopServerBump = false;
+    }
 }
 
 QVariantList StreamHandler::getAudioInputDevices()
@@ -163,4 +187,12 @@ void StreamHandler::stopRecording()
 {
     disableAudio();
     disableVideo();
+}
+
+void StreamHandler::bumpServer()
+{
+    if (!mStopServerBump)
+    {
+        mTcpSocketHandler->sendBumpSignal();
+    }
 }

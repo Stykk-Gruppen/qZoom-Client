@@ -173,6 +173,22 @@ void TcpSocketHandler::writeHeader()
 
 }
 
+void TcpSocketHandler::sendBumpSignal()
+{
+    qDebug() << "Writing bump signal. Denne kommer nok ganske ofte opp :) Heisann folkens.";
+    QByteArray header = QString("BUMP").toUtf8();
+
+    header.prepend(mStreamId.toLocal8Bit().data());
+    header.prepend(mStreamId.size());
+
+    //Puts the roomId and its size at the front of the array
+    header.prepend(mRoomId.toLocal8Bit().data());
+    header.prepend(mRoomId.size());
+
+    mSocket->write(header);
+    header.clear();
+}
+
 
 void TcpSocketHandler::connected()
 {
@@ -201,8 +217,6 @@ int TcpSocketHandler::getBytesWritten()
 {
     return mBytesWritten;
 }
-
-
 
 QByteArray TcpSocketHandler::getReply()
 {

@@ -12,7 +12,6 @@ class StreamHandler : public QObject
 {
     Q_OBJECT
 public:
-
     StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
@@ -26,6 +25,8 @@ public:
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
     Q_INVOKABLE QString getDefaultAudioInputDevice();
     Q_INVOKABLE void init();
+    void bumpServer();
+
 private:
     void grabVideoHeader();
     int64_t mTime;
@@ -34,6 +35,7 @@ private:
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;
+    bool mStopServerBump;
     int mBufferSize;
     std::mutex mUDPSendDatagramMutexLock;
     QString mAudioDevice;
