@@ -11,12 +11,43 @@ void InputStreamHandler::init()
 {
     //new TcpServerHandler();
     //TcpServerHandler.init();
+}
 
+void InputStreamHandler::close()
+{
+    for(auto i : mVideoHeaderVector)
+        delete i;
+    mVideoHeaderVector.clear();
+
+    for(auto i : mAudioBufferVector)
+        delete i;
+    mAudioBufferVector.clear();
+
+    for(auto i : mVideoBufferVector)
+        delete i;
+    mVideoBufferVector.clear();
+
+    for(auto i : mAudioMutexVector)
+        delete i;
+    mAudioMutexVector.clear();
+
+    for(auto i : mVideoMutexVector)
+        delete i;
+    mVideoMutexVector.clear();
+
+    for(auto i : mAudioPlaybackHandlerVector)
+        delete i;
+    mAudioPlaybackHandlerVector.clear();
+
+    for(auto i : mVideoPlaybackHandlerVector)
+        delete i;
+    mVideoPlaybackHandlerVector.clear();
 }
 
 void InputStreamHandler::removeStream(QString streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
+
 }
 
 /**

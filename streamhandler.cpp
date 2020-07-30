@@ -32,6 +32,12 @@ void StreamHandler::init()
     if(mAudioEnabled) enableAudio();
 }
 
+void StreamHandler::close()
+{
+    delete mAudioHandler;
+    delete mVideoHandler;
+}
+
 
 
 void StreamHandler::grabVideoHeader()

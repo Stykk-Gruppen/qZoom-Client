@@ -66,6 +66,14 @@ void SessionHandler::initOtherStuff()
 
 void SessionHandler::closeOtherStuff()
 {
+    mInputStreamHandler->close();
+    mSocketHandler->closeSocket();
+    mTcpSocketHandler->close();
+    mStreamHandler->close();
+    delete mInputStreamHandler;
+    delete mSocketHandler;
+    delete mTcpSocketHandler;
+    delete mStreamHandler;
 }
 
 QVariantList SessionHandler::getAudioInputDevices()
