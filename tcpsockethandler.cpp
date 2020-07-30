@@ -43,7 +43,7 @@ void TcpSocketHandler::readyRead()
     //qDebug() << mSocket->readAll();
     QByteArray data = mSocket->readAll();
 
-    qDebug() << "Data received: " << data;
+    //qDebug() << "Data received: " << data;
 
 
     int code = data[0];
@@ -63,13 +63,13 @@ void TcpSocketHandler::readyRead()
         //qDebug() << reply.indexOf(27);
         for(int i = 0; i < numOfHeaders; i++)
         {
-            qDebug() << "Data: " << data;
+            //qDebug() << "Data: " << data;
             QByteArray temp = QByteArray(data, data.indexOf(27));
-            qDebug() << "Temp: " << temp;
+            //qDebug() << "Temp: " << temp;
             mInputStreamHandler->handleHeader(temp);
-            qDebug() << "Data before remove endline: " << data;
+            //qDebug() << "Data before remove endline: " << data;
             data.remove(0, data.indexOf(27)+1);
-            qDebug() << "Data after remove endline: " << data;
+            //qDebug() << "Data after remove endline: " << data;
         }
         //mSocket->write("0");
         break;
@@ -98,7 +98,7 @@ void TcpSocketHandler::readyRead()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
-    qDebug() << "About to write header";
+    //qDebug() << "About to write header";
     //mSocket->connectToHost(mAddress, mPort);
 
 
@@ -112,7 +112,7 @@ void TcpSocketHandler::writeHeader()
 
 
 
-    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+   // qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
 
     mSocket->write(myHeader);
     myHeader.clear();
@@ -175,7 +175,7 @@ void TcpSocketHandler::writeHeader()
 
 void TcpSocketHandler::sendBumpSignal()
 {
-    qDebug() << "Writing bump signal. Denne kommer nok ganske ofte opp :) Heisann folkens.";
+    //qDebug() << "Writing bump signal. Denne kommer nok ganske ofte opp :) Heisann folkens.";
     QByteArray header = QString("BUMP").toUtf8();
 
     header.prepend(mStreamId.toLocal8Bit().data());
@@ -185,7 +185,7 @@ void TcpSocketHandler::sendBumpSignal()
     header.prepend(mRoomId.toLocal8Bit().data());
     header.prepend(mRoomId.size());
 
-    mSocket->write(header);
+    //mSocket->write(header);
     header.clear();
 }
 
