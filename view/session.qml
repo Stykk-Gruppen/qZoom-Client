@@ -117,7 +117,13 @@ Rectangle {
     Component.onCompleted: {
         //addScreen();
         var roomId = sessionHandler.getRoomId();
+        var roomPassword = sessionHandler.getRoomPassword();
         setTitle("qZoom :: Session (" + roomId + ")");
+
+        backendSettings.setLastRoomId(roomId);
+        backendSettings.setLastRoomPassword(roomPassword);
+        backendSettings.saveSettings();
+
         /*if(backendSettings.getAudioOn())
         {
             streamHandler.enableAudio();

@@ -7,8 +7,8 @@ Settings::Settings()
 
 void Settings::loadSettings()
 {
-    QFile file(settingsFile);
-    if(QFileInfo::exists(settingsFile))
+    QFile file(mSettingsFile);
+    if(QFileInfo::exists(mSettingsFile))
     {
         qDebug() << "Found settings file";
         file.open(QIODevice::ReadWrite | QIODevice::Text);
@@ -19,6 +19,12 @@ void Settings::loadSettings()
         mVideoOn = settings.value("videoOn").toBool();
         mDisplayName = settings.value("displayName").toString();
         mDefaultAudioInput = settings.value("defaultAudioInput").toString();
+        mSaveLastRoom = settings.value("saveLastRoom").toBool();
+        if (mSaveLastRoom)
+        {
+            mLastRoomId = settings.value("lastRoomId").toString();
+            mLastRoomPassword = settings.value("lastRoomPassword").toString();
+        }
         qDebug() << mAudioOn;
         qDebug() << mVideoOn;
         qDebug() << mDisplayName;
@@ -38,13 +44,15 @@ void Settings::loadAndSaveDefaultSettings()
     mVideoOn = true;
     mDisplayName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
     mDefaultAudioInput = "default";
-
+    mSaveLastRoom = true;
+    mLastRoomId = "";
+    mLastRoomPassword = "";
     saveSettings();
 }
 
 void Settings::saveSettings()
 {
-    QFile file(settingsFile);
+    QFile file(mSettingsFile);
 
     file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
     QJsonObject object;
@@ -52,6 +60,12 @@ void Settings::saveSettings()
     object.insert("videoOn", QJsonValue::fromVariant(mVideoOn));
     object.insert("displayName", QJsonValue::fromVariant(mDisplayName));
     object.insert("defaultAudioInput", QJsonValue::fromVariant(mDefaultAudioInput));
+    object.insert("saveLastRoom", QJsonValue::fromVariant(mSaveLastRoom));
+    if (mSaveLastRoom)
+    {
+        object.insert("lastRoomId", QJsonValue::fromVariant(mLastRoomId));
+        object.insert("lastRoomPassword", QJsonValue::fromVariant(mLastRoomPassword));
+    }
 
     QJsonDocument settings(object);
 
@@ -81,6 +95,16 @@ QString Settings::getDefaultAudioInput()
     return mDefaultAudioInput;
 }
 
+QString Settings::getLastRoomId()
+{
+    return mLastRoomId;
+}
+
+QString Settings::getLastRoomPassword()
+{
+    return mLastRoomPassword;
+}
+
 void Settings::setAudioOn(bool val)
 {
     mAudioOn = val;
@@ -99,4 +123,24 @@ void Settings::setDisplayName(QString val)
 void Settings::setDefaultAudioInput(QString val)
 {
     mDefaultAudioInput = val;
+}
+
+void Settings::setSaveLastRoom(bool val)
+{
+    mSaveLastRoom = val;
+}
+
+bool Settings::getSaveLastRoom()
+{
+    return mSaveLastRoom;
+}
+
+void Settings::setLastRoomId(QString val)
+{
+    mLastRoomId = val;
+}
+
+void Settings::setLastRoomPassword(QString val)
+{
+    mLastRoomPassword = val;
 }

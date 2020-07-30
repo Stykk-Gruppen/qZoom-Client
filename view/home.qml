@@ -11,7 +11,9 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         spacing: 32
+
         Rectangle {
+            id: joinRectangle
             width: 200
             height: 200
             color: "#141414"
@@ -30,6 +32,18 @@ Rectangle {
                     joinSessionColumn.visible = true
                     backButton.visible = true
                     joinSessionButton.visible = true
+
+                    if (userHandler.isGuest()) {
+                        displayNameField.text = backendSettings.getDisplayName();
+                        displayNameField.visible = true;
+                    } else {
+                        displayNameField.visible = false;
+                    }
+
+                    if (backendSettings.getSaveLastRoom()) {
+                        roomIdField.text = backendSettings.getLastRoomId();
+                        roomPasswordField.text = backendSettings.getLastRoomPassword();
+                    }
                 }
             }
         }
@@ -50,7 +64,7 @@ Rectangle {
                 id: hostMouseArea
                 anchors.fill: parent
                 cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                enabled: !sessionHandler.isGuest()
+                enabled: !userHandler.isGuest()
                 onClicked: {
                     if (userHandler.hasRoom()) {
                         changePage("host")
@@ -66,6 +80,7 @@ Rectangle {
         }
 
         Rectangle {
+            id: logInRectangle
             width: 200
             height: 200
             color: "#141414"
@@ -88,6 +103,7 @@ Rectangle {
         }
 
         Rectangle {
+            id: settingsRectangle
             width: 200
             height: 200
             color: "#141414"
@@ -114,6 +130,18 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         spacing: 32
+
+        TextField {
+            id: displayNameField
+            width: 200
+            //height: 32
+            text: qsTr("")
+            ///font.pixelSize: 24
+            placeholderText: qsTr("Display Name")
+            selectByMouse: true
+            focus: true
+            visible: false
+        }
         TextField {
             id: roomIdField
             width: 200

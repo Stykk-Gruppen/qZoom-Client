@@ -79,12 +79,17 @@ void ImageHandler::removePeer(uint8_t index)
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();
-    if(index>0){
+    if(index > 0)
+    {
         //qDebug() << index;
     }
     if(mImageMap[index] != image)
     {
         mImageMap[index] = image;
+    }
+    else
+    {
+        qDebug() << "Same Image";
     }
     imgLock.unlock();
 }

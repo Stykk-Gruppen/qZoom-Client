@@ -17,19 +17,28 @@ public:
     Q_INVOKABLE void saveSettings();
     Q_INVOKABLE bool getAudioOn();
     Q_INVOKABLE bool getVideoOn();
+    Q_INVOKABLE bool getSaveLastRoom();
     Q_INVOKABLE QString getDisplayName();
     Q_INVOKABLE QString getDefaultAudioInput();
+    Q_INVOKABLE QString getLastRoomId();
+    Q_INVOKABLE QString getLastRoomPassword();
     Q_INVOKABLE void setAudioOn(bool val);
     Q_INVOKABLE void setVideoOn(bool val);
     Q_INVOKABLE void setDisplayName(QString val);
     Q_INVOKABLE void setDefaultAudioInput(QString val);
+    Q_INVOKABLE void setSaveLastRoom(bool val);
+    Q_INVOKABLE void setLastRoomId(QString val);
+    Q_INVOKABLE void setLastRoomPassword(QString val);
 
 private:
     bool mAudioOn;
     bool mVideoOn;
+    bool mSaveLastRoom;
     QString mDisplayName;
     QString mDefaultAudioInput;
-    QString settingsFile = "./settings.json";
+    QString mSettingsFile = "./settings.json";
+    QString mLastRoomId;
+    QString mLastRoomPassword;
 };
 
 #endif // SETTINGS_H

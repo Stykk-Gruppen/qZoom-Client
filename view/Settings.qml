@@ -18,6 +18,7 @@ Dialog {
         defaultAudioInput.currentIndex = index;
         audioOn.checked = backendSettings.getAudioOn();
         videoOn.checked = backendSettings.getVideoOn();
+        saveLastRoom.checked = backendSettings.getSaveLastRoom();
         displayName.text = backendSettings.getDisplayName();
 
     }
@@ -42,7 +43,6 @@ Dialog {
 
 
     Rectangle{
-
         ColumnLayout {
             RowLayout {
                 Text {
@@ -67,8 +67,13 @@ Dialog {
                 text: qsTr("Video on when joining meeting")
             }
 
-            RowLayout {
+            CheckBox {
+                id: saveLastRoom
+                checked: true
+                text: qsTr("Remember last room")
+            }
 
+            RowLayout {
                 Text {
                     text: qsTr("Default input device");
                 }
@@ -76,8 +81,6 @@ Dialog {
                 ComboBox {
                     id: defaultAudioInput
                     editable: true
-
-
                 }
             }
         }
@@ -86,9 +89,9 @@ Dialog {
         console.log("Apply clicked")
         backendSettings.setAudioOn(audioOn.checked);
         backendSettings.setVideoOn(videoOn.checked);
+        backendSettings.setSaveLastRoom(saveLastRoom.checked);
         backendSettings.setDisplayName(displayName.text === ""? "UserName" : displayName.text);
-
-            backendSettings.setDisplayName(displayName.text);
+        backendSettings.setDisplayName(displayName.text);
         backendSettings.setDefaultAudioInput(defaultAudioInput.currentText);
         backendSettings.saveSettings();
     }

@@ -17,7 +17,7 @@ public:
     Q_INVOKABLE QString getPersonalRoomPassword();
     Q_INVOKABLE bool hasRoom();
     Q_INVOKABLE bool updatePersonalRoom(QString roomId, QString roomPassword);
-    bool isGuest();
+    Q_INVOKABLE bool isGuest();
     int getUserId();
     QString getStreamId();
     QString getGuestName();

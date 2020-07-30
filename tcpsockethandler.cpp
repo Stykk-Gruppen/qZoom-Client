@@ -4,7 +4,8 @@
 TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QHostAddress address, int port, QObject* parent): QObject(parent)
 {
     mAddress = address;
-    mPort = port;
+    //mPort = port;
+    mPort = 1338;
     qDebug() << mAddress;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
