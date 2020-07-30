@@ -51,6 +51,7 @@ void ImageHandler::addPeer(uint8_t index)
     qDebug() << "added peer: "<< index;
     mImageMap[index] = mDefaultImage;
     emit addScreen();
+    qDebug() << "After add screen emit";
 }
 
 void ImageHandler::updateImage(const QImage &image, uint8_t index)

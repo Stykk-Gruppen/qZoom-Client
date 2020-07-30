@@ -20,6 +20,7 @@ public:
     void addStreamToVector(QString,int);
     int findStreamIdIndex(QString);
     void init();
+    void removeStream(QString streamId);
     std::vector<QByteArray*> mVideoHeaderVector;
     std::vector<QString> mStreamIdVector;
     std::vector<QByteArray*> mAudioBufferVector;

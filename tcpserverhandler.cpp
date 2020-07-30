@@ -66,10 +66,11 @@ void TcpServerHandler::readTcpPacket()
         //mSocket->write("0");
         break;
     }
-
     case 1:
     {
         //REmove the user with this streamId
+        qDebug() << "About to remove this user: " << data;
+
 
     }
     default:

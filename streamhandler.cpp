@@ -112,6 +112,7 @@ void StreamHandler::enableVideo()
     }
 
     int error = mVideoHandler->init();
+    mTcpSocketHandler->writeHeader();
     if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");

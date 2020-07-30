@@ -35,7 +35,9 @@ void TcpSocketHandler::readyRead()
 
     //qDebug() << mSocket->readAll();
     QByteArray data = mSocket->readAll();
-    mReady = true;
+
+    qDebug() << "Data received: " << data;
+
 
     int code = data[0];
     data.remove(0, 1);
@@ -54,10 +56,13 @@ void TcpSocketHandler::readyRead()
         //qDebug() << reply.indexOf(27);
         for(int i = 0; i < numOfHeaders; i++)
         {
+            qDebug() << "Data: " << data;
             QByteArray temp = QByteArray(data, data.indexOf(27));
-            //qDebug() << "Temp: " << temp;
+            qDebug() << "Temp: " << temp;
             mInputStreamHandler->handleHeader(temp);
-            data.remove(0, data.indexOf(27));
+            qDebug() << "Data before remove endline: " << data;
+            data.remove(0, data.indexOf(27)+1);
+            qDebug() << "Data after remove endline: " << data;
         }
         //mSocket->write("0");
         break;
@@ -66,6 +71,15 @@ void TcpSocketHandler::readyRead()
     case 1:
     {
         //REmove the user with this streamId
+        qDebug() << "About to remove this user: " << data;
+        int streamIdLength = data[0];
+        data.remove(0,1);
+        QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        QString streamId(streamIdArray);
+        data.remove(0, streamIdLength);
+
+        mInputStreamHandler->removeStream(streamId);
+
 
     }
     default:
@@ -78,7 +92,6 @@ void TcpSocketHandler::readyRead()
 void TcpSocketHandler::writeHeader()
 {
     qDebug() << "About to write header";
-    static bool firstRound = true;
     //mSocket->connectToHost(mAddress, mPort);
     mSocket->connectToHost(mAddress, mPort);
     //qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
@@ -87,22 +100,17 @@ void TcpSocketHandler::writeHeader()
         qDebug() << "TcpSocketError: " << mSocket->errorString();
     }
 
-    if(firstRound)
-    {
-        myHeader.prepend(mStreamId.toLocal8Bit().data());
-        myHeader.prepend(mStreamId.size());
 
-        //Puts the roomId and its size at the front of the array
-        myHeader.prepend(mRoomId.toLocal8Bit().data());
-        myHeader.prepend(mRoomId.size());
+    myHeader.prepend(mStreamId.toLocal8Bit().data());
+    myHeader.prepend(mStreamId.size());
 
-        firstRound = false;
-    }
+    //Puts the roomId and its size at the front of the array
+    myHeader.prepend(mRoomId.toLocal8Bit().data());
+    myHeader.prepend(mRoomId.size());
 
 
 
     qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
-
 
     mSocket->write(myHeader);
     myHeader.clear();

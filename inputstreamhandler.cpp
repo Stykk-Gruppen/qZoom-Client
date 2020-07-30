@@ -14,6 +14,11 @@ void InputStreamHandler::init()
 
 }
 
+void InputStreamHandler::removeStream(QString streamId)
+{
+    qDebug() << "Trying to remove user with streamId: " << streamId;
+}
+
 /**
  * Reads the streamId from the data and removes it, then finds the matching index
  * or creates a new one and appends the header data to the appropriate buffer.
@@ -87,7 +92,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
         }
         //If the streamId does not exist, push it and buffers/locks
         addStreamToVector(streamId, mStreamIdVector.size());
-        return mStreamIdVector.size();
+        return mStreamIdVector.size() - 1;
     }
     else
     {
