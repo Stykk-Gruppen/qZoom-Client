@@ -104,6 +104,7 @@ void InputStreamHandler::handleHeader(QByteArray data)
     mVideoMutexVector[index]->lock();
     if(mVideoHeaderVector[index]->isEmpty())
     {
+        qDebug() << " header is empty adding it to the buffers " << data;
         mVideoHeaderVector[index]->append(data);
         mVideoBufferVector[index]->append(data);
     }

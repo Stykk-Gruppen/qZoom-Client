@@ -93,11 +93,11 @@ void SocketHandler::readPendingDatagrams()
             mInputStreamHandler->mVideoMutexVector[index]->unlock();
             if(!mInputStreamHandler->mVideoPlaybackStartedVector[index] && mInputStreamHandler->mVideoBufferVector[index]->size() >= mBufferSize)
             {
-                qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
+                //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
                 QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;
             }
-            //qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
+            qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else
         {
