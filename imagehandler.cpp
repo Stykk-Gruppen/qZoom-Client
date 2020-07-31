@@ -224,7 +224,7 @@ QImage ImageHandler::generateGenericImage(QString displayName)
     painter.setPen(QPen(Qt::white));
     painter.setFont(QFont("Helvetica [Cronyx]", 26, QFont::Bold));
     //QString text = displayName + " hat seinen Kamera ausgeschaltet";
-    QString text = displayName + "\n (Screen Muted)";
+    QString text = displayName + "\n (Screen Disabled)";
     painter.drawText(QRectF(0, 0, 1280, 720), Qt::AlignCenter | Qt::AlignTop, text);
     return image;
 }

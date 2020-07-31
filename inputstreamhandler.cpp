@@ -198,7 +198,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
 
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
-    uint8_t index = findStreamIdIndex(streamId, displayName);
+    uint8_t index = findStreamIdIndex(streamId, displayName) + 1;
     mImageHandler->updatePeerDisplayName(index, displayName);
 }
 
