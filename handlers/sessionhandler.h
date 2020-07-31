@@ -42,12 +42,11 @@ public:
 
 private:
     void addUser();
+    void initOtherStuff();
     void closeOtherStuff();
     void getUserRoom();
     void setDefaultRoomID();
     bool addGuestUserToDatabase();
-    std::pair<bool, bool> initOtherStuff();
-
     bool mUserHasRoom;
     bool mSessionIsActive;
     int mBufferSize;

@@ -25,7 +25,7 @@ UserHandler* SessionHandler::getUser()
 
 bool SessionHandler::enableVideo()
 {
-   return mStreamHandler->enableVideo();
+   return mStreamHandler->enableVideo() >= 0;
 
 }
 
@@ -36,7 +36,7 @@ void SessionHandler::disableVideo()
 
 bool SessionHandler::enableAudio()
 {
-    return mStreamHandler->enableAudio();
+    return mStreamHandler->enableAudio() >= 0;
 }
 
 void SessionHandler::disableAudio()
@@ -44,7 +44,7 @@ void SessionHandler::disableAudio()
     mStreamHandler->disableAudio();
 }
 
-std::pair<bool, bool> SessionHandler::initOtherStuff()
+void SessionHandler::initOtherStuff()
 {
     QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
     QString roomId = getRoomId();
@@ -65,14 +65,17 @@ std::pair<bool, bool> SessionHandler::initOtherStuff()
 void SessionHandler::closeOtherStuff()
 {
     mSessionIsActive = false;
+    qDebug() << "Before close";
     mInputStreamHandler->close();
     mSocketHandler->closeSocket();
     mTcpSocketHandler->close();
     mStreamHandler->close();
+    qDebug() << "After close, about to delete";
     delete mInputStreamHandler;
     delete mSocketHandler;
     delete mTcpSocketHandler;
     delete mStreamHandler;
+    qDebug() << "Deleted everything";
 }
 
 QVariantList SessionHandler::getAudioInputDevices()
@@ -191,6 +194,7 @@ bool SessionHandler::leaveSession()
         {
             qDebug() << "Removed guest from the session";
             setDefaultRoomID();
+            qDebug() << "Setting the default roomId";
             return true;
         }
         else

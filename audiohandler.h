@@ -27,10 +27,10 @@ public:
     void changeAudioInputDevice(QString deviceName);
     QVariantList getAudioInputDevices();
     void toggleGrabFrames(bool a);
+    void cleanup();
 
 private:
     void initPacket(AVPacket *packet);
-    void cleanup();
     int mBufferSize;
     int64_t mTime;
     QString mAudioDeviceName;

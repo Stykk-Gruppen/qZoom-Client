@@ -442,6 +442,5 @@ Rectangle {
 
     Component.onCompleted: {
         setTitle("qZoom :: Home");
-        console.log(header.height)
     }
 }
