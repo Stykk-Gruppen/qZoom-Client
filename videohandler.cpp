@@ -27,7 +27,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 int VideoHandler::init()
 {
-
+    mActive = false;
     ifmt_ctx = NULL;
     //ofmt_ctx = NULL;
     int ret;
@@ -183,8 +183,9 @@ int VideoHandler::init()
 
 static int64_t pts = 0;
 
-void VideoHandler::grabFrames() {
-
+void VideoHandler::grabFrames()
+{
+    mActive = true;
     AVPacket* pkt = av_packet_alloc();
     AVStream *in_stream, *out_stream;
     AVPacket* outPacket = av_packet_alloc();
@@ -450,6 +451,12 @@ void VideoHandler::grabFrames() {
 void VideoHandler::close()
 {
     avformat_close_input(&ifmt_ctx);
+    mActive = false;
+}
+
+bool VideoHandler::isActive()
+{
+    return mActive;
 }
 
 int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)

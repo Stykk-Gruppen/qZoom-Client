@@ -29,6 +29,7 @@ public:
     void grabFrames();
     void close();
     bool writeToFile = true;
+    bool isActive();
     int numberOfFrames;
     const char* filename = "nyTest.ismv";
     QString aDeviceName;
@@ -48,6 +49,7 @@ private:
         bool headerSent;
     };
     mSocketStruct* mStruct;
+    bool mActive = false;
 
     int64_t time;
     int mBufferSize;

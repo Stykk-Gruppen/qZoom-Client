@@ -802,6 +802,7 @@ int AudioHandler::init()
 int AudioHandler::grabFrames()
 {
     int count = 0;
+    mActive = true;
     while (!mAbortGrabFrames)
     {
         count++;
@@ -815,8 +816,11 @@ int AudioHandler::grabFrames()
          * Since the decoder's and the encoder's frame size may differ, we
          * need to FIFO buffer to store as many frames worth of input samples
          * that they make up at least one frame worth of output samples. */
+        if(mAbortGrabFrames) break;
         while (av_audio_fifo_size(mFifo) < output_frame_size)
         {
+            if(mAbortGrabFrames) break;
+
             //qDebug() << "fifo < outputframe zie";
             /* Decode one frame worth of audio samples, convert it to the
              * output sample format and put it into the FIFO buffer. */
@@ -837,9 +841,13 @@ int AudioHandler::grabFrames()
         /* If we have enough samples for the encoder, we encode them.
          * At the end of the file, we pass the remaining samples to
          * the encoder. */
+        if(mAbortGrabFrames) break;
+
         while (av_audio_fifo_size(mFifo) >= output_frame_size ||
                (finished && av_audio_fifo_size(mFifo) > 0))
         {
+            if(mAbortGrabFrames) break;
+
             /* Take one frame worth of audio samples from the FIFO buffer,
              * encode it and write it to the output file. */
             if (loadEncodeAndWrite())
@@ -866,6 +874,7 @@ int AudioHandler::grabFrames()
         }
     }
     avformat_close_input(&mInputFormatContext);
+    mActive = false;
 
     //cleanup();
     return 0;
@@ -883,6 +892,11 @@ int AudioHandler::grabFrames()
     return 0;
     */
 
+}
+
+bool AudioHandler::isActive()
+{
+    return mActive;
 }
 
 QVariantList AudioHandler::getAudioInputDevices()

@@ -28,8 +28,10 @@ public:
     QVariantList getAudioInputDevices();
     void toggleGrabFrames(bool a);
     void cleanup();
+    bool isActive();
 
 private:
+    bool mActive = false;
     void initPacket(AVPacket *packet);
     int mBufferSize;
     int64_t mTime;

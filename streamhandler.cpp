@@ -54,10 +54,33 @@ void StreamHandler::init()
 void StreamHandler::close()
 {
     qDebug() << "Closing streamHandler";
-    disableAudio();
-    disableVideo();
-    delete mAudioHandler;
-    delete mVideoHandler;
+
+    if(mAudioHandler != nullptr)
+    {
+        disableAudio();
+        while(mAudioHandler->isActive())
+        {
+            //av_usleep(500);
+            //qDebug() << "Audio handler is still active";
+        }
+        qDebug() << "Audiohandler not active, deleting it";
+        delete mAudioHandler;
+
+    }
+
+    if(mVideoHandler != nullptr)
+    {
+        disableVideo();
+
+        while(mVideoHandler->isActive())
+        {
+            //av_usleep(500);
+            //qDebug() << "VideoHandler is still active";
+        }
+        qDebug() << "Videohandler not active, deleting it";
+
+        delete mVideoHandler;
+    }
 }
 
 
