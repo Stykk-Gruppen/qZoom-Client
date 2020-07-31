@@ -2,8 +2,9 @@
 
 ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImageProvider::Image)
 {
-    mDefaultImage = QImage("0.png");
     mSettings = settings;
+    mDefaultImage = generateGenericImage(mSettings->getDisplayName());//QImage("0.png");
+
     this->blockSignals(false);
     //addPeer(0, mSettings->getDisplayName());
 }
@@ -184,6 +185,8 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
             memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0]);
         }
     }
+    //av_freep(&frame->data[0]);
+    //av_frame_unref(frame);
 
     av_freep(&frameRGB->data[0]);
     av_frame_unref(frameRGB);

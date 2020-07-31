@@ -14,6 +14,11 @@ AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* b
     mStruct->writeLock = _writeLock;
 }
 
+AudioPlaybackHandler::~AudioPlaybackHandler()
+{
+    delete mStruct;
+}
+
 void AudioPlaybackHandler::initAudio(QObject *parent)
 {
     mAudioFormat.setSampleRate(44100);
