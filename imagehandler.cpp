@@ -69,7 +69,9 @@ void ImageHandler::addPeer(uint8_t index, QString displayName)
 void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
+
     mImageMap.erase(index);
+
     emit refreshScreens();
 }
 

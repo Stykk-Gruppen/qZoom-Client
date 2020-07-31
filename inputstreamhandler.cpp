@@ -92,6 +92,7 @@ void InputStreamHandler::removeStream(QString streamId)
         mVideoPlaybackStartedVector.erase(mVideoPlaybackStartedVector.begin() + index);
         mStreamIdVector.erase(mStreamIdVector.begin() + index);
         qDebug() << "Successfully removed stream with streamId: " << streamId;
+        mImageHandler->removePeer(index);
     }
     else
     {
