@@ -72,6 +72,11 @@ void InputStreamHandler::removeStream(QString streamId)
             index = i;
         }
     }
+
+    /* Kan dette slettes uten at mutex er locked?
+    Eg fikk en segmentation fault pga customRead
+    leste av en buffer som ikke eksisterte lengre
+    */
     if(index != -1)
     {
         delete mVideoHeaderVector.at(index);

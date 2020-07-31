@@ -10,7 +10,7 @@ extern "C" {
 #include <ao/ao.h>
 #include "libswresample/swresample.h"
 }
-#include "imagehandler.h"
+#include "handlers/imagehandler.h"
 
 class AudioPlaybackHandler : public QObject
 {

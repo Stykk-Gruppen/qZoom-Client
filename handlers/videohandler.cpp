@@ -3,7 +3,7 @@
 
 
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
-                           ImageHandler* imageHandler, SocketHandler* _socketHandler,
+                           ImageHandler* imageHandler, UdpSocketHandler* _socketHandler,
                            int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent): QObject(parent)
 {
     mBufferSize = bufferSize;

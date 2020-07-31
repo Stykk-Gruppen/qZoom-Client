@@ -7,18 +7,18 @@
 #include <QNetworkDatagram>
 #include <QProcess>
 #include <mutex>
-#include "imagehandler.h"
-#include "videoplaybackhandler.h"
-#include "audioplaybackhandler.h"
+#include "handlers/imagehandler.h"
+#include "handlers/videoplaybackhandler.h"
+#include "handlers/audioplaybackhandler.h"
 
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
 class InputStreamHandler;
-class SocketHandler : public QObject
+class UdpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
+    explicit UdpSocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     void closeSocket();
     QTcpSocket* mTCPSocket;

@@ -7,12 +7,12 @@
 #include <QHostInfo>
 #include <QHostAddress>
 #include <QNetworkInterface>
-#include "imagehandler.h"
-#include "inputstreamhandler.h"
-#include "sockethandler.h"
-#include "tcpserverhandler.h"
-#include "tcpsockethandler.h"
-#include "streamhandler.h"
+#include "handlers/imagehandler.h"
+#include "handlers/inputstreamhandler.h"
+#include "handlers/udpsockethandler.h"
+#include "handlers/tcpserverhandler.h"
+#include "handlers/tcpsockethandler.h"
+#include "handlers/streamhandler.h"
 
 class SessionHandler : public QObject
 {
@@ -21,7 +21,8 @@ public:
     explicit SessionHandler(Database* _db, UserHandler* _user,
                             ImageHandler* imageHandler,
                             Settings* settings, int bufferSize,
-                            QHostAddress address, int port,
+                            QHostAddress address, int _portNumberTCP,
+                            int _portNumerUDP,
                             QObject *parent = nullptr);
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
@@ -50,7 +51,8 @@ private:
     bool mUserHasRoom;
     bool mSessionIsActive;
     int mBufferSize;
-    int mPort;
+    int mPortNumberTCP;
+    int mPortNumberUDP;
     QString mRoomId;
     QString mRoomPassword;
     QString mRoomHostUsername;
@@ -62,7 +64,7 @@ private:
     StreamHandler* mStreamHandler;
     ImageHandler* mImageHandler;
     InputStreamHandler* mInputStreamHandler;
-    SocketHandler* mSocketHandler;
+    UdpSocketHandler* mSocketHandler;
     TcpServerHandler* mTcpServerHandler;
     TcpSocketHandler* mTcpSocketHandler;
 

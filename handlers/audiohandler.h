@@ -16,12 +16,12 @@ extern "C" {
 #include "libswresample/swresample.h"
 }
 #include <stdio.h>
-#include "sockethandler.h"
+#include "handlers/udpsockethandler.h"
 
 class AudioHandler
 {
 public:
-    AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,SocketHandler*, int bufferSize);
+    AudioHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time,UdpSocketHandler*, int bufferSize);
     int grabFrames();
     int init();
     void changeAudioInputDevice(QString deviceName);
@@ -52,7 +52,7 @@ private:
     int writeOutputFileHeader();
     int initFifo();
     int initResampler();
-    SocketHandler *mSocketHandler;
+    UdpSocketHandler *mSocketHandler;
     AVFormatContext *mInputFormatContext;
     AVFormatContext *mOutputFormatContext;
     AVCodecContext *mInputCodecContext;

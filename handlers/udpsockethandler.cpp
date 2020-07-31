@@ -1,6 +1,6 @@
-#include "sockethandler.h"
+#include "udpsockethandler.h"
 
-SocketHandler::SocketHandler(int bufferSize, int _port, InputStreamHandler* inputStreamHandler,
+UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler* inputStreamHandler,
                              QString streamId, QString roomId, QHostAddress address,QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
@@ -16,15 +16,15 @@ SocketHandler::SocketHandler(int bufferSize, int _port, InputStreamHandler* inpu
  * When we used mAddress(ip address to the server) it did not recieve any datagrams.
  * It also connects the readyRead signal to the readPendingDatagram function.
  */
-void SocketHandler::initSocket()
+void UdpSocketHandler::initSocket()
 {
     mUdpSocket = new QUdpSocket(this);
     mUdpSocket->bind(QHostAddress::Any, mPort, QAbstractSocket::ShareAddress);
-    connect(mUdpSocket, &QUdpSocket::readyRead, this, &SocketHandler::readPendingDatagrams);
+    connect(mUdpSocket, &QUdpSocket::readyRead, this, &UdpSocketHandler::readPendingDatagrams);
 
 }
 
-void SocketHandler::closeSocket()
+void UdpSocketHandler::closeSocket()
 {
     qDebug() << "Closing SocketHandler";
     mUdpSocket->abort();
@@ -38,7 +38,7 @@ void SocketHandler::closeSocket()
  * a single byte which will let us know if the datagram is audio or video.
  * The function will use the streamId to send the datagram to the correct buffer/playbackhandler
  */
-void SocketHandler::readPendingDatagrams()
+void UdpSocketHandler::readPendingDatagrams()
 {
 
     while (mUdpSocket->hasPendingDatagrams())
@@ -49,7 +49,7 @@ void SocketHandler::readPendingDatagrams()
 
 
         //To allow debugging on localhost. We added the operations the server performs on incoming datagrams before sending them to a client
-        if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address() && mAddress.toIPv4Address() != QHostAddress("213.162.241.177").toIPv4Address())
+       /* if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address() && mAddress.toIPv4Address() != QHostAddress("213.162.241.177").toIPv4Address())
         {
             //roomId is the first x bytes, then streamId
             int roomIdLength = data[0];
@@ -59,7 +59,7 @@ void SocketHandler::readPendingDatagrams()
             QByteArray roomIdArray = QByteArray(data, roomIdLength);
             QString roomId(roomIdArray);
             data.remove(0, roomIdLength);
-        }
+        }*/
 
         int streamIdLength = data[0];
         data.remove(0,1);
@@ -70,7 +70,10 @@ void SocketHandler::readPendingDatagrams()
         data.remove(0, streamIdLength);
 
         int index = findStreamIdIndex(streamId);
-        if(index < 0) continue;
+        if(index < 0)
+        {
+            continue;
+        }
 
         //Checks the first byte in the datagram to determine if the datagram is audio or video
         int audioOrVideoInt = data[0];
@@ -99,7 +102,7 @@ void SocketHandler::readPendingDatagrams()
                 QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;
             }
-            qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
+           // qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else
         {
@@ -117,7 +120,7 @@ void SocketHandler::readPendingDatagrams()
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found
  */
-int SocketHandler::findStreamIdIndex(QString streamId)
+int UdpSocketHandler::findStreamIdIndex(QString streamId)
 {
     if(mInputStreamHandler->mStreamIdVector.size()>=1)
     {
@@ -144,7 +147,7 @@ int SocketHandler::findStreamIdIndex(QString streamId)
  * @param arr QByteArray to be sent
  * @return Error code (0 if successful)
  */
-int SocketHandler::sendDatagram(QByteArray arr)
+int UdpSocketHandler::sendDatagram(QByteArray arr)
 {
     int ret = 0;
     /*

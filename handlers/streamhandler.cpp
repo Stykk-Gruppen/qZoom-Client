@@ -1,7 +1,7 @@
 #include "streamhandler.h"
 
 
-StreamHandler::StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
+StreamHandler::StreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
     mSettings = settings;
     mBufferSize = bufferSize;

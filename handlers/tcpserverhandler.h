@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include "inputstreamhandler.h"
+#include "handlers/inputstreamhandler.h"
 
 //SKal lytte fra server, og opprette nye instanser av videoplaybackhandler og audioplaybackhandler basert på streamId og RoomId?
 class TcpServerHandler : public QObject

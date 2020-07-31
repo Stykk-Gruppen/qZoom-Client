@@ -4,8 +4,8 @@
 #include <QObject>
 #include <mutex>
 #include <vector>
-#include <audioplaybackhandler.h>
-#include <videoplaybackhandler.h>
+#include <handlers/audioplaybackhandler.h>
+#include <handlers/videoplaybackhandler.h>
 #include <QHostAddress>
 
 

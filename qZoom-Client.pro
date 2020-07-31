@@ -16,23 +16,23 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 TARGET.CAPABILITY += SwEvent
 
 SOURCES += \
-        audiohandler.cpp \
-        audioplaybackhandler.cpp \
+        handlers/audiohandler.cpp \
+        handlers/audioplaybackhandler.cpp \
         config.cpp \
         core/database.cpp \
         handlers/errorhandler.cpp \
         handlers/sessionhandler.cpp \
         handlers/userhandler.cpp \
-        imagehandler.cpp \
-        inputstreamhandler.cpp \
+        handlers/imagehandler.cpp \
+        handlers/inputstreamhandler.cpp \
         main.cpp \
         settings.cpp \
-        sockethandler.cpp \
-        streamhandler.cpp \
-        tcpserverhandler.cpp \
-        tcpsockethandler.cpp \
-        videohandler.cpp \
-        videoplaybackhandler.cpp
+        handlers/udpsockethandler.cpp \
+        handlers/streamhandler.cpp \
+        handlers/tcpserverhandler.cpp \
+        handlers/tcpsockethandler.cpp \
+        handlers/videohandler.cpp \
+        handlers/videoplaybackhandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -54,21 +54,21 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    audiohandler.h \
-    audioplaybackhandler.h \
+    handlers/audiohandler.h \
+    handlers/audioplaybackhandler.h \
     core/database.h \
     handlers/errorhandler.h \
     handlers/sessionhandler.h \
     handlers/userhandler.h \
-    imagehandler.h \
-    inputstreamhandler.h \
+    handlers/imagehandler.h \
+    handlers/inputstreamhandler.h \
     settings.h \
-    sockethandler.h \
-    streamhandler.h \
-    tcpserverhandler.h \
-    tcpsockethandler.h \
-    videohandler.h \
-    videoplaybackhandler.h
+    handlers/udpsockethandler.h \
+    handlers/streamhandler.h \
+    handlers/tcpserverhandler.h \
+    handlers/tcpsockethandler.h \
+    handlers/videohandler.h \
+    handlers/videoplaybackhandler.h
 
 DISTFILES += \
     img/qZoom-logo.png

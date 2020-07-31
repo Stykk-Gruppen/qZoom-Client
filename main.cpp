@@ -2,28 +2,18 @@
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include <QQmlContext>
-#include <QCamera>
-#include <QCameraInfo>
-#include <QVideoProbe>
-#include <QMediaPlayer>
-#include <QMediaRecorder>
 #include <QObject>
-#include <QVideoFrame>
-#include <QCameraImageCapture>
-#include <QBuffer>
-#include "videohandler.h"
-#include "audiohandler.h"
-#include <QCameraViewfinder>
+#include "handlers/videohandler.h"
+#include "handlers/audiohandler.h"
 #include <QVariant>
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <QAudioInput>
-#include <QFile>
 #include <QTimer>
-#include "streamhandler.h"
-#include "videoplaybackhandler.h"
+#include "handlers/streamhandler.h"
+#include "handlers/videoplaybackhandler.h"
 #include "settings.h"
-#include "imagehandler.h"
+#include "handlers/imagehandler.h"
 #include <QQuickView>
 extern "C"
 {
@@ -36,9 +26,9 @@ extern "C"
 #include <QtCore/QCoreApplication>
 #include <QtGui/QGuiApplication>
 #include <QtQuick/QQuickView>
-#include "inputstreamhandler.h"
-#include "tcpsockethandler.h"
-#include "audioplaybackhandler.h"
+#include "handlers/inputstreamhandler.h"
+#include "handlers/tcpsockethandler.h"
+#include "handlers/audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
 #include "core/database.h"
@@ -57,16 +47,16 @@ int main(int argc, char *argv[])
 
     errorHandler = new ErrorHandler;
 
-    //When buffer size is larger than 2k the server sends datagrams, but they do not arrive at the client (for video)
     int bufferSize = 8*1024;
-    int port = 1337;
+    int portNumberTCP = 1338;
+    int portNumberUDP = 1337;
     QHostAddress address;
     //address = QHostAddress::LocalHost;
-    //address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("46.250.220.237"); //feqzz.no
    // address = QHostAddress::LocalHost;
-    //address = QHostAddress("2001:4da8:a:1:6000:100:000f:d37b:46.250.220.57"); //tarves.no ipv6 og ipv4
-    address = QHostAddress("46.250.220.57"); //tarves.no
+  //address = QHostAddress("2001:4da8:a:1:6000:100:000f:d37b:46.250.220.57"); //tarves.no ipv6 og ipv4
+    //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent
@@ -92,7 +82,9 @@ int main(int argc, char *argv[])
     Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
-    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject, imageHandlerObject, settings.data(), bufferSize, address, port);
+    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject,
+                                                              imageHandlerObject, settings.data(),
+                                                              bufferSize, address, portNumberTCP,portNumberUDP);
 
     //InputStreamHandler* inputStreamHandlerObject = new InputStreamHandler(imageHandlerObject, bufferSize, address);
     //SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandlerObject, sessionHandlerObject, address);

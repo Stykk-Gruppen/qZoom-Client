@@ -5,9 +5,9 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QHostAddress>
-#include "videohandler.h"
+#include "handlers/videohandler.h"
 #include <vector>
-#include "inputstreamhandler.h"
+#include "handlers/inputstreamhandler.h"
 #include <QString>
 #include <QByteArray>
 

@@ -3,7 +3,8 @@
 SessionHandler::SessionHandler(Database* _db, UserHandler* _user,
                                ImageHandler* imageHandler,
                                Settings* settings, int bufferSize,
-                               QHostAddress address, int port,
+                               QHostAddress address, int _portNumberTCP,
+                               int _portNumerUDP,
                                QObject *parent) : QObject(parent)
 {
     mDb = _db;
@@ -12,7 +13,8 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user,
     mIpAddress = "Ipaddress";
     mSettings = settings;
     mBufferSize = bufferSize;
-    mPort = port;
+    mPortNumberTCP = _portNumberTCP;
+    mPortNumberUDP = _portNumerUDP;
     mAddress = address;
     mImageHandler = imageHandler;
     mSessionIsActive = false;
@@ -51,9 +53,9 @@ void SessionHandler::initOtherStuff()
     QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
-    mSocketHandler = new SocketHandler(mBufferSize, mPort, mInputStreamHandler, streamId, roomId, mAddress);
+    mSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
     //mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
-    mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPort);
+    mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPortNumberTCP);
     mStreamHandler = new StreamHandler(mImageHandler, mSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
     //Init tcpServerHandler
     //mTcpServerHandler->init();
