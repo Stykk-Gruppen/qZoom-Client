@@ -106,6 +106,14 @@ void InputStreamHandler::removeStream(QString streamId)
  */
 void InputStreamHandler::handleHeader(QByteArray data)
 {
+
+    int displayNameLength = data[0];
+    data.remove(0, 1);
+
+    QByteArray displayNameArray = QByteArray(data, displayNameLength);
+    QString displayName(displayNameArray);
+    data.remove(0, displayNameLength);
+
     int streamIdLength = data[0];
     data.remove(0, 1);
 
@@ -114,12 +122,6 @@ void InputStreamHandler::handleHeader(QByteArray data)
     QString streamId(streamIdArray);
     data.remove(0, streamIdLength);
 
-    int displayNameLength = data[0];
-    data.remove(0, 1);
-
-    QByteArray displayNameArray = QByteArray(data, displayNameLength);
-    QString displayName(displayNameArray);
-    data.remove(0, displayNameLength);
 
     qDebug() << "Adding streamId: " << streamId;
     qDebug() << "Adding displayName: " << displayName;
