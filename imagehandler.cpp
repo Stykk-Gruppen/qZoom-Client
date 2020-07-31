@@ -70,7 +70,7 @@ void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
 
-    mImageMap.erase(index);
+    mImageMap.erase(index+1);
 
     emit refreshScreens();
 }
