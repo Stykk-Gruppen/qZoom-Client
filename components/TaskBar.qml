@@ -68,7 +68,7 @@ Rectangle {
                 }
                 else
                 {
-                    if(sessionHandler.enableAudio() >= 0)
+                    if(sessionHandler.enableAudio())
                     {
                         state = "normal"
                         toggled = !toggled
@@ -91,7 +91,7 @@ Rectangle {
                 }
                 else
                 {
-                    if(sessionHandler.enableVideo() >= 0)
+                    if(sessionHandler.enableVideo())
                     {
                         state = "normal"
                         toggled = !toggled

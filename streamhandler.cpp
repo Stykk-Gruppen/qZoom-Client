@@ -58,6 +58,9 @@ void StreamHandler::init()
 
 void StreamHandler::close()
 {
+    qDebug() << "Closing streamHandler";
+    disableAudio();
+    disableVideo();
     delete mAudioHandler;
     delete mVideoHandler;
 }
@@ -160,7 +163,8 @@ int StreamHandler::enableVideo()
     {
         fprintf(stderr, "Could not init videohandler");
         errorHandler->giveErrorDialog("Could not stream video");
-        return error;
+        qDebug() << "Error: " << error;
+        return (int)error;
     }
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);

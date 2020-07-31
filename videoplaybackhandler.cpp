@@ -11,7 +11,6 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
     mStruct = new mBufferAndLockStruct();
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
-
     //Lagt til disse for å kunne få header via tcp
     mStruct->headerReceived = new bool(false);
     mStruct->headerBuffer = headerBuffer;
@@ -20,7 +19,6 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
 
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
-
 
    // qDebug() << "Inne i read packet";
 
@@ -146,7 +144,7 @@ void VideoPlaybackHandler::start()
         AVCodecContext *videoDecoderCodecContext;
         if(video_stream)
         {
-            video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+           // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
             AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
             AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
@@ -169,6 +167,7 @@ void VideoPlaybackHandler::start()
         AVPacket packet;
         //AVFrame* resampled = 0;
 
+        //Mulig vi må legge til en stop variabel her, slik at ting ikke krasher når vi forlater en rom.
         while (1) {
             //qDebug() << "About to call av read frame";
             //av_read_frame(fmt_ctx, NULL);

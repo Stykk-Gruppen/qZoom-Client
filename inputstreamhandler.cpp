@@ -15,6 +15,7 @@ void InputStreamHandler::init()
 
 void InputStreamHandler::close()
 {
+    qDebug() << "Closing inputStreamHandler";
     for(auto i : mVideoHeaderVector)
         delete i;
     mVideoHeaderVector.clear();

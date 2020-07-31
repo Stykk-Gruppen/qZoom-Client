@@ -41,7 +41,7 @@ public:
 
 private:
     void addUser();
-    std::pair<bool, bool> initOtherStuff();
+    void initOtherStuff();
     void closeOtherStuff();
     QString mRoomId;
     QString mRoomPassword;

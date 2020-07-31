@@ -33,6 +33,7 @@ void TcpSocketHandler::init()
 
 void TcpSocketHandler::close()
 {
+    qDebug() << "Closing TcpSocketHandler";
     mSocket->close();
     delete mSocket;
 }
