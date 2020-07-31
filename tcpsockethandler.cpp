@@ -90,6 +90,7 @@ void TcpSocketHandler::readyRead()
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->removeStream(streamId);
+        break;
     }
     case 2:
     {
@@ -108,6 +109,7 @@ void TcpSocketHandler::readyRead()
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->updateParticipantDisplayName(streamId, displayName);
+        break;
     }
     default:
         qDebug() << "Dont understand the code sent in beginning of tcp mesasge";
