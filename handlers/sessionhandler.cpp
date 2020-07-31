@@ -76,6 +76,7 @@ void SessionHandler::closeOtherStuff()
     delete mTcpSocketHandler;
     delete mStreamHandler;
     qDebug() << "Deleted everything";
+    mImageHandler->removeAllPeers();
 }
 
 QVariantList SessionHandler::getAudioInputDevices()

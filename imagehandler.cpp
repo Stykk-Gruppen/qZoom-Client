@@ -61,6 +61,12 @@ void ImageHandler::addPeer(uint8_t index, QString displayName)
     emit refreshScreens();
 }
 
+void ImageHandler::removeAllPeers()
+{
+    qDebug() << "Removing all peers";
+    mImageMap.clear();
+}
+
 /**
  * Removes index from mImageMap and sends the signal refreshScreens
  * which is connected to TaskBar.qml Connections function onRefreshScreens()

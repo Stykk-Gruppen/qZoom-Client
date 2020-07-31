@@ -28,6 +28,7 @@ public:
     void addPeer(uint8_t index, QString displayName);
     void removePeer(uint8_t index);
     void updatePeerDisplayName(uint8_t index, QString displayName);
+    void removeAllPeers();
     Q_INVOKABLE int getNumberOfScreens();
     std::mutex imgLock;
 
