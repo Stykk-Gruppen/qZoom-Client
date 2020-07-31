@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     QHostAddress address;
 
    // address = QHostAddress::LocalHost;
+    //address = QHostAddress("2001:4da8:a:1:6000:100:000f:d37b:46.250.220.57"); //tarves.no ipv6 og ipv4
     address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
