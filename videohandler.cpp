@@ -25,6 +25,11 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     mStruct->headerSent = false;
 }
 
+VideoHandler::~VideoHandler()
+{
+    delete mStruct;
+}
+
 int VideoHandler::init()
 {
     mActive = false;
@@ -397,7 +402,10 @@ void VideoHandler::grabFrames()
             writeLock->unlock();
 
 
-
+            //av_freep(&scaledFrame->data[0]);
+            //av_frame_unref(scaledFrame);
+            //av_freep(&videoFrame->data[0]);
+            //av_frame_unref(videoFrame);
 
 
             //qDebug() << "Wrote video packet ret = " << ret;
@@ -451,6 +459,8 @@ void VideoHandler::grabFrames()
 void VideoHandler::close()
 {
     avformat_close_input(&ifmt_ctx);
+    avformat_free_context(ofmt_ctx);
+
     mActive = false;
 }
 

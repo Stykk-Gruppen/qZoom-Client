@@ -27,6 +27,7 @@ void SocketHandler::initSocket()
 void SocketHandler::closeSocket()
 {
     qDebug() << "Closing SocketHandler";
+    mUdpSocket->abort();
     mUdpSocket->close();
     delete mUdpSocket;
 }

@@ -18,6 +18,7 @@ class AudioPlaybackHandler : public QObject
 public:
     AudioPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
                          int bufferSize, QObject *parent = nullptr);
+    ~AudioPlaybackHandler();
     void getStream();
     static int customReadPacket(void *opaque, uint8_t *buf, int buf_size);
     void start();

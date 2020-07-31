@@ -106,6 +106,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             mSettings->setLastRoomId(mRoomId);
             mSettings->setLastRoomPassword(mRoomPassword);
             mSettings->saveSettings();
+            qDebug() << "Adding peer with display name" << mSettings->getDisplayName();
             mImageHandler->addPeer(0, mSettings->getDisplayName());
 
 

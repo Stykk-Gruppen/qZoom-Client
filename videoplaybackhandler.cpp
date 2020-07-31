@@ -17,6 +17,11 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock,ImageHandler* 
 
 }
 
+VideoPlaybackHandler::~VideoPlaybackHandler()
+{
+    delete mStruct;
+}
+
 int VideoPlaybackHandler::read_packet(void *opaque, uint8_t *buf, int buf_size)
 {
 

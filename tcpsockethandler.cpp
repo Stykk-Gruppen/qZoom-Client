@@ -14,6 +14,8 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QStr
     mDisplayName = displayName;
 }
 
+
+
 void TcpSocketHandler::init()
 {
     mSocket = new QTcpSocket(this);

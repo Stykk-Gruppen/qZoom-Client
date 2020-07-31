@@ -25,6 +25,7 @@ class VideoHandler : public QObject
     Q_OBJECT
 public:
     VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent = 0);
+    ~VideoHandler();
     int init();
     void grabFrames();
     void close();

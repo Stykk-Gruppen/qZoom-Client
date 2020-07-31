@@ -60,8 +60,8 @@ void StreamHandler::close()
         disableAudio();
         while(mAudioHandler->isActive())
         {
-            //av_usleep(500);
-            //qDebug() << "Audio handler is still active";
+            av_usleep(500);
+            qDebug() << "Audio handler is still active";
         }
         qDebug() << "Audiohandler not active, deleting it";
         delete mAudioHandler;
@@ -74,8 +74,8 @@ void StreamHandler::close()
 
         while(mVideoHandler->isActive())
         {
-            //av_usleep(500);
-            //qDebug() << "VideoHandler is still active";
+            av_usleep(500);
+            qDebug() << "VideoHandler is still active";
         }
         qDebug() << "Videohandler not active, deleting it";
 
