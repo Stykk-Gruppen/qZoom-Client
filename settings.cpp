@@ -25,10 +25,10 @@ void Settings::loadSettings()
             mLastRoomId = settings.value("lastRoomId").toString();
             mLastRoomPassword = settings.value("lastRoomPassword").toString();
         }
-        qDebug() << mAudioOn;
-        qDebug() << mVideoOn;
-        qDebug() << mDisplayName;
-        qDebug() << mDefaultAudioInput;
+        //qDebug() << mAudioOn;
+        //qDebug() << mVideoOn;
+        //qDebug() << mDisplayName;
+        //qDebug() << mDefaultAudioInput;
         file.close();
     }
     else
@@ -69,10 +69,11 @@ void Settings::saveSettings()
 
     QJsonDocument settings(object);
 
-    qDebug() << settings;
+    //qDebug() << settings;
     file.write(settings.toJson());
     file.close();
-    qDebug() << "Saved Settings to file" << settings;
+    //qDebug() << "Saved Settings to file" << settings;
+    qDebug() << "Saved Settings to file";
 }
 
 bool Settings::getAudioOn()

@@ -17,7 +17,7 @@ class TcpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, int port = 1338, QObject* parent = nullptr);
+    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QString displayName, QHostAddress address, int port = 1338, QObject* parent = nullptr);
     void init();
     void close();
     QByteArray getReply();
@@ -25,7 +25,8 @@ public:
     void wait();
     int getBytesWritten();
     void writeHeader();
-    void sendBumpSignal();
+    void updateDisplayName(QString displayName);
+    void sendChangedDisplayNameSignal();
     QByteArray myHeader;
 
 public slots:
@@ -46,6 +47,7 @@ private:
     bool mReady;
     QString mRoomId;
     QString mStreamId;
+    QString mDisplayName;
     InputStreamHandler* mInputStreamHandler;
     std::vector<QByteArray> videoHeaders;
     void addStream();

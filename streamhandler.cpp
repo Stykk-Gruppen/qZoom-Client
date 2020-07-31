@@ -49,11 +49,6 @@ void StreamHandler::init()
            mAudioEnabled = false;
         }
     }
-
-    if (!mVideoEnabled && !mAudioEnabled)
-    {
-        mStopServerBump = false;
-    }
 }
 
 void StreamHandler::close()
@@ -82,25 +77,9 @@ void StreamHandler::grabVideoHeader()
     mVideoHandler = nullptr;
 }
 
-void StreamHandler::record()
-{
-    /*
-    qDebug() << "Starter record";
-    if(mVideoEnabled)
-    {
-        QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
-    }
-    if(mAudioEnabled)
-    {
-        QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
-    }
-    */
-}
-
 int StreamHandler::enableAudio()
 {
     mAudioEnabled = true;
-    mStopServerBump = true;
     qDebug() << "enabling audio";
     if (mAudioHandler == nullptr)
     {
@@ -134,24 +113,18 @@ void StreamHandler::disableAudio()
         //delete mAudioHandler;
         qDebug() << "audio disabled";
     }
-
-    if (!mVideoEnabled && !mAudioEnabled)
-    {
-        mStopServerBump = false;
-    }
 }
 
 int StreamHandler::enableVideo()
 {
     mVideoEnabled = true;
-    mStopServerBump = true;
     qDebug() << "enabling video";
     if (mVideoHandler == nullptr)
     {
         qDebug() << "new videohandler";
         //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
-                                         mTime, mImageHandler, mSocketHandler,mBufferSize, mTcpSocketHandler);
+                                         mTime, mImageHandler, mSocketHandler, mBufferSize, mTcpSocketHandler);
     }
 
     int error = mVideoHandler->init();
@@ -179,11 +152,6 @@ void StreamHandler::disableVideo()
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
     }
-
-    if (!mVideoEnabled && !mAudioEnabled)
-    {
-        mStopServerBump = false;
-    }
 }
 
 QVariantList StreamHandler::getAudioInputDevices()
@@ -203,20 +171,6 @@ void StreamHandler::changeAudioInputDevice(QString deviceName)
 QString StreamHandler::getDefaultAudioInputDevice()
 {
     return "default";
-}
-
-void StreamHandler::stopRecording()
-{
-    disableAudio();
-    disableVideo();
-}
-
-void StreamHandler::bumpServer()
-{
-    if (!mStopServerBump)
-    {
-        mTcpSocketHandler->sendBumpSignal();
-    }
 }
 
 bool StreamHandler::checkVideoEnabled()

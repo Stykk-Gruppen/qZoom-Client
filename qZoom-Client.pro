@@ -69,3 +69,6 @@ HEADERS += \
     tcpsockethandler.h \
     videohandler.h \
     videoplaybackhandler.h
+
+DISTFILES += \
+    img/qZoom-logo.png

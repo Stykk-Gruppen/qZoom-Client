@@ -25,8 +25,9 @@ public:
     void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
-    void addPeer(uint8_t index);
+    void addPeer(uint8_t index, QString displayName);
     void removePeer(uint8_t index);
+    void updatePeerDisplayName(uint8_t index, QString displayName);
     Q_INVOKABLE int getNumberOfScreens();
     std::mutex imgLock;
 
@@ -38,7 +39,8 @@ signals:
     void refreshScreens();
 private:
     QImage generateGenericImage(QString username);
-    QMap<uint8_t, QImage> mImageMap;
+    //QMap<uint8_t, QImage> mImageMap;
+    std::map<uint8_t, std::pair<QImage, QString>> mImageMap;
     QImage mDefaultImage;
     //SwsContext *imgConvertCtx = nullptr;
     //AVFrame	*frameRGB = av_frame_alloc();

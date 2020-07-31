@@ -9,5 +9,9 @@
         <file>view/Settings.qml</file>
         <file>view/host.qml</file>
         <file>view/RoomInfo.qml</file>
+        <file>img/qZoom-logo.png</file>
+        <file>components/Header.qml</file>
+        <file>img/join-session-icon.png</file>
+        <file>img/host-session-icon.png</file>
     </qresource>
 </RCC>

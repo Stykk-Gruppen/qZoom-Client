@@ -20,12 +20,12 @@ T.Button {
 
     background: Rectangle {
         id: buttonBackground
-        color: "#e8e8e8"
+        color: "#5CBB5C"
         implicitWidth: 100
         implicitHeight: 40
         opacity: enabled ? 1 : 0.3
-        border.color: "gray"
-        border.width: 1
+        //border.color: "gray"
+        border.width: 0
         radius: 11
     }
 
@@ -74,7 +74,7 @@ T.Button {
             when: control.toggle
             PropertyChanges {
                 target: buttonBackground
-                color: "red"
+                color: "#DB504A"
             }
         }
 

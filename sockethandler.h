@@ -29,14 +29,15 @@ public:
 public slots:
     void readPendingDatagrams();
 private:
-    void addStreamToVector(QString,int);
+    void addStreamToVector(QString, int);
     int findStreamIdIndex(QString);
     int mBufferSize;
     QString mRoomId;
     QString mStreamId;
     InputStreamHandler* mInputStreamHandler;
     uint signalCount = 0;
-    struct mBufferAndLockStruct {
+    struct mBufferAndLockStruct
+    {
         QByteArray* buffer;
         std::mutex* writeLock;
     };

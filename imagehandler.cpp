@@ -5,7 +5,7 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
     mDefaultImage = QImage("0.png");
     mSettings = settings;
     this->blockSignals(false);
-    addPeer(0);
+    //addPeer(0, mSettings->getDisplayName());
 }
 
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
@@ -19,17 +19,18 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
         {
 
             index = idIndex[1].toInt();
-            if(index>0){
+            if(index > 0)
+            {
                 //qDebug() << index;
             }
         }
     }
-    QImage result = mImageMap[index];
+    QImage result = mImageMap[index].first;
 
     if(result.isNull())
     {
         //result = mDefaultImage;
-        result = generateGenericImage(mSettings->getDisplayName());
+        result = generateGenericImage(mImageMap[index].second);
         //qDebug() << "Default image is null";
     }
 
@@ -51,10 +52,11 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
  * which is connected to TaskBar.qml Connections function onRefreshScreens()
  * @param index uint8_t
  */
-void ImageHandler::addPeer(uint8_t index)
+void ImageHandler::addPeer(uint8_t index, QString displayName)
 {
     qDebug() << "Added peer to ImageHandler map: " << index;
-    mImageMap[index] = mDefaultImage;
+    mImageMap[index].first = generateGenericImage(displayName);
+    mImageMap[index].second = displayName;
     emit refreshScreens();
 }
 
@@ -66,8 +68,15 @@ void ImageHandler::addPeer(uint8_t index)
 void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
-    mImageMap.remove(index);
+    mImageMap.erase(index);
     emit refreshScreens();
+}
+
+void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
+{
+    qDebug() << index << "Updated their display name to:" << displayName;
+    mImageMap[index].second = displayName;
+    mImageMap[index].first = generateGenericImage(mImageMap[index].second);
 }
 
 /**
@@ -83,9 +92,9 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
     {
         //qDebug() << index;
     }
-    if(mImageMap[index] != image)
+    if(mImageMap[index].first != image)
     {
-        mImageMap[index] = image;
+        mImageMap[index].first = image;
     }
     else
     {
@@ -94,6 +103,9 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
     imgLock.unlock();
 }
 
+/**
+ * One for the history books.
+ */
 void ImageHandler::veryFunStianLoop()
 {
     /*QtConcurrent::run([this]()
@@ -198,18 +210,19 @@ int ImageHandler::getNumberOfScreens()
     //return 5;
 }
 
-QImage ImageHandler::generateGenericImage(QString username)
+QImage ImageHandler::generateGenericImage(QString displayName)
 {
-    QImage image(QSize(1200,900),QImage::Format_RGB32);
+    QImage image(QSize(1280, 720), QImage::Format_RGB32);
     QPainter painter(&image);
     painter.setBrush(QBrush(Qt::green));
-    painter.fillRect(QRectF(0,0,1200,900),Qt::black);
-    painter.fillRect(QRectF(200,150,800,600), Qt::blue);
+    painter.fillRect(QRectF(0, 0, 1280, 720), QColor(27, 29, 54, 255));
+    //painter.fillRect(QRectF(200,150,800,600), Qt::blue);
 
     painter.setPen(QPen(Qt::white));
     painter.setFont(QFont("Helvetica [Cronyx]", 26, QFont::Bold));
-    QString text = username + " hat seinen Kamera ausgeschaltet";
-    painter.drawText(QRect(400,300,400,300), text);
+    //QString text = displayName + " hat seinen Kamera ausgeschaltet";
+    QString text = displayName + "\n (Screen Muted)";
+    painter.drawText(QRectF(0, 0, 1280, 720), Qt::AlignCenter | Qt::AlignTop, text);
     return image;
 }
 

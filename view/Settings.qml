@@ -87,12 +87,22 @@ Dialog {
     }
     onApply: {
         console.log("Apply clicked")
+
         backendSettings.setAudioOn(audioOn.checked);
         backendSettings.setVideoOn(videoOn.checked);
         backendSettings.setSaveLastRoom(saveLastRoom.checked);
-        backendSettings.setDisplayName(displayName.text === ""? "UserName" : displayName.text);
-        backendSettings.setDisplayName(displayName.text);
         backendSettings.setDefaultAudioInput(defaultAudioInput.currentText);
+
+        if (displayName.text !== backendSettings.getDisplayName()) {
+            backendSettings.setDisplayName(displayName.text === "" ? "UserName" : displayName.text);
+            backendSettings.setDisplayName(displayName.text);
+            sessionHandler.updateDisplayName();
+        }
+        else {
+            backendSettings.setDisplayName(displayName.text === "" ? "UserName" : displayName.text);
+            backendSettings.setDisplayName(displayName.text);
+        }
+
         backendSettings.saveSettings();
     }
     onRejected: console.log("Close clicked")

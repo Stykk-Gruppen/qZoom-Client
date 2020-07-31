@@ -3,126 +3,281 @@ import QtQuick.Controls 1.4
 import "../components" as C
 
 Rectangle {
-    color: "dimgray"
+    //color: "#161637"
+    id: root
+    color: Qt.rgba(27/255, 29/255, 54/255, 1)
 
-    Row {
-        id: optionRow
-        visible: true
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 32
+    /*
+    C.Header {
+        id: header
+        anchors.top: parent.top
+    }
+    */
 
-        Rectangle {
-            id: joinRectangle
-            width: 200
-            height: 200
-            color: "#141414"
-            radius: 10
-            Text {
-                text: "Join"
-                color: "white"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    optionRow.visible = false;
-                    joinSessionColumn.visible = true
-                    backButton.visible = true
-                    joinSessionButton.visible = true
+    Column {
 
-                    if (userHandler.isGuest()) {
-                        displayNameField.text = backendSettings.getDisplayName();
-                        displayNameField.visible = true;
-                    } else {
-                        displayNameField.visible = false;
-                    }
-
-                    if (backendSettings.getSaveLastRoom()) {
-                        roomIdField.text = backendSettings.getLastRoomId();
-                        roomPasswordField.text = backendSettings.getLastRoomPassword();
-                    }
-                }
-            }
+        spacing: 10
+        anchors.fill: parent
+        anchors.top: parent.top
+        C.Header {
+            id: header
+            color: root.color
+            //anchors.top: parent.top
         }
 
-        Rectangle {
-            id: hostRectangle
-            width: 200
-            height: 200
-            color: "#141414"
-            radius: 10
-            Text {
-                text: "Host"
-                color: "white"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            MouseArea {
-                id: hostMouseArea
-                anchors.fill: parent
-                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                enabled: !userHandler.isGuest()
-                onClicked: {
-                    if (userHandler.hasRoom()) {
-                        changePage("host")
-                    }
-                    else {
+        C.PushButton {
+            id: backButton
+            text: "Back"
+            font.pixelSize: 32
+            visible: false
+            onClicked: clear()
+        }
+
+        /*
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            Rectangle {
+                id: joinRectangle2
+                width: 200
+                height: 200
+                color: "#5CBB5C"
+                radius: 10
+                Text {
+                    text: "Join"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
                         optionRow.visible = false;
                         joinSessionColumn.visible = true
                         backButton.visible = true
-                        createSessionButton.visible = true
+                        joinSessionButton.visible = true
+
+                        if (userHandler.isGuest()) {
+                            displayNameField.text = backendSettings.getDisplayName();
+                            displayNameField.visible = true;
+                        } else {
+                            displayNameField.visible = false;
+                        }
+
+                        if (backendSettings.getSaveLastRoom()) {
+                            roomIdField.text = backendSettings.getLastRoomId();
+                            roomPasswordField.text = backendSettings.getLastRoomPassword();
+                        }
+                    }
+                }
+            }
+        }
+        */
+    }
+
+        Row {
+            id: optionRow
+            visible: true
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 32
+
+            Column {
+                spacing: 15
+                Image {
+                    id: joinSessionImage
+                    width: 200
+                    height: 200
+                    source: "../img/join-session-icon.png"
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            optionRow.visible = false;
+                            joinSessionColumn.visible = true
+                            backButton.visible = true
+                            joinSessionButton.visible = true
+
+                            if (userHandler.isGuest()) {
+                                displayNameField.text = backendSettings.getDisplayName();
+                                displayNameField.visible = true;
+                            } else {
+                                displayNameField.visible = false;
+                            }
+
+                            if (backendSettings.getSaveLastRoom()) {
+                                roomIdField.text = backendSettings.getLastRoomId();
+                                roomPasswordField.text = backendSettings.getLastRoomPassword();
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Join Session"
+                    color: "white"
+                    font.pixelSize: 24
+                    anchors.horizontalCenter: joinSessionImage.horizontalCenter
+                    //anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            /*
+            Rectangle {
+                id: joinRectangle
+                width: 200
+                height: 200
+                color: "#5CBB5C"
+                radius: 10
+                Text {
+                    text: "Join"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        optionRow.visible = false;
+                        joinSessionColumn.visible = true
+                        backButton.visible = true
+                        joinSessionButton.visible = true
+
+                        if (userHandler.isGuest()) {
+                            displayNameField.text = backendSettings.getDisplayName();
+                            displayNameField.visible = true;
+                        } else {
+                            displayNameField.visible = false;
+                        }
+
+                        if (backendSettings.getSaveLastRoom()) {
+                            roomIdField.text = backendSettings.getLastRoomId();
+                            roomPasswordField.text = backendSettings.getLastRoomPassword();
+                        }
+                    }
+                }
+            }
+            */
+
+            Column {
+                spacing: 15
+                Image {
+                    id: hostSessionImage
+                    width: 200
+                    height: 200
+                    source: "../img/host-session-icon.png"
+
+                    MouseArea {
+                        id: hostMouseArea
+                        anchors.fill: parent
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        enabled: !userHandler.isGuest()
+                        onClicked: {
+                            if (userHandler.hasRoom()) {
+                                changePage("host")
+                            }
+                            else {
+                                optionRow.visible = false;
+                                joinSessionColumn.visible = true
+                                backButton.visible = true
+                                createSessionButton.visible = true
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Host Session"
+                    color: "white"
+                    font.pixelSize: 24
+                    anchors.horizontalCenter: hostSessionImage.horizontalCenter
+                    //anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+
+            /*
+            Rectangle {
+                id: hostRectangle
+                width: 200
+                height: 200
+                color: "#5CBB5C"
+                radius: 10
+                Text {
+                    text: "Host"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    id: hostMouseArea
+                    anchors.fill: parent
+                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    enabled: !userHandler.isGuest()
+                    onClicked: {
+                        if (userHandler.hasRoom()) {
+                            changePage("host")
+                        }
+                        else {
+                            optionRow.visible = false;
+                            joinSessionColumn.visible = true
+                            backButton.visible = true
+                            createSessionButton.visible = true
+                        }
+                    }
+                }
+            }
+            */
+
+            Rectangle {
+                id: logInRectangle
+                width: 200
+                height: 200
+                color: "#5CBB5C"
+                radius: 10
+                Text {
+                    text: "Log in"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        optionRow.visible = false;
+                        loginColumn.visible = true
+                        backButton.visible = true
+                    }
+                }
+            }
+
+            Rectangle {
+                id: settingsRectangle
+                width: 200
+                height: 200
+                color: "#5CBB5C"
+                radius: 10
+                Text {
+                    text: "Settings"
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        showSettings();
                     }
                 }
             }
         }
 
-        Rectangle {
-            id: logInRectangle
-            width: 200
-            height: 200
-            color: "#141414"
-            radius: 10
-            Text {
-                text: "Log in"
-                color: "white"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    optionRow.visible = false;
-                    loginColumn.visible = true
-                    backButton.visible = true
-                }
-            }
-        }
 
-        Rectangle {
-            id: settingsRectangle
-            width: 200
-            height: 200
-            color: "#141414"
-            radius: 10
-            Text {
-                text: "Settings"
-                color: "white"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    showSettings();
-                }
-            }
-        }
-    }
+
+
 
     Column {
         id: joinSessionColumn
@@ -238,13 +393,7 @@ Rectangle {
         }
     }
 
-    C.PushButton {
-        id: backButton
-        text: "Back"
-        font.pixelSize: 32
-        visible: false
-        onClicked: clear()
-    }
+
 
     function joinSession() {
         if (sessionHandler.joinSession(roomIdField.text, roomPasswordField.text)) {
@@ -293,5 +442,6 @@ Rectangle {
 
     Component.onCompleted: {
         setTitle("qZoom :: Home");
+        console.log(header.height)
     }
 }

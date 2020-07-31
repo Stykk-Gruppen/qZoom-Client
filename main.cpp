@@ -62,8 +62,9 @@ int main(int argc, char *argv[])
     int port = 1337;
     QHostAddress address;
 
-   // address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress::LocalHost;
+    //address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress("46.250.220.237"); //feqzz.no
     //address = QHostAddress("158.36.165.235"); //Tarald
     //address = QHostAddress("92.220.136.246"); //Stian
     //address = QHostAddress("79.160.58.120"); //Kent

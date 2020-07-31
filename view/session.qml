@@ -20,7 +20,7 @@ Rectangle {
         id: screenGridArea
         width: window.width
         height: (window.height - taskBar.height)
-        color: "dimgray"
+        color: "#161637"
         Grid {
             id: gridId
             function calcColumns() { //Disse to funksjonene kan nok gjøres mye bedre. Hvis man klarer å se mønsteret :P
@@ -63,7 +63,7 @@ Rectangle {
                 Rectangle {
                     width: focusScreen ? screenGridArea.width : screenGridArea.width/parent.columns
                     height: focusScreen ? screenGridArea.height : screenGridArea.height/parent.rows
-                    color: "dimgray"
+                    color: "#161637"
 
                     Image {
                         id: liveImage
@@ -102,13 +102,6 @@ Rectangle {
         }
     }
 
-    Item {
-        Timer {
-            interval: 3000; running: true; repeat: true
-            onTriggered: sendBump();
-        }
-    }
-
     C.TaskBar {
         id: taskBar
         anchors.bottom: parent.bottom
@@ -120,9 +113,9 @@ Rectangle {
         var roomPassword = sessionHandler.getRoomPassword();
         setTitle("qZoom :: Session (" + roomId + ")");
 
-        backendSettings.setLastRoomId(roomId);
-        backendSettings.setLastRoomPassword(roomPassword);
-        backendSettings.saveSettings();
+        //backendSettings.setLastRoomId(roomId);
+        //backendSettings.setLastRoomPassword(roomPassword);
+        //backendSettings.saveSettings();
 
         /*if(backendSettings.getAudioOn())
         {
@@ -132,14 +125,7 @@ Rectangle {
         {
             streamHandler.enableVideo();
         }*/
-
-
     }
-
-    function sendBump() {
-        sessionHandler.sendBumpSignal();
-    }
-
     /*
     function addScreen() {
         var width = screenGridArea.width/gridId.calcColumns();

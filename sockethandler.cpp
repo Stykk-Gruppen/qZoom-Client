@@ -86,7 +86,7 @@ void SocketHandler::readPendingDatagrams()
             }
             // qDebug() << "audio buffer size " << mAudioBufferVector[index].size() << "after signal: " << signalCount;
         }
-        else if (audioOrVideoInt ==1)
+        else if (audioOrVideoInt == 1)
         {
             mInputStreamHandler->mVideoMutexVector[index]->lock();
             mInputStreamHandler->mVideoBufferVector[index]->append(data);
@@ -119,7 +119,7 @@ int SocketHandler::findStreamIdIndex(QString streamId)
 {
     if(mInputStreamHandler->mStreamIdVector.size()>=1)
     {
-        for(size_t i=0;i<mInputStreamHandler->mStreamIdVector.size();i++)
+        for(size_t i = 0; i < mInputStreamHandler->mStreamIdVector.size(); i++)
         {
             if(QString::compare(streamId, mInputStreamHandler->mStreamIdVector[i], Qt::CaseSensitive)==0)
             {
@@ -153,8 +153,8 @@ int SocketHandler::sendDatagram(QByteArray arr)
 
     //Creats a new QByteArray from the first byte in arr, which should be the audioOrVideo byte.
     //Then it removes the byte from arr
-    QByteArray arrToPrepend = QByteArray(arr,1);
-    arr.remove(0,1);
+    QByteArray arrToPrepend = QByteArray(arr, 1);
+    arr.remove(0, 1);
 
     //Puts the streamId and its size at the front of the array,
     //so the server knows where to send the stream
@@ -165,17 +165,18 @@ int SocketHandler::sendDatagram(QByteArray arr)
     arrToPrepend.prepend(mRoomId.toLocal8Bit().data());
     arrToPrepend.prepend(mRoomId.size());
 
-    while(arr.size()>0){
-        if(arr.size()>512-arrToPrepend.size())
+    while(arr.size() > 0)
+    {
+        if(arr.size() > (512 - arrToPrepend.size()))
         {
             /*
              * Creates a deep copy of x bytes in arr.
              * Prepends the QByteArray containing roomId, streamId, audioOrVideoByte.
              * Then removes x bytes from arr.
              */
-            QByteArray temp = QByteArray(arr,512-arrToPrepend.size());
+            QByteArray temp = QByteArray(arr, (512 - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
-            arr.remove(0,512-arrToPrepend.size());
+            arr.remove(0, (512 - arrToPrepend.size()));
             ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
         }
         else
@@ -184,7 +185,9 @@ int SocketHandler::sendDatagram(QByteArray arr)
             ret = mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
             break;
         }
-        if(ret<0){
+
+        if(ret<0)
+        {
             qDebug() << mUdpSocket->error();
             break;
         }

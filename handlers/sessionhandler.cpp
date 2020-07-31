@@ -1,11 +1,13 @@
 #include "sessionhandler.h"
 
-SessionHandler::SessionHandler(Database* _db, UserHandler* _user, ImageHandler* imageHandler,  Settings* settings, int bufferSize, QHostAddress address, int port,  QObject *parent) : QObject(parent)
+SessionHandler::SessionHandler(Database* _db, UserHandler* _user,
+                               ImageHandler* imageHandler,
+                               Settings* settings, int bufferSize,
+                               QHostAddress address, int port,
+                               QObject *parent) : QObject(parent)
 {
     mDb = _db;
     mUser = _user;
-    //Set default room id
-    //mRoomId = "Debug";
     setDefaultRoomID();
     mIpAddress = "Ipaddress";
     mSettings = settings;
@@ -13,9 +15,7 @@ SessionHandler::SessionHandler(Database* _db, UserHandler* _user, ImageHandler* 
     mPort = port;
     mAddress = address;
     mImageHandler = imageHandler;
-
-
-
+    mSessionIsActive = false;
 }
 
 UserHandler* SessionHandler::getUser()
@@ -48,10 +48,12 @@ std::pair<bool, bool> SessionHandler::initOtherStuff()
 {
     QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
     QString roomId = getRoomId();
+    QString displayName = mSettings->getDisplayName();
+    mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
     mSocketHandler = new SocketHandler(mBufferSize, mPort, mInputStreamHandler, streamId, roomId, mAddress);
     //mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
-    mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, mAddress, mPort);
+    mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPort);
     mStreamHandler = new StreamHandler(mImageHandler, mSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
     //Init tcpServerHandler
     //mTcpServerHandler->init();
@@ -62,6 +64,7 @@ std::pair<bool, bool> SessionHandler::initOtherStuff()
 
 void SessionHandler::closeOtherStuff()
 {
+    mSessionIsActive = false;
     mInputStreamHandler->close();
     mSocketHandler->closeSocket();
     mTcpSocketHandler->close();
@@ -96,6 +99,11 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             mRoomPassword = q.value(1).toString();
             mRoomHostUsername = q.value(2).toString();
             addUser();
+
+            mSettings->setLastRoomId(mRoomId);
+            mSettings->setLastRoomPassword(mRoomPassword);
+            mSettings->saveSettings();
+            mImageHandler->addPeer(0, mSettings->getDisplayName());
 
 
             //Init everything that needs init
@@ -271,7 +279,24 @@ void SessionHandler::setDefaultRoomID()
     mRoomId = "Debug";
 }
 
-void SessionHandler::sendBumpSignal()
+void SessionHandler::updateDisplayName()
 {
-    mStreamHandler->bumpServer();
+    qDebug() << "SessionHandler will updateDisplayName";
+    if (mSessionIsActive)
+    {
+        qDebug() << "Session is active";
+        mImageHandler->updatePeerDisplayName(0, mSettings->getDisplayName());
+        mTcpSocketHandler->updateDisplayName(mSettings->getDisplayName());
+        mTcpSocketHandler->sendChangedDisplayNameSignal();
+    }
+}
+
+bool SessionHandler::checkVideoEnabled()
+{
+    return mStreamHandler->checkVideoEnabled();
+}
+
+bool SessionHandler::checkAudioEnabled()
+{
+    return mStreamHandler->checkAudioEnabled();
 }

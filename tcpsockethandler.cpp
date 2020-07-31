@@ -1,7 +1,7 @@
 #include "tcpsockethandler.h"
 
 
-TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QHostAddress address, int port, QObject* parent): QObject(parent)
+TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QString displayName, QHostAddress address, int port, QObject* parent): QObject(parent)
 {
     mAddress = address;
     //mPort = port;
@@ -11,6 +11,7 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QStr
     mInputStreamHandler = inputStreamHandler;
     mStreamId = streamId;
     mRoomId = roomId;
+    mDisplayName = displayName;
 }
 
 void TcpSocketHandler::init()
@@ -44,7 +45,7 @@ void TcpSocketHandler::readyRead()
     //qDebug() << mSocket->readAll();
     QByteArray data = mSocket->readAll();
 
-    //qDebug() << "Data received: " << data;
+    qDebug() << "Data received: " << data;
 
 
     int code = data[0];
@@ -56,7 +57,7 @@ void TcpSocketHandler::readyRead()
         //HEADER
         int numOfHeaders = data[0];
         qDebug() << "number of headers recieved from server: " << numOfHeaders;
-        data.remove(0,1);
+        data.remove(0, 1);
         //QString data(reply);
 
 
@@ -69,26 +70,41 @@ void TcpSocketHandler::readyRead()
             //qDebug() << "Temp: " << temp;
             mInputStreamHandler->handleHeader(temp);
             //qDebug() << "Data before remove endline: " << data;
-            data.remove(0, data.indexOf(27)+1);
+            data.remove(0, (data.indexOf(27) + 1));
             //qDebug() << "Data after remove endline: " << data;
         }
         //mSocket->write("0");
         break;
     }
-
     case 1:
     {
         //REmove the user with this streamId
         qDebug() << "About to remove this user: " << data;
         int streamIdLength = data[0];
-        data.remove(0,1);
+        data.remove(0, 1);
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
         QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->removeStream(streamId);
+    }
+    case 2:
+    {
+        //Update Participant displayName
+        qDebug() << "Updating display name for user: " << data;
+        int displayNameLength = data[0];
+        data.remove(0, 1);
+        QByteArray displayNameArray = QByteArray(data, displayNameLength);
+        QString displayName(displayNameArray);
+        data.remove(0, displayNameLength);
 
+        int streamIdLength = data[0];
+        data.remove(0, 1);
+        QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        QString streamId(streamIdArray);
+        data.remove(0, streamIdLength);
 
+        mInputStreamHandler->updateParticipantDisplayName(streamId, displayName);
     }
     default:
         qDebug() << "Dont understand the code sent in beginning of tcp mesasge";
@@ -102,18 +118,17 @@ void TcpSocketHandler::writeHeader()
     //qDebug() << "About to write header";
     //mSocket->connectToHost(mAddress, mPort);
 
-
-
     myHeader.prepend(mStreamId.toLocal8Bit().data());
     myHeader.prepend(mStreamId.size());
+
+    myHeader.prepend(mDisplayName.toLocal8Bit().data());
+    myHeader.prepend(mDisplayName.size());
 
     //Puts the roomId and its size at the front of the array
     myHeader.prepend(mRoomId.toLocal8Bit().data());
     myHeader.prepend(mRoomId.size());
 
-
-
-   // qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
 
     mSocket->write(myHeader);
     myHeader.clear();
@@ -174,19 +189,23 @@ void TcpSocketHandler::writeHeader()
 
 }
 
-void TcpSocketHandler::sendBumpSignal()
+void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
-    //qDebug() << "Writing bump signal. Denne kommer nok ganske ofte opp :) Heisann folkens.";
-    QByteArray header = QString("BUMP").toUtf8();
+    QByteArray header = QString("DISPLAY_NAME_UPDATE").toUtf8();
 
     header.prepend(mStreamId.toLocal8Bit().data());
     header.prepend(mStreamId.size());
+
+    header.prepend(mDisplayName.toLocal8Bit().data());
+    header.prepend(mDisplayName.size());
 
     //Puts the roomId and its size at the front of the array
     header.prepend(mRoomId.toLocal8Bit().data());
     header.prepend(mRoomId.size());
 
-    //mSocket->write(header);
+    qDebug() << "My Header: " << header.length() << "\n" << header;
+
+    mSocket->write(header);
     header.clear();
 }
 
@@ -227,4 +246,9 @@ QByteArray TcpSocketHandler::getReply()
 bool TcpSocketHandler::isReady()
 {
     return mReady;
+}
+
+void TcpSocketHandler::updateDisplayName(QString displayName)
+{
+    mDisplayName = displayName;
 }

@@ -4,7 +4,8 @@ import "../components" as C
 
 Rectangle {
 
-    color: "#141414"
+    //color: "#161637"
+    color: "black"
     height: 64
     width: parent.width
 
@@ -47,6 +48,16 @@ Rectangle {
         */
 
         C.PushButton {
+            id: settingsButton
+            text: "Settings"
+            font.pixelSize: 32
+            property var toggled: true
+            onClicked: {
+                showSettings();
+            }
+        }
+
+        C.PushButton {
             id: roomInfoButton
             text: "Room Info"
             font.pixelSize: 32
@@ -64,7 +75,6 @@ Rectangle {
                     state = "red"
                     sessionHandler.disableAudio()
                     toggled = !toggled
-
                 }
                 else
                 {
@@ -124,16 +134,6 @@ Rectangle {
                 gridId.columns = gridId.calcColumns();
                 gridId.rows = gridId.calcRows();
                 repeaterId.model = imageHandler.getNumberOfScreens();
-            }
-        }
-
-        C.PushButton {
-            id: settingsButton
-            text: "Settings"
-            font.pixelSize: 32
-            property var toggled: true
-            onClicked: {
-                showSettings();
             }
         }
 

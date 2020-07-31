@@ -15,8 +15,6 @@ public:
     StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
-    Q_INVOKABLE void record();
-    Q_INVOKABLE void stopRecording();
     Q_INVOKABLE void disableAudio();
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
@@ -27,7 +25,6 @@ public:
     Q_INVOKABLE bool checkAudioEnabled();
     Q_INVOKABLE int enableAudio();
     Q_INVOKABLE int enableVideo();
-    void bumpServer();
     void close();
 
 private:
@@ -38,7 +35,6 @@ private:
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;
-    bool mStopServerBump;
     int mBufferSize;
     std::mutex mUDPSendDatagramMutexLock;
     QString mAudioDevice;

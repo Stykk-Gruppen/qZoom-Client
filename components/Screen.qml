@@ -3,7 +3,7 @@ import QtQuick 2.0
 Rectangle {
     width: focusScreen ? screenGridArea.width : screenGridArea.width/parent.columns
     height: focusScreen ? screenGridArea.height : screenGridArea.height/parent.rows
-    color: "dimgray"
+    color: "#161637"
     property var index: 0
 
     function setInfo(_index, _width, _height) {

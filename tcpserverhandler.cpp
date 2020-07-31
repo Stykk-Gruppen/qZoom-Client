@@ -48,7 +48,7 @@ void TcpServerHandler::readTcpPacket()
         //HEADER
         int numOfHeaders = data[0];
         qDebug() << "number of headers recieved from server: " << numOfHeaders;
-        data.remove(0,1);
+        data.remove(0, 1);
         //QString data(reply);
 
 
