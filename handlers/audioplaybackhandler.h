@@ -11,35 +11,22 @@ extern "C" {
 #include "libswresample/swresample.h"
 }
 #include "handlers/imagehandler.h"
+#include "playback.h"
 
-class AudioPlaybackHandler : public QObject
+class AudioPlaybackHandler : public Playback
 {
     Q_OBJECT
 public:
     AudioPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
-                         int bufferSize, QObject *parent = nullptr);
+                         size_t bufferSize, QObject *parent = nullptr);
     ~AudioPlaybackHandler();
-    void getStream();
-    static int customReadPacket(void *opaque, uint8_t *buf, int buf_size);
     void start();
-    int decodeAndPlay();
-    int mAudioStreamIndex = -1;
 private:
-    int mVectorIndex;
-    struct mBufferAndLockStruct {
-        QByteArray* buffer;
-        std::mutex* writeLock;
-    };
-    int mBufferSize;
-    mBufferAndLockStruct* mStruct;
     void initAudio(QObject *parent);
-    QByteArray mBuffer;
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
-    uint8_t mSenderId = 0; //Value set to 0 just for testing.
-    ImageHandler* mImageHandler;
-signals:
+
 };
 
 #endif // PLAYBACKHANDLER_H

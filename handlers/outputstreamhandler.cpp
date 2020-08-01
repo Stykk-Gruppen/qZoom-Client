@@ -1,7 +1,7 @@
 #include "outputstreamhandler.h"
 
 
-OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
+OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, size_t bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
     mSettings = settings;
     mBufferSize = bufferSize;
@@ -91,7 +91,8 @@ void OutputStreamHandler::grabVideoHeader()
     {
         qDebug() << "Creating new VideoHandler";
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
-                                                             mTime, mImageHandler, mSocketHandler,mBufferSize, mTcpSocketHandler);
+                                         mTime, mImageHandler, mSocketHandler,
+                                         mBufferSize, mTcpSocketHandler);
     }
     qDebug() << "Init videoHandler";
     mVideoHandler->init();
@@ -112,7 +113,7 @@ int OutputStreamHandler::enableAudio()
         qDebug() << "creating mAudioHandler";
         //int64_t time = av_gettime();
         mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock,
-                                         mTime, mSocketHandler,mBufferSize);
+                                         mTime, mSocketHandler, mBufferSize);
     }
 
     int error = mAudioHandler->init();
@@ -150,7 +151,8 @@ int OutputStreamHandler::enableVideo()
         qDebug() << "new videohandler";
         //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
-                                         mTime, mImageHandler, mSocketHandler, mBufferSize, mTcpSocketHandler);
+                                         mTime, mImageHandler, mSocketHandler,
+                                         mBufferSize, mTcpSocketHandler);
     }
 
     int error = mVideoHandler->init();

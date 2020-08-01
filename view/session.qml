@@ -66,6 +66,7 @@ Rectangle {
                     color: "#161637"
 
                     Image {
+
                         id: liveImage
                         anchors.fill: parent
                         property bool counter: false
@@ -94,7 +95,7 @@ Rectangle {
                     Item {
                         Timer {
                             interval: 41; running: true; repeat: true
-                            onTriggered: liveImage.reload();
+                            onTriggered:liveImage.reload();
                         }
                     }
                 }

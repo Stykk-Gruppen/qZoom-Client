@@ -11,7 +11,7 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
 
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    int index = 0;
+    uint8_t index = 0;
     QStringList onlyId = id.split("=");
     if(onlyId.size() >= 2)
     {
@@ -19,12 +19,18 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
         if(idIndex.size() >= 2)
         {
 
-            index = idIndex[1].toInt();
-            if(index > 0)
-            {
-                //qDebug() << index;
-            }
+            index = idIndex[1].toUInt();
         }
+    }
+    //This means the screen for the user, which is stored in numeric_value_max in the map
+    if(index==0)
+    {
+        index = std::numeric_limits<uint8_t>::max();
+    }
+    else
+    {
+        //All other participants are located in the map at their screen index-1
+        index--;
     }
     QImage result = mImageMap[index].first;
 
@@ -101,10 +107,6 @@ void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();
-    if(index > 0)
-    {
-        //qDebug() << index;
-    }
     if(mImageMap[index].first != image)
     {
         mImageMap[index].first = image;
@@ -169,7 +171,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
     if(codecContext == nullptr)
     {
-        emit updateImage(generateGenericImage(mSettings->getDisplayName()), 0);
+        updateImage(generateGenericImage(mSettings->getDisplayName()), std::numeric_limits<uint8_t>::max());
         return;
     }
 
@@ -206,7 +208,7 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     sws_freeContext(imgConvertCtx);
 
     //av_frame_free(&frameRGB);
-    emit updateImage(img, index);
+    updateImage(img, index);
     //av_frame_unref(frameRGB);
     //av_frame_free(&frameRGB);
     //delete frameRGB;

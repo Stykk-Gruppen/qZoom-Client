@@ -6,34 +6,20 @@
 #include <QtConcurrent/QtConcurrent>
 #include "handlers/imagehandler.h"
 #include <handlers/tcpsockethandler.h>
+#include <playback.h>
 
-class VideoPlaybackHandler : public QObject
+class VideoPlaybackHandler : public Playback
 {
     Q_OBJECT
 public:
-    VideoPlaybackHandler(std::mutex* writeLock, ImageHandler* imageHandler, QByteArray* headerBuffer,
-                         QByteArray* buffer, int bufferSize, int index, QObject *parent = nullptr);
+    VideoPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
+                         size_t bufferSize, ImageHandler* imageHandler,
+                         int index, QObject *parent = nullptr);
     ~VideoPlaybackHandler();
-    void getStream();
-    static int read_packet(void *opaque, uint8_t *buf, int buf_size);
     void start();
-    int mVideoStreamIndex = -1;
 private:
     int mIndex;
-    struct mBufferAndLockStruct {
-        QByteArray* buffer;
-        std::mutex* writeLock;
-        bool* headerReceived;
-        QByteArray* headerBuffer;
-
-    };
-    int mBufferSize;
-    mBufferAndLockStruct* mStruct;
-    QByteArray mBuffer;
-    QIODevice* mpOut;
-    uint8_t mSenderId = 0; //Value set to 0 just for testing.
-    ImageHandler* mImageHandler;
-signals:
+    ImageHandler* imageHandler;
 };
 
 #endif // PLAYBACKHANDLER_H

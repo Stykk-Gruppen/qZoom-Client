@@ -12,7 +12,7 @@ class OutputStreamHandler : public QObject
 {
     Q_OBJECT
 public:
-    OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
+    OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, size_t buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void disableAudio();
@@ -35,7 +35,7 @@ private:
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;
-    int mBufferSize;
+    size_t mBufferSize;
     std::mutex mUDPSendDatagramMutexLock;
     QString mAudioDevice;
     QString mVideoDevice;

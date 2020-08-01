@@ -118,7 +118,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             qDebug() << "Adding peer with display name" << mSettings->getDisplayName();
 
             //TODO maybe more intensive to find numeric_limit in map compared to 0?
-            uint_8 userIndex = std::numeric_limits<uint_8>::max();
+            uint8_t userIndex = std::numeric_limits<uint8_t>::max();
 
             mImageHandler->addPeer(userIndex, mSettings->getDisplayName());
 

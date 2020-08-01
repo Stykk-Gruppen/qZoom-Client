@@ -27,6 +27,7 @@ SOURCES += \
         handlers/imagehandler.cpp \
         handlers/inputstreamhandler.cpp \
         main.cpp \
+        playback.cpp \
         settings.cpp \
         handlers/udpsockethandler.cpp \
         handlers/tcpserverhandler.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     handlers/userhandler.h \
     handlers/imagehandler.h \
     handlers/inputstreamhandler.h \
+    playback.h \
     settings.h \
     handlers/udpsockethandler.h \
     handlers/tcpserverhandler.h \

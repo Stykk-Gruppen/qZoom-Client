@@ -147,12 +147,18 @@ void InputStreamHandler::handleHeader(QByteArray data)
 /**
  * When recieving a TCP request with a header from a unknown streamId,
  * we need to create new buffers, mutex and playbackhandlers for both video and audio.
- * @param streamId QString to add to mStreamIdVector
+ * @param streamId QString to add to mStreamIdVector, used to identify packets and datagrams
  * @param index int to add a peer to ImageHandler
+ * @param displayName QString to display on GUI
  */
 void InputStreamHandler::addStreamToVector(int index, QString streamId, QString displayName)
 {
     qDebug() << "Adding streamId: " << streamId;
+    if(index >= std::numeric_limits<uint_8>::max())
+    {
+        qDebug() << "We currently do not allow for more than 255 participants in a room" << Q_FUNC_INFO;
+        return;
+    }
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
     mVideoHeaderVector.push_back(tempVideoHeaderBuffer);
     QByteArray* tempAudioBuffer = new QByteArray();
@@ -164,7 +170,8 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
     mAudioMutexVector.push_back(tempAudioLock);
     mVideoMutexVector.push_back(tempVideoLock);
     mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock, tempAudioBuffer, mBufferSize));
-    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, mImageHandler, tempVideoHeaderBuffer, tempVideoBuffer, mBufferSize, (index + 1)));
+    mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, tempVideoBuffer, mBufferSize,
+                                                                   mImageHandler, index));
     mStreamIdVector.push_back(streamId);
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
