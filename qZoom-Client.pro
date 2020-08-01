@@ -21,6 +21,7 @@ SOURCES += \
         config.cpp \
         core/database.cpp \
         handlers/errorhandler.cpp \
+        handlers/outputstreamhandler.cpp \
         handlers/sessionhandler.cpp \
         handlers/userhandler.cpp \
         handlers/imagehandler.cpp \
@@ -28,7 +29,6 @@ SOURCES += \
         main.cpp \
         settings.cpp \
         handlers/udpsockethandler.cpp \
-        handlers/streamhandler.cpp \
         handlers/tcpserverhandler.cpp \
         handlers/tcpsockethandler.cpp \
         handlers/videohandler.cpp \
@@ -58,13 +58,13 @@ HEADERS += \
     handlers/audioplaybackhandler.h \
     core/database.h \
     handlers/errorhandler.h \
+    handlers/outputstreamhandler.h \
     handlers/sessionhandler.h \
     handlers/userhandler.h \
     handlers/imagehandler.h \
     handlers/inputstreamhandler.h \
     settings.h \
     handlers/udpsockethandler.h \
-    handlers/streamhandler.h \
     handlers/tcpserverhandler.h \
     handlers/tcpsockethandler.h \
     handlers/videohandler.h \

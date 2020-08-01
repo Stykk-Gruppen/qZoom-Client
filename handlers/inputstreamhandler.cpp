@@ -169,7 +169,7 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
 
-    //Your own image is at 0, so we add 1 here and in videoPlayback constructor
+    //Your own image is at 0, but index 0 in the vectors is NOT you.
     mImageHandler->addPeer((index + 1), displayName);
 }
 

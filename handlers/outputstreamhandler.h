@@ -8,11 +8,11 @@
 #include "settings.h"
 #include "handlers/errorhandler.h"
 
-class StreamHandler : public QObject
+class OutputStreamHandler : public QObject
 {
     Q_OBJECT
 public:
-    StreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
+    OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void disableAudio();

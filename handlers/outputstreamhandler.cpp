@@ -1,7 +1,7 @@
-#include "streamhandler.h"
+#include "outputstreamhandler.h"
 
 
-StreamHandler::StreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
+OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, int bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
     mSettings = settings;
     mBufferSize = bufferSize;
@@ -18,7 +18,7 @@ StreamHandler::StreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _soc
     }
 }
 
-void StreamHandler::init()
+void OutputStreamHandler::init()
 {
     mVideoEnabled = mSettings->getVideoOn();
     mAudioEnabled = mSettings->getAudioOn();
@@ -51,7 +51,7 @@ void StreamHandler::init()
     }
 }
 
-void StreamHandler::close()
+void OutputStreamHandler::close()
 {
     qDebug() << "Closing streamHandler";
 
@@ -85,7 +85,7 @@ void StreamHandler::close()
 
 
 
-void StreamHandler::grabVideoHeader()
+void OutputStreamHandler::grabVideoHeader()
 {
     if(mVideoHandler == nullptr)
     {
@@ -103,7 +103,7 @@ void StreamHandler::grabVideoHeader()
     mVideoHandler = nullptr;
 }
 
-int StreamHandler::enableAudio()
+int OutputStreamHandler::enableAudio()
 {
     mAudioEnabled = true;
     qDebug() << "enabling audio";
@@ -130,7 +130,7 @@ int StreamHandler::enableAudio()
     return 0;
 }
 
-void StreamHandler::disableAudio()
+void OutputStreamHandler::disableAudio()
 {
     if(mAudioHandler != nullptr)
     {
@@ -141,7 +141,7 @@ void StreamHandler::disableAudio()
     }
 }
 
-int StreamHandler::enableVideo()
+int OutputStreamHandler::enableVideo()
 {
     mVideoEnabled = true;
     qDebug() << "enabling video";
@@ -170,7 +170,7 @@ int StreamHandler::enableVideo()
     return 0;
 }
 
-void StreamHandler::disableVideo()
+void OutputStreamHandler::disableVideo()
 {
     if(mVideoHandler != nullptr)
     {
@@ -181,12 +181,12 @@ void StreamHandler::disableVideo()
     }
 }
 
-QVariantList StreamHandler::getAudioInputDevices()
+QVariantList OutputStreamHandler::getAudioInputDevices()
 {
     return mAudioHandler->getAudioInputDevices();
 }
 
-void StreamHandler::changeAudioInputDevice(QString deviceName)
+void OutputStreamHandler::changeAudioInputDevice(QString deviceName)
 {
     qDebug() << "Changing Audio to: " << deviceName;
     mAudioDevice = deviceName;
@@ -195,17 +195,17 @@ void StreamHandler::changeAudioInputDevice(QString deviceName)
     enableAudio();
 }
 
-QString StreamHandler::getDefaultAudioInputDevice()
+QString OutputStreamHandler::getDefaultAudioInputDevice()
 {
     return "default";
 }
 
-bool StreamHandler::checkVideoEnabled()
+bool OutputStreamHandler::checkVideoEnabled()
 {
     return mVideoEnabled;
 }
 
-bool StreamHandler::checkAudioEnabled()
+bool OutputStreamHandler::checkAudioEnabled()
 {
     return mAudioEnabled;
 }

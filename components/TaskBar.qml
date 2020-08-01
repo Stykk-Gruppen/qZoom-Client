@@ -144,6 +144,7 @@ Rectangle {
             property var toggled: true
             onClicked: {
                 //streamHandler.stopRecording();
+                //TODO handle return value?
                 sessionHandler.leaveSession();
                 changePage("home");
             }

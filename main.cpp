@@ -10,7 +10,7 @@
 #include <libavformat/avformat.h>
 #include <QAudioInput>
 #include <QTimer>
-#include "handlers/streamhandler.h"
+#include "handlers/outputstreamhandler.h"
 #include "handlers/videoplaybackhandler.h"
 #include "settings.h"
 #include "handlers/imagehandler.h"

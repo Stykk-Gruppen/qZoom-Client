@@ -27,23 +27,23 @@ UserHandler* SessionHandler::getUser()
 
 bool SessionHandler::enableVideo()
 {
-   return mStreamHandler->enableVideo() >= 0;
+    return mOutputStreamHandler->enableVideo() >= 0;
 
 }
 
 void SessionHandler::disableVideo()
 {
-    mStreamHandler->disableVideo();
+    mOutputStreamHandler->disableVideo();
 }
 
 bool SessionHandler::enableAudio()
 {
-    return mStreamHandler->enableAudio() >= 0;
+    return mOutputStreamHandler->enableAudio() >= 0;
 }
 
 void SessionHandler::disableAudio()
 {
-    mStreamHandler->disableAudio();
+    mOutputStreamHandler->disableAudio();
 }
 
 void SessionHandler::initOtherStuff()
@@ -53,37 +53,43 @@ void SessionHandler::initOtherStuff()
     QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
-    mSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
+    mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
     //mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
     mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPortNumberTCP);
-    mStreamHandler = new StreamHandler(mImageHandler, mSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
+    mOutputStreamHandler = new OutputStreamHandler(mImageHandler, mUdpSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
     //Init tcpServerHandler
     //mTcpServerHandler->init();
     //Init sending of our header, empty or not
     mTcpSocketHandler->init();
-    mStreamHandler->init();
+    mOutputStreamHandler->init();
 }
 
 void SessionHandler::closeOtherStuff()
 {
     mSessionIsActive = false;
     qDebug() << "Before close";
-    mInputStreamHandler->close();
-    mSocketHandler->closeSocket();
+    //Sockets should close first, they use buffers and locks inside inputStreamHandler
+    mUdpSocketHandler->closeSocket();
     mTcpSocketHandler->close();
-    mStreamHandler->close();
+
+    //This will clear all the vectors containing objects connected to each person in the room
+    mInputStreamHandler->close();
+
+    //This will close the output streams
+    mOutputStreamHandler->close();
+
     qDebug() << "After close, about to delete";
     delete mInputStreamHandler;
-    delete mSocketHandler;
+    delete mUdpSocketHandler;
     delete mTcpSocketHandler;
-    delete mStreamHandler;
+    delete mOutputStreamHandler;
     qDebug() << "Deleted everything";
     mImageHandler->removeAllPeers();
 }
 
 QVariantList SessionHandler::getAudioInputDevices()
 {
-    return mStreamHandler->getAudioInputDevices();
+    return mOutputStreamHandler->getAudioInputDevices();
 }
 
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
@@ -110,7 +116,11 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
             mSettings->setLastRoomPassword(mRoomPassword);
             mSettings->saveSettings();
             qDebug() << "Adding peer with display name" << mSettings->getDisplayName();
-            mImageHandler->addPeer(0, mSettings->getDisplayName());
+
+            //TODO maybe more intensive to find numeric_limit in map compared to 0?
+            uint_8 userIndex = std::numeric_limits<uint_8>::max();
+
+            mImageHandler->addPeer(userIndex, mSettings->getDisplayName());
 
 
             //Init everything that needs init
@@ -187,8 +197,9 @@ bool SessionHandler::leaveSession()
     //CLose all that is opened;
     closeOtherStuff();
 
+    //Serveren gjør jo dette når TCP blir disconnected? Er dette bare gammel kode?
 
-    if (mUser->isGuest())
+    /*if (mUser->isGuest())
     {
         QSqlQuery q(mDb->mDb);
         q.prepare("DELETE FROM roomSession WHERE roomId = :roomId AND userId = :userId");
@@ -222,7 +233,7 @@ bool SessionHandler::leaveSession()
             qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
     }
-    return false;
+    return false;*/
 }
 
 bool SessionHandler::createSession(QString roomId, QString roomPassword)
@@ -301,10 +312,10 @@ void SessionHandler::updateDisplayName()
 
 bool SessionHandler::checkVideoEnabled()
 {
-    return mStreamHandler->checkVideoEnabled();
+    return mOutputStreamHandler->checkVideoEnabled();
 }
 
 bool SessionHandler::checkAudioEnabled()
 {
-    return mStreamHandler->checkAudioEnabled();
+    return mOutputStreamHandler->checkAudioEnabled();
 }

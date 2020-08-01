@@ -12,7 +12,7 @@
 #include "handlers/udpsockethandler.h"
 #include "handlers/tcpserverhandler.h"
 #include "handlers/tcpsockethandler.h"
-#include "handlers/streamhandler.h"
+#include "handlers/outputstreamhandler.h"
 
 class SessionHandler : public QObject
 {
@@ -61,10 +61,10 @@ private:
     Database* mDb;
     UserHandler* mUser;
     Settings* mSettings;
-    StreamHandler* mStreamHandler;
+    OutputStreamHandler* mOutputStreamHandler;
     ImageHandler* mImageHandler;
     InputStreamHandler* mInputStreamHandler;
-    UdpSocketHandler* mSocketHandler;
+    UdpSocketHandler* mUdpSocketHandler;
     TcpServerHandler* mTcpServerHandler;
     TcpSocketHandler* mTcpSocketHandler;
 
