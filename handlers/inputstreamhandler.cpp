@@ -169,8 +169,8 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
 
-    //Your own image is at 0, but index 0 in the vectors is NOT you.
-    mImageHandler->addPeer((index + 1), displayName);
+    //Your own image is at numeric limit for uint8, so we have a problem if a room gets that many participants
+    mImageHandler->addPeer(index, displayName);
 }
 
 /**
@@ -204,7 +204,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
 
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
-    uint8_t index = findStreamIdIndex(streamId, displayName) + 1;
+    uint8_t index = findStreamIdIndex(streamId, displayName);
     mImageHandler->updatePeerDisplayName(index, displayName);
 }
 

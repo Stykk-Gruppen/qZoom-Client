@@ -56,15 +56,19 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 void ImageHandler::addPeer(uint8_t index, QString displayName)
 {
     qDebug() << "Added peer to ImageHandler map: " << index;
+    imgLock.lock();
     mImageMap[index].first = generateGenericImage(displayName);
     mImageMap[index].second = displayName;
+    imgLock.unlock();
     emit refreshScreens();
 }
 
 void ImageHandler::removeAllPeers()
 {
     qDebug() << "Removing all peers";
+    imgLock.lock();
     mImageMap.clear();
+    imgLock.unlock();
 }
 
 /**
@@ -75,9 +79,9 @@ void ImageHandler::removeAllPeers()
 void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
-
-    mImageMap.erase(index+1);
-
+    imgLock.lock();
+    mImageMap.erase(index);
+    imgLock.unlock();
     emit refreshScreens();
 }
 
