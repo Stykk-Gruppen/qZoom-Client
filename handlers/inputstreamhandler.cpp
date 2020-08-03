@@ -166,7 +166,7 @@ void InputStreamHandler::handleHeader(QByteArray data)
  */
 void InputStreamHandler::addStreamToVector(int index, QString streamId, QString displayName)
 {
-    qDebug() << "Adding streamId: " << streamId;
+    qDebug() << "Adding streamId to Vectors: " << streamId;
     if(index >= std::numeric_limits<uint_8>::max())
     {
         qDebug() << "We currently do not allow for more than 255 participants in a room" << Q_FUNC_INFO;
