@@ -46,7 +46,7 @@ void SessionHandler::disableAudio()
     mOutputStreamHandler->disableAudio();
 }
 
-void SessionHandler::initOtherStuff()
+int SessionHandler::initOtherStuff()
 {
     QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
     QString roomId = getRoomId();
@@ -60,7 +60,8 @@ void SessionHandler::initOtherStuff()
     //Init tcpServerHandler
     //mTcpServerHandler->init();
     //Init sending of our header, empty or not
-    mTcpSocketHandler->init();
+    if(mTcpSocketHandler->init() < 0) return -1;
+
     mOutputStreamHandler->init();
 }
 
@@ -122,11 +123,11 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 
 
             //Init everything that needs init
-            initOtherStuff();
-
-
-
-
+            if(initOtherStuff() < 0)
+            {
+                closeOtherStuff();
+                return false;
+            }
             return true;
         }
         else

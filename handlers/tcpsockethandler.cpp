@@ -21,7 +21,7 @@ TcpSocketHandler::~TcpSocketHandler()
 
 
 
-void TcpSocketHandler::init()
+int TcpSocketHandler::init()
 {
     mSocket = new QTcpSocket(this);
     /*connect(mSocket, SIGNAL(connected()), this, SLOT(connected()));
@@ -36,6 +36,9 @@ void TcpSocketHandler::init()
     if(!mSocket->waitForConnected(3000))
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
+        errorHandler->giveErrorDialog("Could not connect to server");
+        return -1;
+
     }
 }
 

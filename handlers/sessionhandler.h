@@ -45,7 +45,7 @@ public:
 
 private:
     void addUser();
-    void initOtherStuff();
+    int initOtherStuff();
     void closeOtherStuff();
     void getUserRoom();
     void setDefaultRoomID();
