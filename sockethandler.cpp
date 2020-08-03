@@ -119,7 +119,7 @@ void SocketHandler::readPendingDatagrams()
  */
 int SocketHandler::findStreamIdIndex(QString streamId)
 {
-    if(mInputStreamHandler->mStreamIdVector.size()>=1)
+    if(mInputStreamHandler->mStreamIdVector.size() >= 1)
     {
         for(size_t i = 0; i < mInputStreamHandler->mStreamIdVector.size(); i++)
         {
@@ -188,7 +188,7 @@ int SocketHandler::sendDatagram(QByteArray arr)
             break;
         }
 
-        if(ret<0)
+        if(ret < 0)
         {
             qDebug() << mUdpSocket->error();
             break;

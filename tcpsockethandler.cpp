@@ -55,7 +55,7 @@ void TcpSocketHandler::readyRead()
     data.remove(0, 1);
     switch(code)
     {
-    case 0:
+    case VIDEO_HEADER:
     {
         //HEADER
         int numOfHeaders = data[0];
@@ -79,7 +79,7 @@ void TcpSocketHandler::readyRead()
         //mSocket->write("0");
         break;
     }
-    case 1:
+    case REMOVE_PARTICIPANT:
     {
         //REmove the user with this streamId
         qDebug() << "About to remove this user: " << data;
@@ -92,7 +92,7 @@ void TcpSocketHandler::readyRead()
         mInputStreamHandler->removeStream(streamId);
         break;
     }
-    case 2:
+    case NEW_DISPLAY_NAME:
     {
         //Update Participant displayName
         qDebug() << "Updating display name for user: " << data;
@@ -109,6 +109,30 @@ void TcpSocketHandler::readyRead()
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->updateParticipantDisplayName(streamId, displayName);
+        break;
+    }
+    case VIDEO_DISABLED:
+    {
+        qDebug() << "Setting user to muted for: " << data;
+        int streamIdLength = data[0];
+        data.remove(0, 1);
+        QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        QString streamId(streamIdArray);
+        data.remove(0, streamIdLength);
+
+        mInputStreamHandler->setPeerToVideoDisabled(streamId);
+        break;
+    }
+    case AUDIO_DISABLED:
+    {
+        qDebug() << "Setting user to muted for: " << data;
+        int streamIdLength = data[0];
+        data.remove(0, 1);
+        QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        QString streamId(streamIdArray);
+        data.remove(0, streamIdLength);
+
+        mInputStreamHandler->setPeerToAudioDisabled(streamId);
         break;
     }
     default:
@@ -196,11 +220,56 @@ void TcpSocketHandler::writeHeader()
 
 void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
-    QByteArray header = QString("DISPLAY_NAME_UPDATE").toUtf8();
+    //QByteArray header = QString("DISPLAY_NAME_UPDATE").toUtf8();
+    QByteArray header = QByteArray::number(NEW_DISPLAY_NAME);
 
     header.prepend(mStreamId.toLocal8Bit().data());
     header.prepend(mStreamId.size());
 
+    header.prepend(mDisplayName.toLocal8Bit().data());
+    header.prepend(mDisplayName.size());
+
+    //Puts the roomId and its size at the front of the array
+    header.prepend(mRoomId.toLocal8Bit().data());
+    header.prepend(mRoomId.size());
+
+    qDebug() << "My Header: " << header.length() << "\n" << header;
+
+    mSocket->write(header);
+    header.clear();
+}
+
+void TcpSocketHandler::sendDisabledVideoSignal()
+{
+    //QByteArray header = QString("VIDEO_DISABLED").toUtf8();
+    QByteArray header = QByteArray::number(VIDEO_DISABLED);
+
+    header.prepend(mStreamId.toLocal8Bit().data());
+    header.prepend(mStreamId.size());
+
+    //Don't really need this, but removing it would make the server parser struggle.
+    header.prepend(mDisplayName.toLocal8Bit().data());
+    header.prepend(mDisplayName.size());
+
+    //Puts the roomId and its size at the front of the array
+    header.prepend(mRoomId.toLocal8Bit().data());
+    header.prepend(mRoomId.size());
+
+    qDebug() << "My Header: " << header.length() << "\n" << header;
+
+    mSocket->write(header);
+    header.clear();
+}
+
+void TcpSocketHandler::sendDisabledAudioSignal()
+{
+    //QByteArray header = QString("AUDIO_DISABLED").toUtf8();
+    QByteArray header = QByteArray::number(AUDIO_DISABLED);
+
+    header.prepend(mStreamId.toLocal8Bit().data());
+    header.prepend(mStreamId.size());
+
+    //Don't really need this, but removing it would make the server parser struggle.
     header.prepend(mDisplayName.toLocal8Bit().data());
     header.prepend(mDisplayName.size());
 

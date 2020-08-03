@@ -29,7 +29,6 @@ SOURCES += \
         settings.cpp \
         sockethandler.cpp \
         streamhandler.cpp \
-        tcpserverhandler.cpp \
         tcpsockethandler.cpp \
         videohandler.cpp \
         videoplaybackhandler.cpp
@@ -65,7 +64,6 @@ HEADERS += \
     settings.h \
     sockethandler.h \
     streamhandler.h \
-    tcpserverhandler.h \
     tcpsockethandler.h \
     videohandler.h \
     videoplaybackhandler.h

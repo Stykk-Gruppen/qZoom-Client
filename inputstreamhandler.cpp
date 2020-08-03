@@ -63,8 +63,11 @@ void InputStreamHandler::close()
 void InputStreamHandler::removeStream(QString streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
-    int index = -1;
+    //int index = -1;
+    int index = findStreamIdIndex(streamId);
 
+
+    /*
     for(size_t i = 0; i < mStreamIdVector.size(); i++)
     {
         if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
@@ -72,6 +75,9 @@ void InputStreamHandler::removeStream(QString streamId)
             index = i;
         }
     }
+    */
+
+
     if(index != -1)
     {
         delete mVideoHeaderVector.at(index);
@@ -127,7 +133,13 @@ void InputStreamHandler::handleHeader(QByteArray data)
     qDebug() << "Adding streamId: " << streamId;
     qDebug() << "Adding displayName: " << displayName;
 
-    int index = findStreamIdIndex(streamId, displayName);
+    int index = findStreamIdIndex(streamId);
+    if (index < 0)
+    {
+        //Failed to find streamId in vector. Will add them instead.
+        addStreamToVector(mStreamIdVector.size(), streamId, displayName);
+        index = (mStreamIdVector.size() - 1);
+    }
 
     mVideoMutexVector[index]->lock();
     if(mVideoHeaderVector[index]->isEmpty())
@@ -173,6 +185,7 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found, or 0 if not found
  */
+/*
 int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
 {
     qDebug() << "InputStreamHandler findStreamId index: " << streamId;
@@ -196,11 +209,39 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
         return 0;
     }
 }
+*/
+
+int InputStreamHandler::findStreamIdIndex(QString streamId)
+{
+    if(mStreamIdVector.size() >= 1)
+    {
+        for(size_t i = 0; i < mStreamIdVector.size(); i++)
+        {
+            if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
-    uint8_t index = findStreamIdIndex(streamId, displayName) + 1;
-    mImageHandler->updatePeerDisplayName(index, displayName);
+    uint8_t index = findStreamIdIndex(streamId);
+    mImageHandler->updatePeerDisplayName((index + 1), displayName);
+}
+
+void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
+{
+    uint8_t index = findStreamIdIndex(streamId);
+    mImageHandler->setPeerVideoAsDisabled((index + 1));
+}
+
+void InputStreamHandler::setPeerToAudioDisabled(QString streamId)
+{
+    //uint8_t index = findStreamIdIndex(streamId);
+    //mImageHandler->setPeerToMuted((index + 1));
 }
 
 

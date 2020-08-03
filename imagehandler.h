@@ -29,6 +29,7 @@ public:
     void removePeer(uint8_t index);
     void updatePeerDisplayName(uint8_t index, QString displayName);
     void removeAllPeers();
+    void setPeerVideoAsDisabled(uint8_t index);
     Q_INVOKABLE int getNumberOfScreens();
     std::mutex imgLock;
 
@@ -40,11 +41,8 @@ signals:
     void refreshScreens();
 private:
     QImage generateGenericImage(QString username);
-    //QMap<uint8_t, QImage> mImageMap;
     std::map<uint8_t, std::pair<QImage, QString>> mImageMap;
     QImage mDefaultImage;
-    //SwsContext *imgConvertCtx = nullptr;
-    //AVFrame	*frameRGB = av_frame_alloc();
     Settings* mSettings;
 };
 

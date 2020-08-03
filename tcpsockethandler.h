@@ -27,6 +27,8 @@ public:
     void writeHeader();
     void updateDisplayName(QString displayName);
     void sendChangedDisplayNameSignal();
+    void sendDisabledVideoSignal();
+    void sendDisabledAudioSignal();
     QByteArray myHeader;
 
 public slots:
@@ -38,6 +40,7 @@ public slots:
 private:
     //Should match enum in Server::TcpServerHandler
     enum mTcpReturnValues { STREAM_ID_NOT_FOUND, ROOM_ID_NOT_FOUND, SESSION_STARTED };
+    enum mTcpHeaderCodes { VIDEO_HEADER, REMOVE_PARTICIPANT, NEW_DISPLAY_NAME, VIDEO_DISABLED, AUDIO_DISABLED };
     QHostAddress mAddress;
     int mPort;
     int mBytesWritten;

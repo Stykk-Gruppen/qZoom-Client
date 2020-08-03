@@ -10,7 +10,6 @@
 #include "imagehandler.h"
 #include "inputstreamhandler.h"
 #include "sockethandler.h"
-#include "tcpserverhandler.h"
 #include "tcpsockethandler.h"
 #include "streamhandler.h"
 
@@ -63,7 +62,6 @@ private:
     ImageHandler* mImageHandler;
     InputStreamHandler* mInputStreamHandler;
     SocketHandler* mSocketHandler;
-    TcpServerHandler* mTcpServerHandler;
     TcpSocketHandler* mTcpSocketHandler;
 
 signals:

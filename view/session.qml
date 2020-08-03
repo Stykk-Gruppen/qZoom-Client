@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import QtMultimedia 5.15
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.15
+import QtGraphicalEffects 1.0
 import "../components" as C
 
 Rectangle {
@@ -69,6 +70,13 @@ Rectangle {
                         id: liveImage
                         anchors.fill: parent
                         property bool counter: false
+                        layer.enabled: true
+                            layer.effect: DropShadow {
+                                verticalOffset: 3
+                                horizontalOffset: 0
+                                radius: 8
+                                color: "#26000000"
+                            }
 
                         asynchronous: true
                         source: "image://live/10"

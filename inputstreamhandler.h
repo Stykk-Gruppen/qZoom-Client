@@ -18,11 +18,14 @@ class InputStreamHandler : public QObject
 public:
     explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent = nullptr);
     void addStreamToVector(int index, QString streamId, QString displayName);
-    int findStreamIdIndex(QString streamId, QString displayName);
+    //int findStreamIdIndex(QString streamId, QString displayName);
+    int findStreamIdIndex(QString streamId);
     void init();
     void close();
     void removeStream(QString streamId);
     void updateParticipantDisplayName(QString streamId, QString displayName);
+    void setPeerToVideoDisabled(QString streamId);
+    void setPeerToAudioDisabled(QString streamId);
     std::vector<QByteArray*> mVideoHeaderVector;
     std::vector<QString> mStreamIdVector;
     std::vector<QByteArray*> mAudioBufferVector;

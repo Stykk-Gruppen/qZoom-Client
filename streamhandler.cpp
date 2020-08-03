@@ -138,6 +138,7 @@ void StreamHandler::disableAudio()
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
         //delete mAudioHandler;
         qDebug() << "audio disabled";
+        mTcpSocketHandler->sendDisabledAudioSignal();
     }
 }
 
@@ -178,6 +179,7 @@ void StreamHandler::disableVideo()
         //delete mVideoHandler;
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
+        mTcpSocketHandler->sendDisabledVideoSignal();
     }
 }
 

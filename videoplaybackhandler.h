@@ -6,7 +6,6 @@
 #include <QtConcurrent/QtConcurrent>
 #include "imagehandler.h"
 #include <tcpsockethandler.h>
-#include <tcpserverhandler.h>
 
 class VideoPlaybackHandler : public QObject
 {
@@ -26,7 +25,6 @@ private:
         std::mutex* writeLock;
         bool* headerReceived;
         QByteArray* headerBuffer;
-
     };
     int mBufferSize;
     mBufferAndLockStruct* mStruct;

@@ -76,7 +76,7 @@ void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
 
-    mImageMap.erase(index+1);
+    mImageMap.erase(index + 1);
 
     emit refreshScreens();
 }
@@ -85,6 +85,11 @@ void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
 {
     qDebug() << index << "Updated their display name to:" << displayName;
     mImageMap[index].second = displayName;
+    mImageMap[index].first = generateGenericImage(mImageMap[index].second);
+}
+
+void ImageHandler::setPeerVideoAsDisabled(uint8_t index)
+{
     mImageMap[index].first = generateGenericImage(mImageMap[index].second);
 }
 
@@ -97,10 +102,6 @@ void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();
-    if(index > 0)
-    {
-        //qDebug() << index;
-    }
     if(mImageMap[index].first != image)
     {
         mImageMap[index].first = image;
