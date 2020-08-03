@@ -22,7 +22,7 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
  */
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    qDebug() << id;
+    //qDebug() << id;
     uint8_t index = 0;
     QStringList onlyId = id.split("=");
     if(onlyId.size() >= 2)
