@@ -121,6 +121,7 @@ void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
 
 void ImageHandler::setPeerVideoAsDisabled(uint8_t index)
 {
+    qDebug() << "Set peer video as disabled for index: " << index;
     mImageMap[index].first = generateGenericImage(mImageMap[index].second);
 }
 

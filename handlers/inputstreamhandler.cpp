@@ -242,13 +242,13 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
     uint8_t index = findStreamIdIndex(streamId);
-    mImageHandler->updatePeerDisplayName((index + 1), displayName);
+    mImageHandler->updatePeerDisplayName(index, displayName);
 }
 
 void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
-    mImageHandler->setPeerVideoAsDisabled((index + 1));
+    mImageHandler->setPeerVideoAsDisabled(index);
 }
 
 void InputStreamHandler::setPeerToAudioDisabled(QString streamId)

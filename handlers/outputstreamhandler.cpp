@@ -1,7 +1,9 @@
 #include "outputstreamhandler.h"
 
 
-OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, size_t bufferSize, Settings* settings, TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
+OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler,
+                                         size_t bufferSize, Settings* settings,
+                                         TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
 {
     mSettings = settings;
     mBufferSize = bufferSize;
@@ -14,7 +16,7 @@ OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketH
     mTcpSocketHandler = tcpSocketHandler;
     if(!mVideoEnabled)
     {
-        mImageHandler->readImage(nullptr, nullptr, 0);
+        mImageHandler->readImage(nullptr, nullptr, std::numeric_limits<uint8_t>::max());
     }
 }
 
