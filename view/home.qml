@@ -82,13 +82,23 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 32
 
+
             Column {
                 spacing: 15
-                Image {
-                    id: joinSessionImage
+                Rectangle {
+                    id: joinSessionRectangle
                     width: 200
                     height: 200
-                    source: "../img/join-session-icon.png"
+                    color: "#5CBB5C"
+                    radius: 24
+
+                    Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 125
+                        height: 125
+                        source: "../img/join-session-icon.png"
+                    }
 
                     MouseArea {
                         anchors.fill: parent
@@ -118,7 +128,7 @@ Rectangle {
                     text: "Join Session"
                     color: "white"
                     font.pixelSize: 24
-                    anchors.horizontalCenter: joinSessionImage.horizontalCenter
+                    anchors.horizontalCenter: joinSessionRectangle.horizontalCenter
                     //anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -161,13 +171,25 @@ Rectangle {
             }
             */
 
+
             Column {
+                id: hostSessionColumn
+                visible: !userHandler.isGuest()
                 spacing: 15
-                Image {
-                    id: hostSessionImage
+                Rectangle {
+                    id: hostSessionRectangle
                     width: 200
                     height: 200
-                    source: "../img/host-session-icon.png"
+                    color: "#5CBB5C"
+                    radius: 24
+
+                    Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "../img/host-session-icon.png"
+                        height: 125
+                        width: 125
+                    }
 
                     MouseArea {
                         id: hostMouseArea
@@ -192,10 +214,50 @@ Rectangle {
                     text: "Host Session"
                     color: "white"
                     font.pixelSize: 24
-                    anchors.horizontalCenter: hostSessionImage.horizontalCenter
+                    anchors.horizontalCenter: hostSessionRectangle.horizontalCenter
                     //anchors.verticalCenter: parent.verticalCenter
                 }
             }
+
+            Column {
+                id: logInColumn
+                visible: userHandler.isGuest()
+                spacing: 15
+                Rectangle {
+                    id: logInRectangle
+                    width: 200
+                    height: 200
+                    color: "#5CBB5C"
+                    radius: 24
+
+                    Image {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "../img/login-icon.png"
+                        height: 125
+                        width: 125
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            optionRow.visible = false;
+                            loginColumn.visible = true
+                            backButton.visible = true
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Log In"
+                    color: "white"
+                    font.pixelSize: 24
+                    anchors.horizontalCenter: logInRectangle.horizontalCenter
+                    //anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+        }
 
             /*
             Rectangle {
@@ -229,13 +291,13 @@ Rectangle {
                 }
             }
             */
-
+            /*
             Rectangle {
                 id: logInRectangle
                 width: 200
                 height: 200
                 color: "#5CBB5C"
-                radius: 10
+                radius: 24
                 Text {
                     text: "Log in"
                     color: "white"
@@ -252,7 +314,9 @@ Rectangle {
                     }
                 }
             }
+            */
 
+            /*
             Rectangle {
                 id: settingsRectangle
                 width: 200
@@ -274,6 +338,7 @@ Rectangle {
                 }
             }
         }
+        */
 
 
 
@@ -409,6 +474,8 @@ Rectangle {
         if (userHandler.login(loginUsernameField.text, loginPasswordField.text)) {
             console.log("Successfully logged in!")
             clear()
+            hostSessionColumn.visible = true
+            logInColumn.visible = false
             hostMouseArea.enabled = true;
             hostMouseArea.cursorShape = Qt.PointingHandCursor
 

@@ -185,3 +185,9 @@ int UserHandler::getGuestId()
     }
     return ret;
 }
+
+bool UserHandler::logout()
+{
+    mIsGuest = true;
+    return true;
+}

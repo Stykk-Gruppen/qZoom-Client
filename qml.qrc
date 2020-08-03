@@ -13,5 +13,8 @@
         <file>components/Header.qml</file>
         <file>img/join-session-icon.png</file>
         <file>img/host-session-icon.png</file>
+        <file>img/info-icon.png</file>
+        <file>img/settings-icon.png</file>
+        <file>img/login-icon.png</file>
     </qresource>
 </RCC>

@@ -12,6 +12,7 @@ public:
     explicit UserHandler(Database* _db, Settings* settings, QObject *parent = nullptr);
     ~UserHandler();
     Q_INVOKABLE bool login(QString username, QString password);
+    Q_INVOKABLE bool logout();
     Q_INVOKABLE QString getErrorMessage();
     Q_INVOKABLE QString getPersonalRoomId();
     Q_INVOKABLE QString getPersonalRoomPassword();

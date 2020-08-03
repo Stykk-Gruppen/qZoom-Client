@@ -47,6 +47,49 @@ Rectangle {
         }
         */
 
+        Rectangle {
+            id: settingsRectangle
+            color: "#5CBB5C"
+            implicitHeight: 30
+            implicitWidth: 30
+            radius: 11
+            Image {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                height: 20
+                width: 20
+                source: "../img/settings-icon.png"
+            }
+            MouseArea {
+                hoverEnabled: true
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: showSettings()
+            }
+        }
+
+        Rectangle {
+            id: roomInfoRectangle
+            color: "#5CBB5C"
+            implicitHeight: 30
+            implicitWidth: 30
+            radius: 11
+            Image {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                height: 20
+                width: 20
+                source: "../img/info-icon.png"
+            }
+            MouseArea {
+                hoverEnabled: true
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: roomInfo.open()
+            }
+        }
+
+        /*
         C.PushButton {
             id: settingsButton
             text: "Settings"
@@ -63,6 +106,7 @@ Rectangle {
             font.pixelSize: 32
             onClicked: roomInfo.open()
         }
+        */
 
         C.PushButton {
             id: muteAudioButton
