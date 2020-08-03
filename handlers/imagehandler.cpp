@@ -103,6 +103,26 @@ void ImageHandler::removePeer(uint8_t index)
     qDebug() << "Removing peer from ImageHandler map: " << index;
     imgLock.lock();
     mImageMap.erase(index);
+
+    //Might need to move the other participants down a place.
+    //If we remove index 3, the map may get a gap and look like: 0, 1, 2, 4, 255
+    //After the algorithm it will look like: 0, 1, 2, 3, 255
+    //This has to be done to corresponds with the vectors.
+    std::map<uint8_t, std::pair<QImage, QString>>::iterator i;
+    uint8_t counter = 0;
+    for (i = mImageMap.begin(); i != mImageMap.end(); i++)
+    {
+        if (i->first != counter)
+        {
+            if (i->first != std::numeric_limits<uint8_t>::max())
+            {
+                auto nodeHandler = mImageMap.extract(i);
+                nodeHandler.key() = counter;
+                mImageMap.insert(std::move(nodeHandler));
+            }
+        }
+        counter++;
+    }
     imgLock.unlock();
     emit refreshScreens();
 }
