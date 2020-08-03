@@ -58,28 +58,14 @@ void OutputStreamHandler::close()
     if(mAudioHandler != nullptr)
     {
         disableAudio();
-        while(mAudioHandler->isActive())
-        {
-            av_usleep(500);
-            qDebug() << "Audio handler is still active";
-        }
-        qDebug() << "Audiohandler not active, deleting it";
-        delete mAudioHandler;
+
 
     }
 
     if(mVideoHandler != nullptr)
     {
         disableVideo();
-        qDebug() << "After disable video";
-        while(mVideoHandler->isActive())
-        {
-            av_usleep(500);
-            qDebug() << "VideoHandler is still active";
-        }
-        qDebug() << "Videohandler not active, deleting it";
 
-        delete mVideoHandler;
     }
 }
 
@@ -138,6 +124,14 @@ void OutputStreamHandler::disableAudio()
         mAudioEnabled = false;
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
         //delete mAudioHandler;
+        while(mAudioHandler->isActive())
+        {
+            av_usleep(500);
+            qDebug() << "Audio handler is still active";
+        }
+        qDebug() << "Audiohandler not active, deleting it";
+        delete mAudioHandler;
+        mAudioHandler = nullptr;
         qDebug() << "audio disabled";
         if(mTcpSocketHandler->isOpen())
         {
@@ -184,6 +178,17 @@ void OutputStreamHandler::disableVideo()
         //delete mVideoHandler;
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
+
+        while(mVideoHandler->isActive())
+        {
+            av_usleep(500);
+            qDebug() << "VideoHandler is still active";
+        }
+        qDebug() << "Videohandler not active, deleting it";
+
+        delete mVideoHandler;
+        mVideoHandler = nullptr;
+
         if(mTcpSocketHandler->isOpen())
         {
             mTcpSocketHandler->sendDisabledVideoSignal();
