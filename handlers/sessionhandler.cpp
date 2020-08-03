@@ -303,7 +303,7 @@ void SessionHandler::updateDisplayName()
     if (mSessionIsActive)
     {
         qDebug() << "Session is active";
-        mImageHandler->updatePeerDisplayName(0, mSettings->getDisplayName());
+        mImageHandler->updatePeerDisplayName(std::numeric_limits<uint8_t>::max(), mSettings->getDisplayName());
         mTcpSocketHandler->updateDisplayName(mSettings->getDisplayName());
         mTcpSocketHandler->sendChangedDisplayNameSignal();
     }

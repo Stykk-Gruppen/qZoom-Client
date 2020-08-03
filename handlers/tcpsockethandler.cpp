@@ -98,6 +98,7 @@ void TcpSocketHandler::readyRead()
     case REMOVE_PARTICIPANT:
     {
         //REmove the user with this streamId
+        data.remove(0, 1);
         qDebug() << "About to remove this user: " << data;
         int streamIdLength = data[0];
         data.remove(0, 1);
@@ -111,6 +112,7 @@ void TcpSocketHandler::readyRead()
     case NEW_DISPLAY_NAME:
     {
         //Update Participant displayName
+        data.remove(0, 1);
         qDebug() << "Updating display name for user: " << data;
         int displayNameLength = data[0];
         data.remove(0, 1);
@@ -129,7 +131,8 @@ void TcpSocketHandler::readyRead()
     }
     case VIDEO_DISABLED:
     {
-        qDebug() << "Setting user to muted for: " << data;
+        data.remove(0, 1);
+        qDebug() << "Setting user's video to disabled for: " << data;
         int streamIdLength = data[0];
         data.remove(0, 1);
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
@@ -141,6 +144,7 @@ void TcpSocketHandler::readyRead()
     }
     case AUDIO_DISABLED:
     {
+        data.remove(0, 1);
         qDebug() << "Setting user to muted for: " << data;
         int streamIdLength = data[0];
         data.remove(0, 1);
