@@ -3,10 +3,12 @@
 Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
                    size_t bufferSize, QObject *parent) : QObject(parent)
 {
+
     mBufferSize = bufferSize;
     mStruct = new mBufferAndLockStruct();
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
+    mStruct->stopPlayback = &mStopPlayback;
 }
 Playback::~Playback()
 {
@@ -30,11 +32,11 @@ void Playback::stop()
 int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
-    while (s->buffer->size() <= buf_size)
+    while (!(*s->stopPlayback) && s->buffer->size() <= buf_size)
     {
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        //qDebug() << "sleeping";
+        qDebug() << "sleeping";
         //nanosleep(&ts, NULL);
     }
 

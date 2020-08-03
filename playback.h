@@ -16,6 +16,7 @@ protected:
     struct mBufferAndLockStruct {
         QByteArray* buffer;
         std::mutex* writeLock;
+        bool* stopPlayback;
     };
     size_t mBufferSize;
     mBufferAndLockStruct* mStruct;

@@ -247,6 +247,7 @@ void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString 
 
 void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
 {
+    //mVideoPlaybackHandlerVector[findStreamIdIndex(streamId)]->stop();
     uint8_t index = findStreamIdIndex(streamId);
     mImageHandler->setPeerVideoAsDisabled((index + 1));
 }
