@@ -71,13 +71,6 @@ Rectangle {
                         anchors.fill: parent
                         property bool counter: false
                         layer.enabled: true
-                            layer.effect: DropShadow {
-                                verticalOffset: 3
-                                horizontalOffset: 0
-                                radius: 8
-                                color: "#26000000"
-                            }
-
                         asynchronous: true
                         source: "image://live/10"
                         fillMode: Image.PreserveAspectFit
@@ -102,7 +95,7 @@ Rectangle {
                     Item {
                         Timer {
                             interval: 41; running: true; repeat: true
-                            onTriggered: liveImage.reload();
+                            onTriggered:liveImage.reload();
                         }
                     }
                 }

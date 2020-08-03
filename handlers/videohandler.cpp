@@ -3,7 +3,7 @@
 
 
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
-                           ImageHandler* imageHandler, SocketHandler* _socketHandler,
+                           ImageHandler* imageHandler, UdpSocketHandler* _socketHandler,
                            int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent): QObject(parent)
 {
     mBufferSize = bufferSize;
@@ -294,7 +294,7 @@ void VideoHandler::grabFrames()
                 scaledFrame->pts = pts;
                 pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            imageHandler->readImage(outputVideoCodecContext, scaledFrame, 0);
+            imageHandler->readImage(outputVideoCodecContext, scaledFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(outputVideoCodecContext, scaledFrame);
             if(ret < 0)
             {
@@ -318,7 +318,7 @@ void VideoHandler::grabFrames()
                 videoFrame->pts = pts;
                 pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            imageHandler->readImage(outputVideoCodecContext, videoFrame, 0);
+            imageHandler->readImage(outputVideoCodecContext, videoFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(outputVideoCodecContext, videoFrame);
             //av_frame_free(&videoFrame);
             if(ret < 0)

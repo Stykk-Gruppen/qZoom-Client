@@ -1,5 +1,5 @@
 #include "audiohandler.h"
-AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time, SocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time, UdpSocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
 {
     mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
@@ -918,7 +918,7 @@ void AudioHandler::changeAudioInputDevice(QString deviceName)
 }
 int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    SocketHandler* socketHandler = reinterpret_cast<SocketHandler*>(opaque);
+    UdpSocketHandler* socketHandler = reinterpret_cast<UdpSocketHandler*>(opaque);
     char *cptr = reinterpret_cast<char*>(const_cast<uint8_t*>(buffer));
     QByteArray send;
     send = QByteArray(reinterpret_cast<char*>(cptr), buffer_size);

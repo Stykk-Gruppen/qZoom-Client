@@ -1,18 +1,18 @@
 #ifndef STREAMHANDLER_H
 #define STREAMHANDLER_H
-#include "videohandler.h"
-#include "audiohandler.h"
-#include "sockethandler.h"
+#include "handlers/videohandler.h"
+#include "handlers/audiohandler.h"
+#include "handlers/udpsockethandler.h"
 #include <QObject>
-#include "imagehandler.h"
+#include "handlers/imagehandler.h"
 #include "settings.h"
 #include "handlers/errorhandler.h"
 
-class StreamHandler : public QObject
+class OutputStreamHandler : public QObject
 {
     Q_OBJECT
 public:
-    StreamHandler(ImageHandler* _imageHandler, SocketHandler* _socketHandler, int buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
+    OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler, size_t buffer_size, Settings* settings, TcpSocketHandler* tcpSocketHandler, QObject *parent = nullptr);
     VideoHandler* mVideoHandler = nullptr;
     AudioHandler* mAudioHandler = nullptr;
     Q_INVOKABLE void disableAudio();
@@ -30,12 +30,12 @@ public:
 private:
     void grabVideoHeader();
     int64_t mTime;
-    SocketHandler* mSocketHandler;
+    UdpSocketHandler* mSocketHandler;
     TcpSocketHandler* mTcpSocketHandler;
     ImageHandler* mImageHandler;
     bool mAudioEnabled = true;
     bool mVideoEnabled = true;
-    int mBufferSize;
+    size_t mBufferSize;
     std::mutex mUDPSendDatagramMutexLock;
     QString mAudioDevice;
     QString mVideoDevice;

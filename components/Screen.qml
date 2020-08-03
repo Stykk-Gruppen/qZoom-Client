@@ -12,6 +12,8 @@ Rectangle {
         height = _height;
     }
 
+
+    //Brukes dette?
     Image {
         id: liveImage
         anchors.fill: parent

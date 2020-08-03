@@ -15,16 +15,20 @@ extern "C" {
 #include "libavutil/frame.h"
 #include "libavutil/imgutils.h"
 }
-#include "sockethandler.h"
-#include "imagehandler.h"
-class SocketHandler;
+#include "handlers/udpsockethandler.h"
+#include "handlers/imagehandler.h"
+class UdpSocketHandler;
 class TcpSocketHandler;
 
 class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t time, ImageHandler* imageHandler, SocketHandler* _socketHandler, int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent = 0);
+    VideoHandler(QString cDeviceName, std::mutex* _writeLock,
+                 int64_t time, ImageHandler* imageHandler,
+                 UdpSocketHandler* _socketHandler,
+                 int bufferSize, TcpSocketHandler* tcpSocketHandler,
+                 QObject* parent = 0);
     ~VideoHandler();
     int init();
     void grabFrames();
@@ -45,7 +49,7 @@ public:
 private:
     //Trenger kanskje ikke denne likevel?
     struct mSocketStruct {
-        SocketHandler* udpSocket;
+        UdpSocketHandler* udpSocket;
         TcpSocketHandler* tcpSocket;
         bool headerSent;
     };
@@ -64,7 +68,7 @@ private:
     AVCodec* inputVideoCodec;
     AVCodec* outputVideoCodec;
     int videoStream;
-    SocketHandler *socketHandler;
+    UdpSocketHandler *socketHandler;
     struct SwsContext* img_convert_ctx;
     ImageHandler* imageHandler;
     bool mAbortGrabFrames = false;
