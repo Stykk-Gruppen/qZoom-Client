@@ -13,7 +13,6 @@
 #include "handlers/imagehandler.h"
 #include "handlers/inputstreamhandler.h"
 #include "handlers/udpsockethandler.h"
-#include "handlers/tcpserverhandler.h"
 #include "handlers/tcpsockethandler.h"
 #include "handlers/outputstreamhandler.h"
 
@@ -68,7 +67,6 @@ private:
     ImageHandler* mImageHandler;
     InputStreamHandler* mInputStreamHandler;
     UdpSocketHandler* mUdpSocketHandler;
-    TcpServerHandler* mTcpServerHandler;
     TcpSocketHandler* mTcpSocketHandler;
 
 signals:

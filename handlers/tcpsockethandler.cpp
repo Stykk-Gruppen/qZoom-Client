@@ -221,7 +221,8 @@ void TcpSocketHandler::writeHeader()
 void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
     //QByteArray header = QString("DISPLAY_NAME_UPDATE").toUtf8();
-    QByteArray header = QByteArray::number(NEW_DISPLAY_NAME);
+    QByteArray header;
+    header.append(NEW_DISPLAY_NAME);
 
     header.prepend(mStreamId.toLocal8Bit().data());
     header.prepend(mStreamId.size());
@@ -242,7 +243,8 @@ void TcpSocketHandler::sendChangedDisplayNameSignal()
 void TcpSocketHandler::sendDisabledVideoSignal()
 {
     //QByteArray header = QString("VIDEO_DISABLED").toUtf8();
-    QByteArray header = QByteArray::number(VIDEO_DISABLED);
+    QByteArray header;
+    header.append(VIDEO_DISABLED);
 
     header.prepend(mStreamId.toLocal8Bit().data());
     header.prepend(mStreamId.size());
@@ -264,7 +266,8 @@ void TcpSocketHandler::sendDisabledVideoSignal()
 void TcpSocketHandler::sendDisabledAudioSignal()
 {
     //QByteArray header = QString("AUDIO_DISABLED").toUtf8();
-    QByteArray header = QByteArray::number(AUDIO_DISABLED);
+    QByteArray header;
+    header.append(AUDIO_DISABLED);
 
     header.prepend(mStreamId.toLocal8Bit().data());
     header.prepend(mStreamId.size());
