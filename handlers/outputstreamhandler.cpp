@@ -53,7 +53,7 @@ void OutputStreamHandler::init()
 
 void OutputStreamHandler::close()
 {
-    qDebug() << "Closing streamHandler";
+    qDebug() << "Closing outputStreamHandler";
 
     if(mAudioHandler != nullptr)
     {
@@ -71,7 +71,7 @@ void OutputStreamHandler::close()
     if(mVideoHandler != nullptr)
     {
         disableVideo();
-
+        qDebug() << "After disable video";
         while(mVideoHandler->isActive())
         {
             av_usleep(500);
@@ -139,7 +139,10 @@ void OutputStreamHandler::disableAudio()
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
         //delete mAudioHandler;
         qDebug() << "audio disabled";
-        mTcpSocketHandler->sendDisabledAudioSignal();
+        if(mTcpSocketHandler->isOpen())
+        {
+            mTcpSocketHandler->sendDisabledAudioSignal();
+        }
     }
 }
 
@@ -181,7 +184,10 @@ void OutputStreamHandler::disableVideo()
         //delete mVideoHandler;
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
-        mTcpSocketHandler->sendDisabledVideoSignal();
+        if(mTcpSocketHandler->isOpen())
+        {
+            mTcpSocketHandler->sendDisabledVideoSignal();
+        }
     }
 }
 
