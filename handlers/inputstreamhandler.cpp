@@ -16,6 +16,17 @@ void InputStreamHandler::init()
 void InputStreamHandler::close()
 {
     qDebug() << "Closing inputStreamHandler";
+
+    for(int i = 0; i < mVideoPlaybackHandlerVector.size(); i++)
+    {
+        qDebug() << "Stopping playbackhandlers";
+        mVideoPlaybackHandlerVector.at(i)->stop();
+        qDebug() << "Waiting for finished..";
+        videoFutures.at(i)->waitForFinished();
+    }
+
+    qDebug() << "After stopping playbackhandlers";
+
     for(auto i : mVideoHeaderVector)
     {
         delete i;
@@ -48,6 +59,7 @@ void InputStreamHandler::close()
 
     for(auto i : mVideoPlaybackHandlerVector)
     {
+
         delete i;
     }
 
@@ -58,6 +70,7 @@ void InputStreamHandler::close()
     mVideoMutexVector.clear();
     mAudioPlaybackHandlerVector.clear();
     mVideoPlaybackHandlerVector.clear();
+    videoFutures.clear();
 }
 
 void InputStreamHandler::removeStream(QString streamId)
@@ -86,6 +99,9 @@ void InputStreamHandler::removeStream(QString streamId)
     */
     if(index != -1)
     {
+        mVideoPlaybackHandlerVector[index]->stop();
+        videoFutures.at(index)->waitForFinished();
+
         delete mVideoHeaderVector.at(index);
         delete mAudioBufferVector.at(index);
         delete mVideoBufferVector.at(index);
@@ -105,6 +121,7 @@ void InputStreamHandler::removeStream(QString streamId)
         mStreamIdVector.erase(mStreamIdVector.begin() + index);
         qDebug() << "Successfully removed stream with streamId: " << streamId;
         mImageHandler->removePeer(index);
+        videoFutures.erase(videoFutures.begin() + index);
     }
     else
     {
@@ -173,6 +190,8 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
         return;
     }
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
+    QFuture<void>* tempFuture = new QFuture<void>();
+    videoFutures.push_back(tempFuture);
     mVideoHeaderVector.push_back(tempVideoHeaderBuffer);
     QByteArray* tempAudioBuffer = new QByteArray();
     QByteArray* tempVideoBuffer = new QByteArray();
@@ -247,8 +266,16 @@ void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString 
 
 void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
 {
-    //mVideoPlaybackHandlerVector[findStreamIdIndex(streamId)]->stop();
     uint8_t index = findStreamIdIndex(streamId);
+    mVideoMutexVector[index]->lock();
+    mVideoPlaybackHandlerVector[index]->stop();
+    videoFutures.at(index)->waitForFinished();
+    mVideoPlaybackStartedVector[index] = false;
+
+    mVideoBufferVector[index]->clear();
+    mVideoHeaderVector[index]->clear();
+    mVideoMutexVector[index]->unlock();
+
     mImageHandler->setPeerVideoAsDisabled(index);
 }
 

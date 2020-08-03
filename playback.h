@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QtConcurrent/QtConcurrent>
+extern "C" {
+#include "libavformat/avformat.h"
+}
 class Playback : public QObject
 {
     Q_OBJECT

@@ -32,8 +32,12 @@ void Playback::stop()
 int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
-    while (!(*s->stopPlayback) && s->buffer->size() <= buf_size)
+    while (s->buffer->size() <= buf_size)
     {
+        if((*s->stopPlayback))
+        {
+            return AVERROR_EOF;
+        }
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         qDebug() << "sleeping";

@@ -16,6 +16,7 @@ VideoPlaybackHandler::~VideoPlaybackHandler()
 
 void VideoPlaybackHandler::start()
 {
+    mStopPlayback = false;
     int error = 0;
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
