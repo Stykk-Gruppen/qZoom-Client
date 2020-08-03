@@ -18,8 +18,10 @@ class TcpSocketHandler : public QObject
     Q_OBJECT
 public:
     explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QString displayName, QHostAddress address, int port = 1338, QObject* parent = nullptr);
+    ~TcpSocketHandler();
     void init();
     void close();
+    bool isOpen();
     QByteArray getReply();
     bool isReady();
     void wait();

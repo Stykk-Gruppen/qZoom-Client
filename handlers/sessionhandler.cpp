@@ -71,17 +71,15 @@ void SessionHandler::closeOtherStuff()
     //Sockets should close first, they use buffers and locks inside inputStreamHandler
     mUdpSocketHandler->closeSocket();
     mTcpSocketHandler->close();
-
     //This will clear all the vectors containing objects connected to each person in the room
     mInputStreamHandler->close();
-
     //This will close the output streams
     mOutputStreamHandler->close();
 
     qDebug() << "After close, about to delete";
-    delete mInputStreamHandler;
     delete mUdpSocketHandler;
     delete mTcpSocketHandler;
+    delete mInputStreamHandler;
     delete mOutputStreamHandler;
     qDebug() << "Deleted everything";
     mImageHandler->removeAllPeers();

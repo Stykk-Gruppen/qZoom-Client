@@ -14,6 +14,11 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QStr
     mDisplayName = displayName;
 }
 
+TcpSocketHandler::~TcpSocketHandler()
+{
+}
+
+
 
 
 void TcpSocketHandler::init()
@@ -34,11 +39,19 @@ void TcpSocketHandler::init()
     }
 }
 
+bool TcpSocketHandler::isOpen()
+{
+    qDebug() << "isOpen is returning: " << (mSocket != nullptr);
+    return mSocket != nullptr;
+}
+
 void TcpSocketHandler::close()
 {
     qDebug() << "Closing TcpSocketHandler";
     mSocket->close();
     delete mSocket;
+    mSocket = nullptr;
+
 }
 
 void TcpSocketHandler::readyRead()
