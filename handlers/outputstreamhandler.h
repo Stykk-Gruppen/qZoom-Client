@@ -28,6 +28,8 @@ public:
     void close();
 
 private:
+    QFuture<void> videoFuture;
+    QFuture<void> audioFuture;
     void grabVideoHeader();
     int64_t mTime;
     UdpSocketHandler* mSocketHandler;
