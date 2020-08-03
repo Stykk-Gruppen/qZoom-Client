@@ -17,6 +17,7 @@ public:
                          int index, QObject *parent = nullptr);
     ~VideoPlaybackHandler();
     void start();
+    void decreaseIndex();
 private:
     int mIndex;
     ImageHandler* imageHandler;

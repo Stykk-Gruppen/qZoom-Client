@@ -153,3 +153,8 @@ void VideoPlaybackHandler::start()
     avcodec_free_context(&videoDecoderCodecContext);
 
 }
+
+void VideoPlaybackHandler::decreaseIndex()
+{
+    mIndex--;
+}
