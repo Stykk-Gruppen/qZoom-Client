@@ -40,7 +40,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
         }
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        qDebug() << "sleeping";
+        //qDebug() << "sleeping";
         //nanosleep(&ts, NULL);
     }
 

@@ -471,7 +471,7 @@ bool VideoHandler::isActive()
 
 int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    //qDebug() << "Inne i custom io write";
+    qDebug() << "Inne i custom io write";
 
 
     mSocketStruct *s = reinterpret_cast<mSocketStruct*>(opaque);
