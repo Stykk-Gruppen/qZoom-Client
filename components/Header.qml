@@ -87,4 +87,9 @@ Rectangle {
         anchors.bottom: parent.bottom
     }
 
+
+    function showLogoutButton() {
+        logoutRectangle.visible = true;
+    }
+
 }

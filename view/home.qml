@@ -477,9 +477,8 @@ Rectangle {
             hostSessionColumn.visible = true
             logInColumn.visible = false
             hostMouseArea.enabled = true;
-            hostMouseArea.cursorShape = Qt.PointingHandCursor
-            C.Header.logOutRectangle.visible = true
-
+            hostMouseArea.cursorShape = Qt.PointingHandCursor;
+            header.showLogoutButton();
         }
         else {
             console.log("Failed to login")
