@@ -48,11 +48,35 @@ Rectangle {
                 width: 25
                 source: "../img/settings-icon.png"
             }
+
             MouseArea {
                 hoverEnabled: true
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
                 onClicked: showSettings()
+            }
+        }
+
+        Rectangle {
+            id: logOutRectangle
+            visible: false
+            color: "#5CBB5C"
+            implicitHeight: 50
+            implicitWidth: 50
+            radius: 11
+
+            Image {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                height: 25
+                width: 25
+                source: "../img/logout-icon.png"
+            }
+
+            MouseArea {
+                hoverEnabled: true
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
             }
         }
     }

@@ -14,6 +14,7 @@ Rectangle {
 
 
     //Brukes dette?
+    //Nei. Hvem spurte?
     Image {
         id: liveImage
         anchors.fill: parent

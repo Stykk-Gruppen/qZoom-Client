@@ -478,6 +478,7 @@ Rectangle {
             logInColumn.visible = false
             hostMouseArea.enabled = true;
             hostMouseArea.cursorShape = Qt.PointingHandCursor
+            C.Header.logOutRectangle.visible = true
 
         }
         else {
