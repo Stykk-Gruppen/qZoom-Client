@@ -26,7 +26,7 @@ class AudioPlaybackHandler : public Playback
     Q_OBJECT
 public:
     AudioPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
-                         size_t bufferSize, QObject *parent = nullptr);
+                         size_t bufferSize, ImageHandler* _imageHandler, int index, QObject *parent = nullptr);
     ~AudioPlaybackHandler();
     void start();
 private:

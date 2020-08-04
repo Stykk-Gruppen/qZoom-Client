@@ -118,7 +118,7 @@ int AudioHandler::openOutputStream()
     }*/
 
     /* Create a new format context for the output container format. */
-    error = avformat_alloc_output_context2(&mOutputFormatContext, NULL,"mpeg", NULL);
+    error = avformat_alloc_output_context2(&mOutputFormatContext, NULL,"mp3", NULL);
     if (error < 0) {
         fprintf(stderr, "Could not alloc output context");
         exit(1);

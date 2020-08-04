@@ -1,7 +1,8 @@
 #include "audioplaybackhandler.h"
 
 AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize,
-                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, parent)
+                                           ImageHandler* _imageHandler,int index,
+                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index, parent)
 {
     initAudio(parent);
     mBufferSize = mBufferSize/16;
@@ -110,7 +111,7 @@ void AudioPlaybackHandler::start()
     //qDebug() << audioDecoderCodecContext->sample_rate;
     SwrContext *resample_context = NULL;
     //out,out,out...in,in,in
-    qDebug() << "audioDecoderCodecContext->sample_fmt," << audioDecoderCodecContext->sample_fmt;
+    //qDebug() << "audioDecoderCodecContext->sample_fmt," << audioDecoderCodecContext->sample_fmt;
     resample_context = swr_alloc_set_opts(NULL,
                                           av_get_default_channel_layout(2),
                                           AV_SAMPLE_FMT_S16,
@@ -212,7 +213,7 @@ void AudioPlaybackHandler::start()
         }
 
         // pull filtered audio from the filtergraph
-         error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
+        error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
         if(error<0){
             char* errbuff = (char *)malloc((1000)*sizeof(char));
             av_strerror(error,errbuff,1000);
@@ -220,7 +221,24 @@ void AudioPlaybackHandler::start()
             exit(1);
         }
 
-
+        AVDictionary *meta = filt_frame->metadata;
+        if(meta)
+        {
+            AVDictionaryEntry* silenceData = av_dict_get(meta, "", NULL, AV_DICT_IGNORE_SUFFIX);
+            if(silenceData)
+            {
+                QString silenceStart = "lavfi.silence_start";
+                QString silenceEnd = "lavfi.silence_end";
+                if(silenceEnd.compare(silenceData->key)==0)
+                {
+                    qDebug() << "Started talking";
+                }
+                if(silenceStart.compare(silenceData->key)==0)
+                {
+                    qDebug() << "Stopped talking";
+                }
+            }
+        }
 
         if (!resampled)
         {
@@ -274,13 +292,14 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
     const AVFilter  *abuffer;
     AVFilterContext *volume_ctx;
     const AVFilter  *volume;
+    AVFilterContext *silcence_ctx;
+    const AVFilter  *silcence;
     AVFilterContext *gate_ctx;
     const AVFilter  *gate;
     AVFilterContext *aformat_ctx;
     const AVFilter  *aformat;
     AVFilterContext *abuffersink_ctx;
     const AVFilter  *abuffersink;
-    AVDictionary *options_dict2 = NULL;
 
     int err;
 
@@ -333,17 +352,28 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
         fprintf(stderr, "Could not find the volume filter.\n");
         return AVERROR_FILTER_NOT_FOUND;
     }
-
     gate_ctx = avfilter_graph_alloc_filter(filter_graph, gate, "agate");
     if (!gate_ctx) {
         fprintf(stderr, "Could not allocate the volume instance.\n");
         return AVERROR(ENOMEM);
     }
+    err = avfilter_init_dict(gate_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the volume filter.\n");
+        return err;
+    }
 
-
-    // av_opt_set_double    (gate_ctx, "volume", 0.9, 0);
-
-    //err = avfilter_init_dict(gate_ctx, NULL);
+    silcence = avfilter_get_by_name("silencedetect");
+    if (!gate) {
+        fprintf(stderr, "Could not find the volume filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+    silcence_ctx = avfilter_graph_alloc_filter(filter_graph, silcence, "agate");
+    if (!silcence_ctx) {
+        fprintf(stderr, "Could not allocate the volume instance.\n");
+        return AVERROR(ENOMEM);
+    }
+    err = avfilter_init_dict(silcence_ctx, NULL);
     if (err < 0) {
         fprintf(stderr, "Could not initialize the volume filter.\n");
         return err;
@@ -375,7 +405,7 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
 
     /* Create the aformat filter;
      * it ensures that the output is of the format we want. */
-     aformat = avfilter_get_by_name("aformat");
+    aformat = avfilter_get_by_name("aformat");
     if (!aformat) {
         fprintf(stderr, "Could not find the aformat filter.\n");
         return AVERROR_FILTER_NOT_FOUND;
@@ -429,7 +459,11 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
     }
     if (err >= 0)
     {
-        err = avfilter_link(gate_ctx, 0, abuffersink_ctx, 0);
+        err = avfilter_link(gate_ctx, 0, silcence_ctx, 0);
+    }
+    if (err >= 0)
+    {
+        err = avfilter_link(silcence_ctx, 0, abuffersink_ctx, 0);
     }
     if (err < 0) {
         fprintf(stderr, "Error connecting filters\n");

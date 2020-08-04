@@ -206,7 +206,8 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
     std::mutex* tempVideoLock = new std::mutex;
     mAudioMutexVector.push_back(tempAudioLock);
     mVideoMutexVector.push_back(tempVideoLock);
-    mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock, tempAudioBuffer, mBufferSize));
+    mAudioPlaybackHandlerVector.push_back(new AudioPlaybackHandler(tempAudioLock, tempAudioBuffer, mBufferSize,
+                                                                   mImageHandler, index));
     mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, tempVideoBuffer, mBufferSize,
                                                                    mImageHandler, index));
     mStreamIdVector.push_back(streamId);
