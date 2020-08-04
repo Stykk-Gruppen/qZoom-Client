@@ -101,7 +101,7 @@ int OutputStreamHandler::enableAudio()
         qDebug() << "creating mAudioHandler";
         //int64_t time = av_gettime();
         mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock,
-                                         mTime, mSocketHandler, mBufferSize);
+                                         mTime, mSocketHandler, mBufferSize, mImageHandler);
     }
 
     int error = mAudioHandler->init();

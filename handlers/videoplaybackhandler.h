@@ -19,8 +19,7 @@ public:
     void start();
     void decreaseIndex();
 private:
-    int mIndex;
-    ImageHandler* imageHandler;
+
 };
 
 #endif // PLAYBACKHANDLER_H

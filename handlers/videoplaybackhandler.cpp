@@ -1,11 +1,10 @@
 #include "videoplaybackhandler.h"
 
 VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer,
-                                           size_t bufferSize,ImageHandler* _imageHandler,int index,
-                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, parent)
+                                           size_t bufferSize, ImageHandler* _imageHandler,int index,
+                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index, parent)
 {
-    mIndex = index;
-    imageHandler = _imageHandler;
+
 }
 
 VideoPlaybackHandler::~VideoPlaybackHandler()

@@ -67,6 +67,7 @@ Rectangle {
                     color: "#161637"
 
                     Image {
+
                         id: liveImage
                         anchors.fill: parent
                         property bool counter: false
@@ -75,6 +76,7 @@ Rectangle {
                         source: "image://live/10"
                         fillMode: Image.PreserveAspectFit
                         cache: false
+
 
                         function reload() {
                             counter = !counter
