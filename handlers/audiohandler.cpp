@@ -1,6 +1,8 @@
 #include "audiohandler.h"
-AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time, UdpSocketHandler *_socketHandler, int bufferSize)/*, QObject* parent): QObject(parent)*/
+AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time,
+                           UdpSocketHandler *_socketHandler, int bufferSize, ImageHandler* _imageHandler)/*, QObject* parent): QObject(parent)*/
 {
+    imageHandler = _imageHandler;
     mBufferSize = bufferSize;
     mSocketHandler = _socketHandler;
     mTime = _time;
@@ -589,6 +591,206 @@ int AudioHandler::initOutputFrame(AVFrame **frame, int frame_size)
     return 0;
 }
 
+int AudioHandler::init_filter_graph(AVFilterGraph **graph,
+                                     AVFilterContext **src,
+                                     AVFilterContext **sink)
+{
+    AVFilterGraph *filter_graph;
+    AVFilterContext *abuffer_ctx;
+    const AVFilter  *abuffer;
+    AVFilterContext *volume_ctx;
+    const AVFilter  *volume;
+    AVFilterContext *silcence_ctx;
+    const AVFilter  *silcence;
+    AVFilterContext *gate_ctx;
+    const AVFilter  *gate;
+    AVFilterContext *aformat_ctx;
+    const AVFilter  *aformat;
+    AVFilterContext *abuffersink_ctx;
+    const AVFilter  *abuffersink;
+
+    int err;
+
+    /* Create a new filtergraph, which will contain all the filters. */
+    filter_graph = avfilter_graph_alloc();
+    if (!filter_graph) {
+        fprintf(stderr, "Unable to create filter graph.\n");
+        return AVERROR(ENOMEM);
+    }
+
+    /* Create the abuffer filter;
+     * it will be used for feeding the data into the graph. */
+    abuffer = avfilter_get_by_name("abuffer");
+    if (!abuffer) {
+        fprintf(stderr, "Could not find the abuffer filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+
+    abuffer_ctx = avfilter_graph_alloc_filter(filter_graph, abuffer, "src");
+    if (!abuffer_ctx) {
+        fprintf(stderr, "Could not allocate the abuffer instance.\n");
+        return AVERROR(ENOMEM);
+    }
+
+
+    av_opt_set_int    (abuffer_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(mOutputCodecContext->sample_fmt), AV_OPT_SEARCH_CHILDREN);
+    //av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(AV_SAMPLE_FMT_S16), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_q  (abuffer_ctx, "time_base",      (AVRational){ 1, 48000 }, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int(abuffer_ctx, "sample_rate",    mOutputCodecContext->sample_rate, AV_OPT_SEARCH_CHILDREN);
+    /*
+    av_opt_set_int    (abuffer_ctx, "channels", ctx->channels, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(ctx->channels)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_q  (abuffer_ctx, "time_base",      ctx->time_base, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int(abuffer_ctx, "sample_rate",    ctx->sample_rate, AV_OPT_SEARCH_CHILDREN);*/
+
+
+    /* Now initialize the filter; we pass NULL options, since we have already
+     * set all the options above. */
+    err = avfilter_init_str(abuffer_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the abuffer filter.\n");
+        return err;
+    }
+
+    gate = avfilter_get_by_name("agate");
+    if (!gate) {
+        fprintf(stderr, "Could not find the volume filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+    gate_ctx = avfilter_graph_alloc_filter(filter_graph, gate, "agate");
+    if (!gate_ctx) {
+        fprintf(stderr, "Could not allocate the volume instance.\n");
+        return AVERROR(ENOMEM);
+    }
+    err = avfilter_init_dict(gate_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the volume filter.\n");
+        return err;
+    }
+
+    silcence = avfilter_get_by_name("silencedetect");
+    if (!gate) {
+        fprintf(stderr, "Could not find the volume filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+    silcence_ctx = avfilter_graph_alloc_filter(filter_graph, silcence, "agate");
+    if (!silcence_ctx) {
+        fprintf(stderr, "Could not allocate the volume instance.\n");
+        return AVERROR(ENOMEM);
+    }
+    err = avfilter_init_dict(silcence_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the volume filter.\n");
+        return err;
+    }
+
+    /* Create volume filter. */
+    // avfilter_get_by_name("silencedetect");
+
+    /* volume = avfilter_get_by_name("volume");
+    if (!volume) {
+        fprintf(stderr, "Could not find the volume filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+
+    volume_ctx = avfilter_graph_alloc_filter(filter_graph, volume, "volume");
+    if (!volume_ctx) {
+        fprintf(stderr, "Could not allocate the volume instance.\n");
+        return AVERROR(ENOMEM);
+    }
+
+
+    av_opt_set_double    (volume_ctx, "volume", 0.9, 0);
+
+    err = avfilter_init_dict(volume_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the volume filter.\n");
+        return err;
+    }*/
+
+    /* Create the aformat filter;
+     * it ensures that the output is of the format we want. */
+    aformat = avfilter_get_by_name("aformat");
+    if (!aformat) {
+        fprintf(stderr, "Could not find the aformat filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+
+    aformat_ctx = avfilter_graph_alloc_filter(filter_graph, aformat, "aformat");
+    if (!aformat_ctx) {
+        fprintf(stderr, "Could not allocate the aformat instance.\n");
+        return AVERROR(ENOMEM);
+    }
+
+
+    av_opt_set_int    (aformat_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (aformat_ctx, "channel_layout", QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (aformat_ctx, "sample_fmt",     av_get_sample_fmt_name(mOutputCodecContext->sample_fmt), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int(aformat_ctx, "sample_rate",    mOutputCodecContext->sample_rate, AV_OPT_SEARCH_CHILDREN);
+
+    err = avfilter_init_dict(aformat_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the volume filter.\n");
+        return err;
+    }
+
+    /* Finally create the abuffersink filter;
+     * it will be used to get the filtered data out of the graph. */
+    abuffersink = avfilter_get_by_name("abuffersink");
+    if (!abuffersink) {
+        fprintf(stderr, "Could not find the abuffersink filter.\n");
+        return AVERROR_FILTER_NOT_FOUND;
+    }
+
+    abuffersink_ctx = avfilter_graph_alloc_filter(filter_graph, abuffersink, "sink");
+    if (!abuffersink_ctx) {
+        fprintf(stderr, "Could not allocate the abuffersink instance.\n");
+        return AVERROR(ENOMEM);
+    }
+
+    /* This filter takes no options. */
+    err = avfilter_init_str(abuffersink_ctx, NULL);
+    if (err < 0) {
+        fprintf(stderr, "Could not initialize the abuffersink instance.\n");
+        return err;
+    }
+
+    /* Connect the filters;
+     * in this simple case the filters just form a linear chain. */
+    err = avfilter_link(abuffer_ctx, 0, aformat_ctx, 0);
+    if (err >= 0)
+    {
+        err = avfilter_link(aformat_ctx, 0, gate_ctx, 0);
+    }
+    if (err >= 0)
+    {
+        err = avfilter_link(gate_ctx, 0, silcence_ctx, 0);
+    }
+    if (err >= 0)
+    {
+        err = avfilter_link(silcence_ctx, 0, abuffersink_ctx, 0);
+    }
+    if (err < 0) {
+        fprintf(stderr, "Error connecting filters\n");
+        return err;
+    }
+
+    /* Configure the graph. */
+    err = avfilter_graph_config(filter_graph, NULL);
+    if (err < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Error configuring the filter graph\n");
+        return err;
+    }
+
+    *graph = filter_graph;
+    *src   = abuffer_ctx;
+    *sink  = abuffersink_ctx;
+
+    return 0;
+}
 /* Global timestamp for the audio frames. */
 static int64_t pts = 0;
 static bool first = true;
@@ -602,9 +804,50 @@ static bool first = true;
  */
 int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
 {
+    int error;
+
+    /* push the audio data from decoded frame into the filtergraph */
+    error = av_buffersrc_add_frame_flags(buffersrc_ctx, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
+    if(error<0){
+        char* errbuff = (char *)malloc((1000)*sizeof(char));
+        av_strerror(error,errbuff,1000);
+        qDebug() << "Failed playbackhandler av_buffersrc_add_frame_flags: code "<<error<< " meaning: " << errbuff;
+        exit(1);
+    }
+
+    // pull filtered audio from the filtergraph
+    error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
+    if(error<0){
+        char* errbuff = (char *)malloc((1000)*sizeof(char));
+        av_strerror(error,errbuff,1000);
+        qDebug() << "Failed playbackhandler av_buffersink_get_frame: code "<<error<< " meaning: " << errbuff;
+        exit(1);
+    }
+
+    AVDictionary *meta = filt_frame->metadata;
+    if(meta)
+    {
+        AVDictionaryEntry* silenceData = av_dict_get(meta, "", NULL, AV_DICT_IGNORE_SUFFIX);
+        if(silenceData)
+        {
+            QString silenceStart = "lavfi.silence_start";
+            QString silenceEnd = "lavfi.silence_end";
+            if(silenceEnd.compare(silenceData->key)==0)
+            {
+                imageHandler->toggleBorder(false, std::numeric_limits<uint8_t>::max());
+            }
+            if(silenceStart.compare(silenceData->key)==0)
+            {
+                imageHandler->toggleBorder(true, std::numeric_limits<uint8_t>::max());
+            }
+        }
+    }
+
+
+
     /* Packet used for temporary storage. */
     AVPacket output_packet;
-    int error;
+
     initPacket(&output_packet);
 
     /* Set a timestamp based on the sample rate for the container. */
@@ -785,7 +1028,14 @@ int AudioHandler::init()
     if(ret<0)
     {
         fprintf(stderr, "Could not open write header");
-        exit(1);
+        exit(-1);
+    }
+
+    /* Set up the filtergraph. */
+    ret = init_filter_graph(&graph, &buffersrc_ctx, &buffersink_ctx);
+    if (ret < 0) {
+        fprintf(stderr, "Unable to init filter graph:");
+        exit(-1);
     }
     //qDebug() << "Fifo init";
     /* Write the header of the output file container. */
