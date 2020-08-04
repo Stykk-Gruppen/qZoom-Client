@@ -284,7 +284,7 @@ bool SessionHandler::addGuestUserToDatabase()
 {
     qDebug() << mUser->getGuestName();
     QSqlQuery q(mDb->mDb);
-    q.prepare("INSERT INTO user (streamId, username, password) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16))");
+    q.prepare("INSERT INTO user (streamId, username, password, isGuest) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16), TRUE)");
     q.bindValue(":username", mUser->getGuestName());
     if (q.exec())
     {
