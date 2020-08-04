@@ -1,11 +1,14 @@
 import QtQuick 2.0
 
+
 Rectangle {
     //color: parent.color
     width: parent.width
-    height: 150
+    height: Math.min(parent.height / 5, 150)
+
 
     Column {
+        height: parent.height
         spacing: 50
         anchors.fill: parent
         anchors.horizontalCenter: parent.horizontalCenter
@@ -23,6 +26,7 @@ Rectangle {
             height: 5
             width: parent.width
             color: "#5CBB5C"
+            anchors.verticalCenter: parent.bottom
         }
     }
 
