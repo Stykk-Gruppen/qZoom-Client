@@ -1145,11 +1145,6 @@ int AudioHandler::grabFrames()
 
 }
 
-bool AudioHandler::isActive()
-{
-    return mActive;
-}
-
 QVariantList AudioHandler::getAudioInputDevices()
 {
     QList<QVariant> q;
@@ -1160,6 +1155,11 @@ QVariantList AudioHandler::getAudioInputDevices()
         //todo sjekk om den faktisk er gyldig før den legges til i listen.
     }
     return q;
+}
+
+bool AudioHandler::isActive()
+{
+    return mActive;
 }
 
 void AudioHandler::changeAudioInputDevice(QString deviceName)
@@ -1182,3 +1182,5 @@ void AudioHandler::toggleGrabFrames(bool a)
 {
     mAbortGrabFrames = !a;
 }
+
+
