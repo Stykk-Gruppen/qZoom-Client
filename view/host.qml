@@ -1,9 +1,43 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import QtQuick.Window 2.12
+import QtQuick 2.12
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.15
+import QtQuick.Dialogs 1.3
 import "../components" as C
 
+
 Rectangle {
-    color: "dimgray"
+    //color: "#161637"
+    id: hostWindow
+    color: Qt.rgba(27/255, 29/255, 54/255, 1)
+
+
+
+    Column {
+
+        spacing: 10
+        anchors.fill: parent
+        anchors.top: parent.top
+        C.Header {
+            id: header
+            color: root.color
+            //anchors.top: parent.top
+        }
+
+        C.PushButton {
+            id: backButton
+            text: "Back"
+            font.pixelSize: 32
+            visible: false
+            onClicked: changePage("home")()
+        }
+    }
+
+
+    Column {
+
 
     Row {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -54,11 +88,6 @@ Rectangle {
         }
     }
 
-    C.PushButton {
-        id: backButton
-        text: "Back"
-        font.pixelSize: 32
-        onClicked: changePage("home")
     }
 
     function changeRoomValues() {
