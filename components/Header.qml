@@ -31,8 +31,8 @@ Rectangle {
                 radius: 11
                 //anchors.horizontalCenter: parent.horizontalCenter
                 //anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right
-                anchors.rightMargin: 5
+                anchors.right: !userHandler.isGuest() ? logoutRectangle.left : parent.right
+                anchors.rightMargin: 15
                 Image {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
@@ -50,6 +50,7 @@ Rectangle {
 
             Rectangle {
                 id: logoutRectangle
+                visible: false
                 color: "#5CBB5C"
                 implicitHeight: 50
                 implicitWidth: 50
@@ -58,15 +59,15 @@ Rectangle {
 
                 //anchors.horizontalCenter: parent.horizontalCenter
                 //anchors.verticalCenter: parent.verticalCenter
-                anchors.right: settingsRectangle.left
-                anchors.rightMargin: 5
+                anchors.right: parent.right
+                anchors.rightMargin: 15
 
                 Image {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     height: 25
                     width: 25
-                    source: "../img/settings-icon.png"
+                    source: "../img/logout-icon.png"
                 }
                 MouseArea {
                     hoverEnabled: true
@@ -76,7 +77,6 @@ Rectangle {
                 }
             }
         }
-
 
     }
     Rectangle {

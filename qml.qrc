@@ -16,5 +16,6 @@
         <file>img/info-icon.png</file>
         <file>img/settings-icon.png</file>
         <file>img/login-icon.png</file>
+        <file>img/logout-icon.png</file>
     </qresource>
 </RCC>
