@@ -48,7 +48,7 @@ void SessionHandler::disableAudio()
 
 int SessionHandler::initOtherStuff()
 {
-    QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
+    QString streamId = (isGuest()) ? getUser()->getGuestStreamId() : getUser()->getStreamId();
     QString roomId = getRoomId();
     QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;

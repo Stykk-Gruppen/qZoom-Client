@@ -23,7 +23,7 @@ public:
     QString getStreamId();
     QString getGuestName();
     int getGuestId();
-
+    QString getGuestStreamId();
 private:
     bool fillUser(int userId);
     bool getPersonalRoom();
