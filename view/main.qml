@@ -36,7 +36,6 @@ ApplicationWindow {
                 id: errorText
                 anchors.centerIn: parent
             }
-
         }
 
 
