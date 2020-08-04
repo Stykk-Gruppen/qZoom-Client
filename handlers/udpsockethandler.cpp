@@ -86,7 +86,8 @@ void UdpSocketHandler::readPendingDatagrams()
             mInputStreamHandler->mAudioMutexVector[index]->unlock();
             if(!mInputStreamHandler->mAudioPlaybackStartedVector[index] && mInputStreamHandler->mAudioBufferVector[index]->size() >= mBufferSize)
             {
-                QtConcurrent::run(mInputStreamHandler->mAudioPlaybackHandlerVector[index], &AudioPlaybackHandler::start);
+                *mInputStreamHandler->mAudioFutures.at(index) = QtConcurrent::run(mInputStreamHandler->mAudioPlaybackHandlerVector[index], &AudioPlaybackHandler::start);
+                qDebug() << "Starting AudioPlaybackHandler for streamId: " << streamId;
                 mInputStreamHandler->mAudioPlaybackStartedVector[index] = true;
             }
             // qDebug() << "audio buffer size " << mAudioBufferVector[index].size() << "after signal: " << signalCount;
@@ -101,7 +102,7 @@ void UdpSocketHandler::readPendingDatagrams()
             if(!mInputStreamHandler->mVideoPlaybackStartedVector[index] && mInputStreamHandler->mVideoBufferVector[index]->size() >= mBufferSize)
             {
                 //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
-                *mInputStreamHandler->videoFutures.at(index) = QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
+                *mInputStreamHandler->mVideoFutures.at(index) = QtConcurrent::run(mInputStreamHandler->mVideoPlaybackHandlerVector[index], &VideoPlaybackHandler::start);
                 qDebug() << "STARTING VIDEOPLAYBACKHANDLER!!!";
                 mInputStreamHandler->mVideoPlaybackStartedVector[index] = true;
             }

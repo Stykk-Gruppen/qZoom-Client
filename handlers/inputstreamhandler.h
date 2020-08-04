@@ -26,7 +26,8 @@ public:
     void updateParticipantDisplayName(QString streamId, QString displayName);
     void setPeerToVideoDisabled(QString streamId);
     void setPeerToAudioDisabled(QString streamId);
-    std::vector<QFuture<void>*> videoFutures;
+    std::vector<QFuture<void>*> mAudioFutures;
+    std::vector<QFuture<void>*> mVideoFutures;
     std::vector<QByteArray*> mVideoHeaderVector;
     std::vector<QString> mStreamIdVector;
     std::vector<QByteArray*> mAudioBufferVector;

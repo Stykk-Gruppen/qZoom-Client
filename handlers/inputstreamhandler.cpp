@@ -16,13 +16,18 @@ void InputStreamHandler::init()
 void InputStreamHandler::close()
 {
     qDebug() << "Closing inputStreamHandler";
+    qDebug() << "Stopping playbackhandlers";
 
-    for(int i = 0; i < mVideoPlaybackHandlerVector.size(); i++)
+    for(size_t i = 0; i < mVideoPlaybackHandlerVector.size(); i++)
     {
-        qDebug() << "Stopping playbackhandlers";
         mVideoPlaybackHandlerVector.at(i)->stop();
-        qDebug() << "Waiting for finished..";
-        videoFutures.at(i)->waitForFinished();
+        mVideoFutures.at(i)->waitForFinished();
+    }
+
+    for(size_t i = 0; i < mAudioPlaybackHandlerVector.size(); i++)
+    {
+        mAudioPlaybackHandlerVector.at(i)->stop();
+        mAudioFutures.at(i)->waitForFinished();
     }
 
     qDebug() << "After stopping playbackhandlers";
@@ -63,6 +68,16 @@ void InputStreamHandler::close()
         delete i;
     }
 
+    for(auto i : mAudioFutures)
+    {
+        delete i;
+    }
+
+    for(auto i : mVideoFutures)
+    {
+        delete i;
+    }
+
     mVideoHeaderVector.clear();
     mAudioBufferVector.clear();
     mVideoBufferVector.clear();
@@ -70,7 +85,8 @@ void InputStreamHandler::close()
     mVideoMutexVector.clear();
     mAudioPlaybackHandlerVector.clear();
     mVideoPlaybackHandlerVector.clear();
-    videoFutures.clear();
+    mVideoFutures.clear();
+    mAudioFutures.clear();
 }
 
 void InputStreamHandler::removeStream(QString streamId)
@@ -99,8 +115,11 @@ void InputStreamHandler::removeStream(QString streamId)
     */
     if(index != -1)
     {
+        mAudioPlaybackHandlerVector.at(index)->stop();
+        mAudioFutures.at(index)->waitForFinished();
+
         mVideoPlaybackHandlerVector[index]->stop();
-        videoFutures.at(index)->waitForFinished();
+        mVideoFutures.at(index)->waitForFinished();
 
         delete mVideoHeaderVector.at(index);
         delete mAudioBufferVector.at(index);
@@ -121,7 +140,8 @@ void InputStreamHandler::removeStream(QString streamId)
         mStreamIdVector.erase(mStreamIdVector.begin() + index);
         qDebug() << "Successfully removed stream with streamId: " << streamId;
         mImageHandler->removePeer(index);
-        videoFutures.erase(videoFutures.begin() + index);
+        mVideoFutures.erase(mVideoFutures.begin() + index);
+        mAudioFutures.erase(mAudioFutures.begin() + index);
 
         for(int i = index; i < mVideoPlaybackHandlerVector.size(); i++)
         {
@@ -195,8 +215,10 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
         return;
     }
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
-    QFuture<void>* tempFuture = new QFuture<void>();
-    videoFutures.push_back(tempFuture);
+    QFuture<void>* tempVideoFuture = new QFuture<void>();
+    QFuture<void>* tempAudioFuture = new QFuture<void>();
+    mVideoFutures.push_back(tempVideoFuture);
+    mAudioFutures.push_back(tempAudioFuture);
     mVideoHeaderVector.push_back(tempVideoHeaderBuffer);
     QByteArray* tempAudioBuffer = new QByteArray();
     QByteArray* tempVideoBuffer = new QByteArray();
@@ -272,14 +294,24 @@ void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString 
 void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
+    //Stopping videoplaybackhandler
     mVideoMutexVector[index]->lock();
     mVideoPlaybackHandlerVector[index]->stop();
-    videoFutures.at(index)->waitForFinished();
+    mVideoFutures.at(index)->waitForFinished();
     mVideoPlaybackStartedVector[index] = false;
-
     mVideoBufferVector[index]->clear();
     mVideoHeaderVector[index]->clear();
     mVideoMutexVector[index]->unlock();
+
+    //Stopping audioPlaybackhandler:
+    mAudioMutexVector[index]->lock();
+    mAudioPlaybackHandlerVector[index]->stop();
+    mAudioFutures.at(index)->waitForFinished();
+    mAudioPlaybackStartedVector[index] = false;
+    mAudioBufferVector[index]->clear();
+    mAudioMutexVector[index]->unlock();
+
+
 
     mImageHandler->setPeerVideoAsDisabled(index);
 }
