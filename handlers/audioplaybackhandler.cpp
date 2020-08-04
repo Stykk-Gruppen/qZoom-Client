@@ -4,6 +4,7 @@ AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* b
                                            QObject *parent) : Playback(_writeLock, buffer, bufferSize, parent)
 {
     initAudio(parent);
+    mBufferSize = mBufferSize/16;
 }
 
 AudioPlaybackHandler::~AudioPlaybackHandler()
@@ -75,10 +76,12 @@ void AudioPlaybackHandler::start()
         }
     }
 
-    AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
-    AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
+    //AVCodecParameters	*audioStreamCodecParameters = audio_stream->codecpar;
+
+    AVCodec* audioDecoderCodec = avcodec_find_decoder((AVCodecID)86016);
+    //AVCodec* audioDecoderCodec = avcodec_find_decoder(audioStreamCodecParameters->codec_id);
     AVCodecContext *audioDecoderCodecContext = avcodec_alloc_context3(audioDecoderCodec);
-    error  = avcodec_parameters_to_context(audioDecoderCodecContext, audio_stream->codecpar);
+    // error  = avcodec_parameters_to_context(audioDecoderCodecContext, audio_stream->codecpar);
     Q_ASSERT(error>=0);
     error = avcodec_open2(audioDecoderCodecContext, audioDecoderCodec, nullptr);
     Q_ASSERT(error>=0);
@@ -107,12 +110,14 @@ void AudioPlaybackHandler::start()
     //qDebug() << audioDecoderCodecContext->sample_rate;
     SwrContext *resample_context = NULL;
     //out,out,out...in,in,in
+    qDebug() << "audioDecoderCodecContext->sample_fmt," << audioDecoderCodecContext->sample_fmt;
     resample_context = swr_alloc_set_opts(NULL,
                                           av_get_default_channel_layout(2),
                                           AV_SAMPLE_FMT_S16,
                                           audioDecoderCodecContext->sample_rate,
                                           av_get_default_channel_layout(audioDecoderCodecContext->channels),
-                                          audioDecoderCodecContext->sample_fmt,
+                                          //audioDecoderCodecContext->sample_fmt, //unfiltered format
+                                          (AVSampleFormat)4, // filtered format
                                           audioDecoderCodecContext->sample_rate,
                                           0, NULL);
 
@@ -197,7 +202,23 @@ void AudioPlaybackHandler::start()
         }
 
 
+        /* push the audio data from decoded frame into the filtergraph */
+        error = av_buffersrc_add_frame_flags(buffersrc_ctx, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
+        if(error<0){
+            char* errbuff = (char *)malloc((1000)*sizeof(char));
+            av_strerror(error,errbuff,1000);
+            qDebug() << "Failed playbackhandler av_buffersrc_add_frame_flags: code "<<error<< " meaning: " << errbuff;
+            exit(1);
+        }
 
+        // pull filtered audio from the filtergraph
+         error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
+        if(error<0){
+            char* errbuff = (char *)malloc((1000)*sizeof(char));
+            av_strerror(error,errbuff,1000);
+            qDebug() << "Failed playbackhandler av_buffersink_get_frame: code "<<error<< " meaning: " << errbuff;
+            exit(1);
+        }
 
 
 
@@ -210,8 +231,10 @@ void AudioPlaybackHandler::start()
         resampled->sample_rate = audioDecoderCodecContext->sample_rate;
         resampled->format = AV_SAMPLE_FMT_S16;
 
-        if ((error = swr_convert_frame(resample_context, resampled, frame)) < 0)
-            //if ((error = swr_convert_frame(resample_context, resampled, frame)) < 0)
+        //qDebug() << "frame fmt" << frame->format;
+        //qDebug() << "filt_frame fmt" << filt_frame->format;
+
+        if ((error = swr_convert_frame(resample_context, resampled, filt_frame)) < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
             av_strerror(error,errbuff,1000);
@@ -221,36 +244,14 @@ void AudioPlaybackHandler::start()
         else
         {
 
-            /* push the audio data from decoded frame into the filtergraph */
-            error = av_buffersrc_add_frame_flags(buffersrc_ctx, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
-            if(error<0){
-                char* errbuff = (char *)malloc((1000)*sizeof(char));
-                av_strerror(error,errbuff,1000);
-                qDebug() << "Failed playbackhandler av_buffersrc_add_frame_flags: code "<<error<< " meaning: " << errbuff;
-                exit(1);
-            }
-            /* pull filtered audio from the filtergraph */
-            error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
-            if(error<0){
-                char* errbuff = (char *)malloc((1000)*sizeof(char));
-                av_strerror(error,errbuff,1000);
-                qDebug() << "Failed playbackhandler av_buffersink_get_frame: code "<<error<< " meaning: " << errbuff;
-                exit(1);
-            }
-            ao_play(device, (char*)filt_frame->extended_data[0],
-                    av_samples_get_buffer_size(filt_frame->linesize,
-                                               filt_frame->channels,
-                                               filt_frame->nb_samples,
-                                               (AVSampleFormat)filt_frame->format,
-                                               0));
 
             //ao_play(device,(char*)resampled->data[0], resampled->linesize[0]);
-           /* ao_play(device, (char*)resampled->extended_data[0],
+            ao_play(device, (char*)resampled->extended_data[0],
                     av_samples_get_buffer_size(resampled->linesize,
                                                resampled->channels,
                                                resampled->nb_samples,
                                                (AVSampleFormat)resampled->format,
-                                               0));*/
+                                               0));
         }
         av_frame_unref(resampled);
         av_frame_unref(frame);
@@ -305,13 +306,13 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
     }
 
 
-     av_opt_set_int    (abuffer_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
-   av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
-   av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int    (abuffer_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
     //av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(AV_SAMPLE_FMT_S16), AV_OPT_SEARCH_CHILDREN);
     av_opt_set_q  (abuffer_ctx, "time_base",      (AVRational){ 1, 48000 }, AV_OPT_SEARCH_CHILDREN);
     av_opt_set_int(abuffer_ctx, "sample_rate",    ctx->sample_rate, AV_OPT_SEARCH_CHILDREN);
-  /*
+    /*
     av_opt_set_int    (abuffer_ctx, "channels", ctx->channels, AV_OPT_SEARCH_CHILDREN);
     av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(ctx->channels)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
     av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
@@ -342,7 +343,7 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
 
     // av_opt_set_double    (gate_ctx, "volume", 0.9, 0);
 
-    err = avfilter_init_dict(gate_ctx, NULL);
+    //err = avfilter_init_dict(gate_ctx, NULL);
     if (err < 0) {
         fprintf(stderr, "Could not initialize the volume filter.\n");
         return err;
@@ -374,7 +375,7 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
 
     /* Create the aformat filter;
      * it ensures that the output is of the format we want. */
-    /* aformat = avfilter_get_by_name("aformat");
+     aformat = avfilter_get_by_name("aformat");
     if (!aformat) {
         fprintf(stderr, "Could not find the aformat filter.\n");
         return AVERROR_FILTER_NOT_FOUND;
@@ -388,14 +389,15 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
 
 
     av_opt_set_int    (aformat_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
-    av_opt_set    (aformat_ctx, "channel_layout", av_get_channel_name(av_get_default_channel_layout(2)), AV_OPT_SEARCH_CHILDREN);
-    av_opt_set    (aformat_ctx, "sample_fmt",     av_get_sample_fmt_name(mOutputCodecContext->sample_fmt), AV_OPT_SEARCH_CHILDREN);
-    av_opt_set_int(aformat_ctx, "sample_rate",    mOutputCodecContext->sample_rate, AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (aformat_ctx, "channel_layout", QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set    (aformat_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
+    av_opt_set_int(aformat_ctx, "sample_rate",    ctx->sample_rate, AV_OPT_SEARCH_CHILDREN);
+
     err = avfilter_init_dict(aformat_ctx, NULL);
     if (err < 0) {
         fprintf(stderr, "Could not initialize the volume filter.\n");
         return err;
-    }*/
+    }
 
     /* Finally create the abuffersink filter;
      * it will be used to get the filtered data out of the graph. */
@@ -420,10 +422,10 @@ int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterConte
 
     /* Connect the filters;
      * in this simple case the filters just form a linear chain. */
-    err = avfilter_link(abuffer_ctx, 0, gate_ctx, 0);
+    err = avfilter_link(abuffer_ctx, 0, aformat_ctx, 0);
     if (err >= 0)
     {
-        //err = avfilter_link(volume_ctx, 0, aformat_ctx, 0);
+        err = avfilter_link(aformat_ctx, 0, gate_ctx, 0);
     }
     if (err >= 0)
     {

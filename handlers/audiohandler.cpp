@@ -118,7 +118,7 @@ int AudioHandler::openOutputStream()
     }*/
 
     /* Create a new format context for the output container format. */
-    error = avformat_alloc_output_context2(&mOutputFormatContext, NULL,"mp3", NULL);
+    error = avformat_alloc_output_context2(&mOutputFormatContext, NULL,"mpeg", NULL);
     if (error < 0) {
         fprintf(stderr, "Could not alloc output context");
         exit(1);
@@ -146,6 +146,7 @@ int AudioHandler::openOutputStream()
 
 
     /* Find the encoder to be used by its name. */
+    qDebug() << "*********************audio encoder:" << mOutputFormatContext->oformat->audio_codec;
     if (!(output_codec = avcodec_find_encoder(mOutputFormatContext->oformat->audio_codec)))
     {
         fprintf(stderr, "Could not find an AAC encoder.\n");
