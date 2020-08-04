@@ -202,7 +202,7 @@ void OutputStreamHandler::disableVideo()
 
 QVariantList OutputStreamHandler::getAudioInputDevices()
 {
-    return mAudioHandler->getAudioInputDevices();
+    return AudioHandler::getAudioInputDevices();
 }
 
 void OutputStreamHandler::changeAudioInputDevice(QString deviceName)

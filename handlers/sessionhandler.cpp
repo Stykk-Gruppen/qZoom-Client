@@ -88,7 +88,8 @@ void SessionHandler::closeOtherStuff()
 
 QVariantList SessionHandler::getAudioInputDevices()
 {
-    return mOutputStreamHandler->getAudioInputDevices();
+    return AudioHandler::getAudioInputDevices();
+
 }
 
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)

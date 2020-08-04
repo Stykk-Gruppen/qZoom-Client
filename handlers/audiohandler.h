@@ -25,11 +25,10 @@ public:
     int grabFrames();
     int init();
     void changeAudioInputDevice(QString deviceName);
-    QVariantList getAudioInputDevices();
     void toggleGrabFrames(bool a);
     void cleanup();
     bool isActive();
-
+    static QVariantList getAudioInputDevices();
 private:
     bool mActive = false;
     void initPacket(AVPacket *packet);
