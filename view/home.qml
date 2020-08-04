@@ -31,7 +31,8 @@ Rectangle {
             font.pixelSize: 32
             visible: false
             onClicked: clear()
-            //anchors.leftMargin: 15
+            anchors.left: parent.left
+            anchors.leftMargin: 15
         }
 
         /*

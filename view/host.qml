@@ -13,10 +13,7 @@ Rectangle {
     id: hostWindow
     color: Qt.rgba(27/255, 29/255, 54/255, 1)
 
-
-
     Column {
-
         spacing: 10
         anchors.fill: parent
         anchors.top: parent.top
@@ -31,7 +28,9 @@ Rectangle {
             text: "Back"
             font.pixelSize: 32
             visible: true
-            onClicked: changePage("home")()
+            onClicked: changePage("home")
+            anchors.left: parent.left
+            anchors.leftMargin: 15
         }
     }
 
@@ -85,8 +84,6 @@ Rectangle {
         }
     }
 
-
-
     function changeRoomValues() {
         if (userHandler.updatePersonalRoom(roomIdField.text, roomPasswordField.text)) {
             errorText.text = "Successfully updated";
@@ -107,7 +104,6 @@ Rectangle {
             errorText.text = "Failed to join session"
         }
     }
-
 
     Component.onCompleted: {
         setTitle("qZoom :: Host")
