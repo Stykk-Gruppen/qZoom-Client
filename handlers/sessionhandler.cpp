@@ -38,12 +38,14 @@ void SessionHandler::disableVideo()
 
 bool SessionHandler::enableAudio()
 {
+    mImageHandler->setPeerAudioIsDisabled(255, false);
     return mOutputStreamHandler->enableAudio() >= 0;
 }
 
 void SessionHandler::disableAudio()
 {
     mOutputStreamHandler->disableAudio();
+    mImageHandler->setPeerAudioIsDisabled(255, true);
 }
 
 int SessionHandler::initOtherStuff()
@@ -60,7 +62,10 @@ int SessionHandler::initOtherStuff()
     //Init tcpServerHandler
     //mTcpServerHandler->init();
     //Init sending of our header, empty or not
-    if(mTcpSocketHandler->init() < 0) return -1;
+    if(mTcpSocketHandler->init() < 0)
+    {
+        return -1;
+    }
 
     mOutputStreamHandler->init();
 }
