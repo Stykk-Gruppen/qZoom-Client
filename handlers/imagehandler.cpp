@@ -8,6 +8,11 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
     this->blockSignals(false);
 }
 
+void ImageHandler::toggleBorder(bool talking,int index)
+{
+    qDebug() << "index: " << index << " talking signal: " << talking;
+}
+
 /**
  * This function is run repeatedly by reload() in session.qml
  * QML will request a QImage by sending a id string. It alternates

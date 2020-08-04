@@ -1,7 +1,7 @@
 #include "playback.h"
 
 Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
-                   size_t bufferSize, QObject *parent) : QObject(parent)
+                   size_t bufferSize,ImageHandler* _imageHandler, int index, QObject *parent) : QObject(parent)
 {
 
     mBufferSize = bufferSize;
@@ -9,6 +9,8 @@ Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
     mStruct->buffer = buffer;
     mStruct->writeLock = _writeLock;
     mStruct->stopPlayback = &mStopPlayback;
+    mIndex = index;
+    imageHandler = _imageHandler;
 }
 Playback::~Playback()
 {
@@ -40,7 +42,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
         }
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        qDebug() << "sleeping";
+        //qDebug() << "sleeping";
         //nanosleep(&ts, NULL);
     }
 

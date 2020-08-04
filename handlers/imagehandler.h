@@ -32,7 +32,7 @@ public:
     void setPeerVideoAsDisabled(uint8_t index);
     Q_INVOKABLE int getNumberOfScreens();
     std::mutex imgLock;
-
+    void toggleBorder(bool talking, int index);
 public slots:
     void updateImage(const QImage &image, uint8_t index);
 

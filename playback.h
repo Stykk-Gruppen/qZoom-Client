@@ -6,11 +6,12 @@
 extern "C" {
 #include "libavformat/avformat.h"
 }
+#include "handlers/imagehandler.h"
 class Playback : public QObject
 {
     Q_OBJECT
 public:
-    explicit Playback(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize, QObject *parent = nullptr);
+    explicit Playback(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize, ImageHandler* _imageHandler, int index, QObject *parent = nullptr);
     virtual void start(){};
     void stop();
     ~Playback();
@@ -24,6 +25,8 @@ protected:
     size_t mBufferSize;
     mBufferAndLockStruct* mStruct;
     bool mStopPlayback = false;
+    int mIndex;
+    ImageHandler* imageHandler;
 };
 
 #endif // PLAYBACK_H

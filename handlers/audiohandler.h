@@ -21,7 +21,8 @@ extern "C" {
 class AudioHandler
 {
 public:
-    AudioHandler(QString cDeviceName, std::mutex* _writeLock, int64_t time,UdpSocketHandler*, int bufferSize);
+    AudioHandler(QString cDeviceName, std::mutex* _writeLock, int64_t time,
+                 UdpSocketHandler*, int bufferSize ,ImageHandler *imageHandler);
     int grabFrames();
     int init();
     void changeAudioInputDevice(QString deviceName);
@@ -37,7 +38,9 @@ private:
     int64_t mTime;
     QString mAudioDeviceName;
     std::mutex* mWriteLock;
-
+    int init_filter_graph(AVFilterGraph **graph,
+                          AVFilterContext **src,
+                          AVFilterContext **sink);
     int openInputStream();
     int openOutputStream();
 
@@ -59,10 +62,17 @@ private:
     AVCodecContext *mOutputCodecContext;
     SwrContext *mResampleContext;
     AVAudioFifo *mFifo;
-
+    ImageHandler* imageHandler;
     static int audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size);
     AVDictionary *mOptions = NULL;
     bool mAbortGrabFrames = false;
+
+
+    AVFilterGraph *graph;
+    AVFilterContext *buffersrc_ctx, *buffersink_ctx;
+    AVFrame *filt_frame = av_frame_alloc();
+
+
 };
 
 #endif // AUDIOHANDLER_H
