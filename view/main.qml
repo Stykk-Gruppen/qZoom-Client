@@ -10,8 +10,8 @@ ApplicationWindow {
     visible: true
     width: 1280
     height: 784
-    minimumHeight: 400
-    minimumWidth: 400
+    minimumHeight: 600
+    minimumWidth: 600
     title: qsTr("qZoom")
 
     Settings {
