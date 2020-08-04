@@ -168,6 +168,23 @@ QString UserHandler::getGuestName()
     return mGuestName;
 }
 
+QString UserHandler::getGuestStreamId()
+{
+    QSqlQuery q(mDb->mDb);
+    q.prepare("SELECT streamId FROM user WHERE id = :id");
+    q.bindValue(":id", getGuestId());
+    if (q.exec())
+    {
+        q.next();
+        return q.value(0).toString();
+    }
+    else
+    {
+        qDebug() << "Failed Query" << Q_FUNC_INFO << " " << q.lastError();
+        return "getGuestStreamIdFailed";
+    }
+}
+
 int UserHandler::getGuestId()
 {
     int ret = -1;
