@@ -36,6 +36,7 @@ ApplicationWindow {
                 id: errorText
                 anchors.centerIn: parent
             }
+
         }
 
 
@@ -87,7 +88,7 @@ ApplicationWindow {
 
     // After loading show initial Login Page
     Component.onCompleted: {
-        stackView.push("qrc:/view/host.qml");
+        stackView.push("qrc:/view/home.qml");
 
     }
 
