@@ -22,7 +22,7 @@ Rectangle {
         anchors.top: parent.top
         C.Header {
             id: header
-            color: root.color
+            color: hostWindow.color
             //anchors.top: parent.top
         }
 
@@ -30,13 +30,10 @@ Rectangle {
             id: backButton
             text: "Back"
             font.pixelSize: 32
-            visible: false
+            visible: true
             onClicked: changePage("home")()
         }
     }
-
-
-    Column {
 
 
     Row {
@@ -88,7 +85,7 @@ Rectangle {
         }
     }
 
-    }
+
 
     function changeRoomValues() {
         if (userHandler.updatePersonalRoom(roomIdField.text, roomPasswordField.text)) {
