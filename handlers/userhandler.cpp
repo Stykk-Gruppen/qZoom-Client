@@ -1,8 +1,8 @@
 #include "userhandler.h"
 
-UserHandler::UserHandler(Database* _db, Settings* settings, QObject *parent) : QObject(parent)
+UserHandler::UserHandler(ServerTcpQueries* _mServerTcpQueries, Settings* settings, QObject *parent) : QObject(parent)
 {
-    mDb = _db;
+    mServerTcpQueries = _mServerTcpQueries;
     mSettings = settings;
     mIsGuest = true;
     mStreamId = "StreamID has not been set. This should never occur.";
@@ -22,88 +22,60 @@ bool UserHandler::isGuest()
 
 bool UserHandler::login(QString username, QString password)
 {
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT id, password FROM user WHERE username = :username");
-    q.bindValue(":username", username);
-    if (q.exec())
+    QVariantList queryData = mServerTcpQueries->querySelectFrom_user1(username);
+    int userId = queryData[0].toInt();
+    //qDebug() << "login userId " << userId;
+    //We have to do some hashing here someday
+    if (password == queryData[1].toString())
     {
-        q.next();
-        int userId = q.value(0).toInt();
-        //We have to do some hashing here someday
-        if (password == q.value(1).toString())
+        if (fillUser(userId))
         {
-            if (fillUser(userId))
+            mIsGuest = false;
+            mHasRoom = getPersonalRoom();
+            qDebug() << "has room: " << mHasRoom;
+            if(mSettings->getDisplayName().contains("guest", Qt::CaseInsensitive))
             {
-                mIsGuest = false;
-                mHasRoom = getPersonalRoom();
-                if(mSettings->getDisplayName().contains("guest", Qt::CaseInsensitive))
-                {
-                    mSettings->setDisplayName(username);
-                    mSettings->saveSettings();
-                }
-                return true;
+                mSettings->setDisplayName(username);
+                mSettings->saveSettings();
             }
-            else
-            {
-                mErrorMessage = "An unknown error has occured";
-            }
+            return true;
         }
         else
         {
-            mErrorMessage = "Password did not match!";
+            mErrorMessage = "An unknown error has occured";
         }
     }
     else
     {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
+        mErrorMessage = "Password did not match!";
     }
     return false;
 }
 
 bool UserHandler::fillUser(int userId)
 {
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT streamId, username, password, timeCreated FROM user WHERE id = :userId");
-    q.bindValue(":userId", userId);
-    if (q.exec())
+    QVariantList queryData = mServerTcpQueries->querySelectFrom_user2(QString::number(userId));
+    if(queryData.size() > 0)
     {
         mUserId = userId;
-        q.next();
-        mStreamId = q.value(0).toString();
-        mUsername = q.value(1).toString();
-        mPassword = q.value(2).toString();
-        mTimeCreated = q.value(3).toString();
+        mStreamId = queryData[0].toString();
+        mUsername = queryData[1].toString();
+        mPassword = queryData[2].toString();
+        mTimeCreated = queryData[3].toString();
         return true;
     }
-    else
-    {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
-        return false;
-    }
+    return false;
 }
 
 bool UserHandler::getPersonalRoom()
 {
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT id, password FROM room WHERE host = :userId");
-    q.bindValue(":userId", mUserId);
-    if (q.exec())
+   // qDebug() << "mUserId " << mUserId;
+    QVariantList queryData = mServerTcpQueries->querySelectFrom_room2(QString::number(mUserId));
+    if(queryData.size()>0)
     {
-        if (q.size() > 0)
-        {
-            q.next();
-            mPersonalRoomId = q.value(0).toString();
-            mPersonalRoomPassword = q.value(1).toString();
-            return true;
-        }
-        else
-        {
-            qDebug() << "User doesn't have a personal room";
-        }
-    }
-    else
-    {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
+        mPersonalRoomId = queryData[0].toString();
+        mPersonalRoomPassword = queryData[1].toString();
+        return true;
     }
     return false;
 }
@@ -114,22 +86,15 @@ bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
     {
         return false;
     }
-    QSqlQuery q(mDb->mDb);
-    q.prepare("UPDATE room SET id = :roomId, password = :roomPassword WHERE host = :host");
-    q.bindValue(":roomId", roomId);
-    q.bindValue(":roomPassword", roomPassword);
-    q.bindValue(":host", mUserId);
-    if (q.exec())
-    {
-        mPersonalRoomId = roomId;
-        mPersonalRoomPassword = roomPassword;
-        return true;
-    }
-    else
+    int numberOfRowsAffected = mServerTcpQueries->queryUpdate_room(roomId,roomPassword,QString::number(mUserId));
+    if(numberOfRowsAffected<=0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;
+        return false;
     }
-    return false;
+    mPersonalRoomId = roomId;
+    mPersonalRoomPassword = roomPassword;
+    return true;
 }
 
 QString UserHandler::getErrorMessage()
@@ -170,37 +135,18 @@ QString UserHandler::getGuestName()
 
 QString UserHandler::getGuestStreamId()
 {
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT streamId FROM user WHERE id = :id");
-    q.bindValue(":id", getGuestId());
-    if (q.exec())
+    QString queryData = mServerTcpQueries->querySelectFrom_user3(QString::number(getGuestId()));
+    if(!queryData.isEmpty())
     {
-        q.next();
-        return q.value(0).toString();
+        return queryData;
     }
-    else
-    {
-        qDebug() << "Failed Query" << Q_FUNC_INFO << " " << q.lastError();
-        return "getGuestStreamIdFailed";
-    }
+    qDebug() << "Failed Query " << Q_FUNC_INFO;
+    return "getGuestStreamIdFailed";
 }
 
 int UserHandler::getGuestId()
 {
-    int ret = -1;
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT id FROM user WHERE username = :username");
-    q.bindValue(":username", mGuestName);
-    if (q.exec())
-    {
-        q.next();
-        ret = q.value(0).toInt();
-    }
-    else
-    {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
-    }
-    return ret;
+    return mServerTcpQueries->querySelectFrom_user4(mGuestName);
 }
 
 bool UserHandler::logout()

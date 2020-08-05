@@ -1,13 +1,13 @@
 #include "sessionhandler.h"
 
-SessionHandler::SessionHandler(Database* _db, UserHandler* _user,
+SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                                ImageHandler* imageHandler,
                                Settings* settings, int bufferSize,
                                QHostAddress address, int _portNumberTCP,
                                int _portNumerUDP,
                                QObject *parent) : QObject(parent)
 {
-    mDb = _db;
+    mServerTcpQueries = _mServerTcpQueries;
     mUser = _user;
     setDefaultRoomID();
     mIpAddress = "Ipaddress";
@@ -25,8 +25,24 @@ UserHandler* SessionHandler::getUser()
     return mUser;
 }
 
+bool SessionHandler::enableScreenShare()
+{
+
+    if(mOutputStreamHandler->checkVideoEnabled())
+    {
+        mOutputStreamHandler->disableVideo();
+    }
+    return mOutputStreamHandler->enableVideo(true) >= 0;
+}
+
+
+
 bool SessionHandler::enableVideo()
 {
+    if(mOutputStreamHandler->checkVideoEnabled())
+    {
+        mOutputStreamHandler->disableVideo();
+    }
     return mOutputStreamHandler->enableVideo() >= 0;
 
 }
@@ -99,53 +115,29 @@ QVariantList SessionHandler::getAudioInputDevices()
 
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
 {
-
     qDebug() << "RoomId: " << _roomId;
-
-
-    QSqlQuery q(mDb->mDb);
-    q.prepare("SELECT r.id, r.password, u.username FROM room AS r, user AS u WHERE r.host = u.id AND r.id = :roomId AND r.password = :roomPassword");
-    q.bindValue(":roomId", _roomId);
-    q.bindValue(":roomPassword", _roomPassword);
-    if (q.exec() && q.size() > 0)
+    QVariantList response = mServerTcpQueries->querySelectFrom_room1(_roomId,_roomPassword);
+    if(response.size()>0)
     {
-        if (q.size() > 0)
+        mRoomId = response[0].toString();
+        mRoomPassword = response[1].toString();
+        qDebug() << "mRoomPassword: " << mRoomPassword;
+        mRoomHostUsername = response[2].toString();
+        addUser();
+        mSettings->setLastRoomId(mRoomId);
+        mSettings->setLastRoomPassword(mRoomPassword);
+        mSettings->saveSettings();
+        uint8_t userIndex = std::numeric_limits<uint8_t>::max();
+        mImageHandler->addPeer(userIndex, mSettings->getDisplayName());
+        if(initOtherStuff() < 0)
         {
-            q.next();
-            mRoomId = q.value(0).toString();
-            mRoomPassword = q.value(1).toString();
-            mRoomHostUsername = q.value(2).toString();
-            addUser();
-
-            mSettings->setLastRoomId(mRoomId);
-            mSettings->setLastRoomPassword(mRoomPassword);
-            mSettings->saveSettings();
-            qDebug() << "Adding peer with display name" << mSettings->getDisplayName();
-
-            //TODO maybe more intensive to find numeric_limit in map compared to 0?
-            uint8_t userIndex = std::numeric_limits<uint8_t>::max();
-
-            mImageHandler->addPeer(userIndex, mSettings->getDisplayName());
-
-
-            //Init everything that needs init
-            if(initOtherStuff() < 0)
-            {
-                closeOtherStuff();
-                return false;
-            }
-            return true;
+            closeOtherStuff();
+            return false;
         }
-        else
-        {
-            qDebug() << "No such room combo";
-        }
-    }
-    else
-    {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
+        return true;
     }
     return false;
+
 }
 
 QString SessionHandler::getRoomId()
@@ -163,33 +155,18 @@ void SessionHandler::addUser()
     qDebug() << "User is guest: " << mUser->isGuest();
     if (!mUser->isGuest())
     {
-        QSqlQuery q(mDb->mDb);
-        q.prepare("INSERT INTO roomSession (roomId, userId) VALUES (:roomId, :userId)");
-        q.bindValue(":roomId", mRoomId);
-        q.bindValue(":userId", mUser->getUserId());
-        if (q.exec())
+        int numberOfRowsAffected = mServerTcpQueries->queryInsertInto_roomSession(mRoomId, QString::number(mUser->getUserId()));
+        if(numberOfRowsAffected<=0)
         {
-            qDebug() << "Added user to the session";
+            qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
-        else
-        {
-            qDebug() << "Failed Query" << Q_FUNC_INFO << " reason: " << q.lastError();
-        }
-
     }
     else
     {
         if (addGuestUserToDatabase())
         {
-            QSqlQuery q(mDb->mDb);
-            q.prepare("INSERT INTO roomSession (roomId, userId) VALUES (:roomId, :userId)");
-            q.bindValue(":roomId", mRoomId);
-            q.bindValue(":userId", mUser->getGuestId());
-            if (q.exec())
-            {
-                qDebug() << "Added guest to the session";
-            }
-            else
+            int numberOfRowsAffected = mServerTcpQueries->queryInsertInto_roomSession(mRoomId, QString::number(mUser->getGuestId()));
+            if(numberOfRowsAffected<=0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
             }
@@ -201,44 +178,6 @@ bool SessionHandler::leaveSession()
 {
     //CLose all that is opened;
     closeOtherStuff();
-
-    //Serveren gjør jo dette når TCP blir disconnected? Er dette bare gammel kode?
-
-    /*if (mUser->isGuest())
-    {
-        QSqlQuery q(mDb->mDb);
-        q.prepare("DELETE FROM roomSession WHERE roomId = :roomId AND userId = :userId");
-        q.bindValue(":roomId", mRoomId);
-        q.bindValue(":userId", mUser->getGuestId());
-        if (q.exec())
-        {
-            qDebug() << "Removed guest from the session";
-            setDefaultRoomID();
-            qDebug() << "Setting the default roomId";
-            return true;
-        }
-        else
-        {
-            qDebug() << "Failed Query" << Q_FUNC_INFO;
-        }
-    }
-    else
-    {
-        QSqlQuery q(mDb->mDb);
-        q.prepare("DELETE FROM roomSession WHERE roomId = :roomId AND userId = :userId");
-        q.bindValue(":roomId", mRoomId);
-        q.bindValue(":userId", mUser->getUserId());
-        if (q.exec())
-        {
-            qDebug() << "Removed user from the session";
-            return true;
-        }
-        else
-        {
-            qDebug() << "Failed Query" << Q_FUNC_INFO;
-        }
-    }
-    return false;*/
 }
 
 bool SessionHandler::createSession(QString roomId, QString roomPassword)
@@ -247,20 +186,13 @@ bool SessionHandler::createSession(QString roomId, QString roomPassword)
     {
         if (!mUser->hasRoom())
         {
-            QSqlQuery q(mDb->mDb);
-            q.prepare("INSERT INTO room (id, host, password) VALUES (:id, :host, :password)");
-            q.bindValue(":id", roomId);
-            q.bindValue(":host", mUser->getUserId());
-            q.bindValue(":password", roomPassword);
-            if (q.exec())
-            {
-                qDebug() << "Added room :" << roomId << "to the database";
-                return joinSession(roomId, roomPassword);
-            }
-            else
+            int numberOfRowsAffected = mServerTcpQueries->queryInsertInto_room(roomId, QString::number(mUser->getUserId()),roomPassword);
+            if(numberOfRowsAffected<=0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
+                return false;
             }
+            return true;
         }
         else
         {
@@ -283,19 +215,14 @@ QString SessionHandler::getRoomHostUsername()
 bool SessionHandler::addGuestUserToDatabase()
 {
     qDebug() << mUser->getGuestName();
-    QSqlQuery q(mDb->mDb);
-    q.prepare("INSERT INTO user (streamId, username, password, isGuest) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16), TRUE)");
-    q.bindValue(":username", mUser->getGuestName());
-    if (q.exec())
-    {
-        qDebug() << "Added guest :" << mUser->getGuestName() << "to the database";
-        return true;
-    }
-    else
+    int numberOfRowsAffected = mServerTcpQueries->queryInsertInto_user(mUser->getGuestName());
+    if(numberOfRowsAffected<=0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;
+        return false;
     }
-    return false;
+    qDebug() << "Added guest :" << mUser->getGuestName() << "to the database";
+    return true;
 }
 
 void SessionHandler::setDefaultRoomID()

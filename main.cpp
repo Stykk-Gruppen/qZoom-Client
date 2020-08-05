@@ -6,6 +6,7 @@
 #include "handlers/videohandler.h"
 #include "handlers/audiohandler.h"
 #include <QVariant>
+#include <QScreen>
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <QAudioInput>
@@ -31,7 +32,6 @@ extern "C"
 #include "handlers/audioplaybackhandler.h"
 #include "handlers/sessionhandler.h"
 #include "handlers/userhandler.h"
-#include "core/database.h"
 #include "handlers/errorhandler.h"
 
 ErrorHandler* errorHandler;
@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     int bufferSize = 8*1024;
     int portNumberTCP = 1338;
     int portNumberUDP = 1337;
+    int portNumberTCPQueries = 1339;
     QHostAddress address;
     //address = QHostAddress::LocalHost;
     address = QHostAddress("46.250.220.57"); //tarves.no
@@ -77,12 +78,12 @@ int main(int argc, char *argv[])
     QScopedPointer<Settings> settings(new Settings());
 
 
+    ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(portNumberTCPQueries, address);
 
-
-    Database* databaseObject = new Database();
-    UserHandler* userHandlerObject = new UserHandler(databaseObject, settings.data());
+    //Database* databaseObject = new Database();
+    UserHandler* userHandlerObject = new UserHandler(serverTcpQueries, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
-    SessionHandler* sessionHandlerObject = new SessionHandler(databaseObject, userHandlerObject,
+    SessionHandler* sessionHandlerObject = new SessionHandler(serverTcpQueries, userHandlerObject,
                                                               imageHandlerObject, settings.data(),
                                                               bufferSize, address, portNumberTCP,portNumberUDP);
 

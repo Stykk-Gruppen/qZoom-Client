@@ -157,6 +157,34 @@ Rectangle {
                 {
                     if(sessionHandler.enableVideo())
                     {
+                        shareScreenButton.toggled = false;
+                        shareScreenButton.state = "red";
+                        state = "normal"
+                        toggled = !toggled
+                    }
+                }
+            }
+        }
+
+        C.PushButton {
+            id: shareScreenButton
+            text: "Share Screen"
+            font.pixelSize: 32
+            property var toggled: false
+            onClicked: {
+                if (toggled)
+                {
+                    state = "red"
+                    sessionHandler.disableVideo()
+                    toggled = !toggled
+                }
+                else
+                {
+                    if(sessionHandler.enableScreenShare())
+                    {
+                        muteVideoButton.toggled = false;
+                        muteVideoButton.state = "red";
+
                         state = "normal"
                         toggled = !toggled
                     }
@@ -217,7 +245,7 @@ Rectangle {
 
     Component.onCompleted: {
         //audioInputModel.getAudioTypes()
-
+        shareScreenButton.state = "red";
         if(!sessionHandler.checkAudioEnabled())
         {
             muteAudioButton.toggled = false;

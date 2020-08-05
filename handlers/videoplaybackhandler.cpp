@@ -105,6 +105,9 @@ void VideoPlaybackHandler::start()
             //nanosleep(&ts, NULL);
             continue;
         }
+
+
+
         //qDebug() << "stream: " << packet.stream_index << " mvideostream: " << mVideoStreamIndex;
 
         //Decode and send to ImageHandler
@@ -140,9 +143,7 @@ void VideoPlaybackHandler::start()
             exit(1);
         }
 
-
         imageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
-
 
         av_frame_unref(frame);
         av_packet_unref(&packet);

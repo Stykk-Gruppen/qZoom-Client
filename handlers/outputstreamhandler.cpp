@@ -80,7 +80,7 @@ void OutputStreamHandler::grabVideoHeader()
         qDebug() << "Creating new VideoHandler";
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mImageHandler, mSocketHandler,
-                                         mBufferSize, mTcpSocketHandler);
+                                         mBufferSize, mTcpSocketHandler, false);
     }
     qDebug() << "Init videoHandler";
     mVideoHandler->init();
@@ -91,6 +91,10 @@ void OutputStreamHandler::grabVideoHeader()
     delete mVideoHandler;
     mVideoHandler = nullptr;
 }
+
+
+
+
 
 int OutputStreamHandler::enableAudio()
 {
@@ -143,7 +147,7 @@ void OutputStreamHandler::disableAudio()
     }
 }
 
-int OutputStreamHandler::enableVideo()
+int OutputStreamHandler::enableVideo(bool screenShare)
 {
     mVideoEnabled = true;
     qDebug() << "enabling video";
@@ -153,7 +157,7 @@ int OutputStreamHandler::enableVideo()
         //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mImageHandler, mSocketHandler,
-                                         mBufferSize, mTcpSocketHandler);
+                                         mBufferSize, mTcpSocketHandler, screenShare);
     }
 
     int error = mVideoHandler->init();

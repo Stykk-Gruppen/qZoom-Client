@@ -2,7 +2,6 @@
 #define SESSIONHANDLER_H
 
 #include <QObject>
-#include "core/database.h"
 #include "handlers/userhandler.h"
 #include <QHostInfo>
 #include <QHostAddress>
@@ -15,12 +14,13 @@
 #include "handlers/udpsockethandler.h"
 #include "handlers/tcpsockethandler.h"
 #include "handlers/outputstreamhandler.h"
+#include "core/servertcpqueries.h"
 
 class SessionHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SessionHandler(Database* _db, UserHandler* _user,
+    explicit SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                             ImageHandler* imageHandler,
                             Settings* settings, int bufferSize,
                             QHostAddress address, int _portNumberTCP,
@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE void disableAudio();
+
     Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool createSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool leaveSession();
@@ -37,6 +38,7 @@ public:
     Q_INVOKABLE bool enableAudio();
     Q_INVOKABLE bool checkVideoEnabled();
     Q_INVOKABLE bool checkAudioEnabled();
+    Q_INVOKABLE bool enableScreenShare();
     Q_INVOKABLE QString getRoomId();
     Q_INVOKABLE QString getRoomPassword();
     Q_INVOKABLE QString getRoomHostUsername();
@@ -44,6 +46,7 @@ public:
     UserHandler* getUser();
 
 private:
+    ServerTcpQueries* mServerTcpQueries;
     void addUser();
     int initOtherStuff();
     void closeOtherStuff();
@@ -60,7 +63,6 @@ private:
     QString mRoomHostUsername;
     QString mIpAddress;
     QHostAddress mAddress;
-    Database* mDb;
     UserHandler* mUser;
     Settings* mSettings;
     OutputStreamHandler* mOutputStreamHandler;
