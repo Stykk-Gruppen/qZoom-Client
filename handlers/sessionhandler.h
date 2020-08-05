@@ -29,6 +29,7 @@ public:
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE void disableAudio();
+
     Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool createSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool leaveSession();
@@ -37,6 +38,7 @@ public:
     Q_INVOKABLE bool enableAudio();
     Q_INVOKABLE bool checkVideoEnabled();
     Q_INVOKABLE bool checkAudioEnabled();
+    Q_INVOKABLE bool enableScreenShare();
     Q_INVOKABLE QString getRoomId();
     Q_INVOKABLE QString getRoomPassword();
     Q_INVOKABLE QString getRoomHostUsername();
