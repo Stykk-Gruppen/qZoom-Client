@@ -28,9 +28,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     {
         this->cDeviceName = cDeviceName;
         mSource = "v4l2";
-
     }
-
 
     //this->aDeviceName = aDeviceName;
     this->imageHandler = imageHandler;
@@ -89,7 +87,7 @@ int VideoHandler::init()
     if(mScreenCapture)
     {
         QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
-        std::string framerate = QString{}.setNum(1).toStdString();
+        //std::string framerate = QString{}.setNum(10).toStdString();
         //av_dict_set(&screenOpt, "framerate", framerate.c_str(), 0);
         av_dict_set(&screenOpt, "video_size", videoSize.toUtf8().data(), 0);
         av_dict_set(&screenOpt, "probesize", "800000000", 0);
@@ -162,17 +160,22 @@ int VideoHandler::init()
         outputVideoCodecContext->height = in_stream->codecpar->height;
 
         //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
+        //EDIT: gjelder antakelig alle etter skjermdeling ble lagt til.
         qDebug() << in_stream->codecpar->width;
         qDebug() << in_stream->codecpar->height;
-        outputVideoCodecContext->width = 640;
-        outputVideoCodecContext->height = 360;
+        //outputVideoCodecContext->width = 960;
+        //outputVideoCodecContext->height = 540;
+        outputVideoCodecContext->width = 800;
+        outputVideoCodecContext->height = 450;
+        //outputVideoCodecContext->width = 640;
+        //outputVideoCodecContext->height = 360;
         if(mScreenCapture)
         {
             //double ratio = in_stream->codecpar->width / in_stream->codecpar->height;
 
             //outputVideoCodecContext->height = outputVideoCodecContext->width / ratio;
 
-            //outputVideoCodecContext->bit_rate = 10000;
+            //outputVideoCodecContext->bit_rate = 80000000;
             //outputVideoCodecContext->framerate = (AVRational){10,1};
             //outputVideoCodecContext->width = in_stream->codecpar->width;
             //outputVideoCodecContext->height = in_stream->codecpar->height;
@@ -186,8 +189,18 @@ int VideoHandler::init()
         outputVideoCodecContext->gop_size = 0;
 
         av_opt_set(outputVideoCodecContext, "preset", "slow", 0);
-        av_opt_set(outputVideoCodecContext, "crf", "22", 0);
+        av_opt_set(outputVideoCodecContext, "crf", "28", 0);
+        //av_opt_set(outputVideoCodecContext, "qmin", "15", 0);
+        //av_opt_set(outputVideoCodecContext, "qmax", "35", 0);
+
+
+        //qDebug() << outputVideoCodecContext-
+
+
         //outputVideoCodecContext->level = FF_LEVEL_UNKNOWN;
+
+
+
 
 
         //Kopierer parametere inn i out_stream
@@ -228,10 +241,10 @@ int VideoHandler::init()
 
     if(mScreenCapture)
     {
-        /*QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
-        std::string framerate = QString{}.setNum(2).toStdString();
-        av_dict_set(&options, "framerate", framerate.c_str(), 0);
-        av_dict_set(&options, "video_size", videoSize.toUtf8().data(), 0);*/
+        //QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
+        //std::string framerate = QString{}.setNum(10).toStdString();
+        //av_dict_set(&options, "framerate", framerate.c_str(), 0);
+        //av_dict_set(&options, "video_size", videoSize.toUtf8().data(), 0);
     }
 
     int avio_buffer_size = mBufferSize;
@@ -546,7 +559,7 @@ bool VideoHandler::isActive()
 
 int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size)
 {
-    qDebug() << "Inne i custom io write";
+    //qDebug() << "Inne i custom io write";
 
 
     mSocketStruct *s = reinterpret_cast<mSocketStruct*>(opaque);
