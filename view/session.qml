@@ -90,8 +90,8 @@ Rectangle {
                                 var screenIndex = focusScreen ? selectedScreenIndex : index
                                 //console.log(screenIndex)
                                 source = "image://live/image?id=" + counter + "&" + screenIndex
-                                borderRectangle.width = liveImage.paintedWidth + 2
-                                borderRectangle.height = liveImage.paintedHeight + 2
+                                //borderRectangle.width = liveImage.paintedWidth + 2
+                                //borderRectangle.height = liveImage.paintedHeight + 2
                                 if (imageHandler.getAudioIsDisabled(index)) {
                                     borderRectangle.color = "#DB504A";
                                 }
@@ -112,7 +112,7 @@ Rectangle {
                                 onDoubleClicked: {
                                     selectedScreenIndex = index
                                     focusScreen = !focusScreen
-                                    repeaterId.model = 0
+                                    //repeaterId.model = 0
                                     repeaterId.model = focusScreen ? 1 : imageHandler.getNumberOfScreens()
                                 }
                             }
