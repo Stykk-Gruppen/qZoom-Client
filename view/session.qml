@@ -112,7 +112,7 @@ Rectangle {
                                 onDoubleClicked: {
                                     selectedScreenIndex = index
                                     focusScreen = !focusScreen
-                                    repeaterId.model = 0
+                                    //repeaterId.model = 0
                                     repeaterId.model = focusScreen ? 1 : imageHandler.getNumberOfScreens()
                                 }
                             }
