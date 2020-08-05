@@ -3,13 +3,13 @@
 
 #include <QObject>
 #include <QString>
-#include "core/database.h"
 #include "settings.h"
+#include "core/servertcpqueries.h"
 class UserHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit UserHandler(Database* _db, Settings* settings, QObject *parent = nullptr);
+    explicit UserHandler(ServerTcpQueries* _mServerTcpQueries, Settings* settings, QObject *parent = nullptr);
     ~UserHandler();
     Q_INVOKABLE bool login(QString username, QString password);
     Q_INVOKABLE bool logout();
@@ -25,9 +25,9 @@ public:
     int getGuestId();
     QString getGuestStreamId();
 private:
+    ServerTcpQueries* mServerTcpQueries;
     bool fillUser(int userId);
     bool getPersonalRoom();
-
     bool mIsGuest;
     bool mHasRoom;
     QString mPersonalRoomId;
@@ -40,7 +40,6 @@ private:
     QString mGuestName;
     QString mGuestId;
     int mUserId;
-    Database* mDb;
     Settings* mSettings;
 
 signals:

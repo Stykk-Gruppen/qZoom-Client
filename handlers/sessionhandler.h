@@ -2,7 +2,6 @@
 #define SESSIONHANDLER_H
 
 #include <QObject>
-#include "core/database.h"
 #include "handlers/userhandler.h"
 #include <QHostInfo>
 #include <QHostAddress>
@@ -15,12 +14,13 @@
 #include "handlers/udpsockethandler.h"
 #include "handlers/tcpsockethandler.h"
 #include "handlers/outputstreamhandler.h"
+#include "core/servertcpqueries.h"
 
 class SessionHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit SessionHandler(Database* _db, UserHandler* _user,
+    explicit SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                             ImageHandler* imageHandler,
                             Settings* settings, int bufferSize,
                             QHostAddress address, int _portNumberTCP,
@@ -44,6 +44,7 @@ public:
     UserHandler* getUser();
 
 private:
+    ServerTcpQueries* mServerTcpQueries;
     void addUser();
     int initOtherStuff();
     void closeOtherStuff();
@@ -60,7 +61,6 @@ private:
     QString mRoomHostUsername;
     QString mIpAddress;
     QHostAddress mAddress;
-    Database* mDb;
     UserHandler* mUser;
     Settings* mSettings;
     OutputStreamHandler* mOutputStreamHandler;

@@ -1,4 +1,4 @@
-QT += quick multimedia core multimediawidgets network sql
+QT += quick multimedia core multimediawidgets network
 
 CONFIG += c++17 console
 
@@ -16,10 +16,10 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 TARGET.CAPABILITY += SwEvent
 
 SOURCES += \
+        core/servertcpqueries.cpp \
         handlers/audiohandler.cpp \
         handlers/audioplaybackhandler.cpp \
         config.cpp \
-        core/database.cpp \
         handlers/errorhandler.cpp \
         handlers/outputstreamhandler.cpp \
         handlers/sessionhandler.cpp \
@@ -55,9 +55,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    core/servertcpqueries.h \
     handlers/audiohandler.h \
     handlers/audioplaybackhandler.h \
-    core/database.h \
     handlers/errorhandler.h \
     handlers/outputstreamhandler.h \
     handlers/sessionhandler.h \
