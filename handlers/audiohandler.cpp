@@ -834,11 +834,11 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
             QString silenceEnd = "lavfi.silence_end";
             if(silenceEnd.compare(silenceData->key)==0)
             {
-                imageHandler->toggleBorder(false, std::numeric_limits<uint8_t>::max());
+                imageHandler->toggleBorder(true, std::numeric_limits<uint8_t>::max());
             }
             if(silenceStart.compare(silenceData->key)==0)
             {
-                imageHandler->toggleBorder(true, std::numeric_limits<uint8_t>::max());
+                imageHandler->toggleBorder(false, std::numeric_limits<uint8_t>::max());
             }
         }
     }
