@@ -8,9 +8,36 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
     this->blockSignals(false);
 }
 
-void ImageHandler::toggleBorder(bool talking,int index)
+void ImageHandler::toggleBorder(bool talking, int index)
 {
     qDebug() << "index: " << index << " talking signal: " << talking;
+    mImageMap[index]->setAudioIsDisabled(false);
+    mImageMap[index]->setIsTalking(talking);
+}
+
+bool ImageHandler::getIsTalking(int index)
+{
+    uint8_t i = getCorrectIndex(index);
+    return mImageMap[i]->getIsTalking();
+}
+
+bool ImageHandler::getAudioIsDisabled(int index)
+{
+    uint8_t i = getCorrectIndex(index);
+    //qDebug() << i << "Audio is disabled?" << mImageMap[i]->getAudioIsDisabled();
+    return mImageMap[i]->getAudioIsDisabled();
+}
+
+uint8_t ImageHandler::getCorrectIndex(int index)
+{
+    if (index == 0)
+    {
+        return std::numeric_limits<uint8_t>::max();
+    }
+    else
+    {
+        return (index - 1);
+    }
 }
 
 /**
@@ -40,7 +67,7 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
         }
     }
     //This means the screen for the user, which is stored in numeric_value_max in the map
-    if(index==0)
+    if(index == 0)
     {
         index = std::numeric_limits<uint8_t>::max();
     }
@@ -49,11 +76,11 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
         //All other participants are located in the map at their screen index-1
         index--;
     }
-    QImage result = mImageMap[index].first;
+    QImage result = mImageMap[index]->getImage();
 
     if(result.isNull())
     {
-        result = generateGenericImage(mImageMap[index].second);
+        result = generateGenericImage(mImageMap[index]->getDisplayName());
     }
 
     //Lets QML know how large the QImage is
@@ -79,13 +106,38 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
  */
 void ImageHandler::addPeer(uint8_t index, QString displayName)
 {
-    qDebug() << "Added peer to ImageHandler map: " << index;
+    qDebug() << "Added peer to ImageHandler map: " << index << Q_FUNC_INFO;
     imgLock.lock();
-    mImageMap[index].first = generateGenericImage(displayName);
-    mImageMap[index].second = displayName;
+    mImageMap[index] = new Participant();
+    mImageMap[index]->setImage(generateGenericImage(displayName));
+    mImageMap[index]->setDisplayName(displayName);
     imgLock.unlock();
     emit refreshScreens();
 }
+
+/*
+int ImageHandler::getFrameWidth(int index)
+{
+    qDebug() << "index: " << index;
+    if(index == 0)
+    {
+        index = 255;
+    }
+    qDebug() << "Frame width:" << mImageMap[index].first.width();
+    return mImageMap[index].first.width();
+}
+
+int ImageHandler::getFrameHeight(int index)
+{
+    qDebug() << "index: " << index;
+    if(index == 0)
+    {
+        index = 255;
+    }
+    qDebug() << "Frame height:" << mImageMap[index].first.height();
+    return mImageMap[index].first.height();
+}
+*/
 
 /**
  * Removes everything from the map
@@ -113,7 +165,7 @@ void ImageHandler::removePeer(uint8_t index)
     //If we remove index 3, the map may get a gap and look like: 0, 1, 2, 4, 255
     //After the algorithm it will look like: 0, 1, 2, 3, 255
     //This has to be done to corresponds with the vectors.
-    std::map<uint8_t, std::pair<QImage, QString>>::iterator i;
+    std::map<uint8_t, Participant*>::iterator i;
     uint8_t counter = 0;
     for (i = mImageMap.begin(); i != mImageMap.end(); i++)
     {
@@ -140,14 +192,20 @@ void ImageHandler::removePeer(uint8_t index)
 void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
 {
     qDebug() << index << "Updated their display name to:" << displayName;
-    mImageMap[index].second = displayName;
-    mImageMap[index].first = generateGenericImage(mImageMap[index].second);
+    mImageMap[index]->setDisplayName(displayName);
+    mImageMap[index]->setImage(generateGenericImage(mImageMap[index]->getDisplayName()));
 }
 
 void ImageHandler::setPeerVideoAsDisabled(uint8_t index)
 {
     qDebug() << "Set peer video as disabled for index: " << index;
-    mImageMap[index].first = generateGenericImage(mImageMap[index].second);
+    mImageMap[index]->setImage(generateGenericImage(mImageMap[index]->getDisplayName()));
+}
+
+void ImageHandler::setPeerAudioIsDisabled(uint8_t index, bool val)
+{
+    qDebug() << "Audio is disabled for index: " << index << val;
+    mImageMap[index]->setAudioIsDisabled(val);
 }
 
 /**
@@ -159,9 +217,9 @@ void ImageHandler::setPeerVideoAsDisabled(uint8_t index)
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
     imgLock.lock();
-    if(mImageMap[index].first != image)
+    if(mImageMap[index]->getImage() != image)
     {
-        mImageMap[index].first = image;
+        mImageMap[index]->setImage(image);
     }
     else
     {

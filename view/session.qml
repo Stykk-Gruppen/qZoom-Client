@@ -65,39 +65,67 @@ Rectangle {
                     width: focusScreen ? screenGridArea.width : screenGridArea.width/parent.columns
                     height: focusScreen ? screenGridArea.height : screenGridArea.height/parent.rows
                     color: "#161637"
+                    //color: "red"
 
-                    Image {
+                    Rectangle {
+                        id: borderRectangle
+                        //anchors.fill: parent
+                        width: parent.width
+                        height: parent.height
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        id: liveImage
-                        anchors.fill: parent
-                        property bool counter: false
-                        layer.enabled: true
-                        asynchronous: true
-                        source: "image://live/10"
-                        fillMode: Image.PreserveAspectFit
-                        cache: false
+                        Image {
+
+                            id: liveImage
+                            //anchors.fill: parent
+                            width: parent.width - 4
+                            height: parent.height - 4
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            property bool counter: false
+                            layer.enabled: true
+                            asynchronous: true
+                            source: "image://live/10"
+                            fillMode: Image.PreserveAspectFit
+                            cache: false
 
 
-                        function reload() {
-                            counter = !counter
-                            var screenIndex = focusScreen ? selectedScreenIndex : index
-                            //console.log(screenIndex)
-                            source = "image://live/image?id=" + counter + "&" + screenIndex
-                        }
+                            function reload() {
+                                counter = !counter
+                                var screenIndex = focusScreen ? selectedScreenIndex : index
+                                //console.log(screenIndex)
+                                source = "image://live/image?id=" + counter + "&" + screenIndex
+                                borderRectangle.width = liveImage.paintedWidth + 4
+                                borderRectangle.height = liveImage.paintedHeight + 4
+                                if (imageHandler.getAudioIsDisabled(index)) {
+                                    borderRectangle.color = "red";
+                                }
+                                else {
+                                    if (imageHandler.getIsTalking(index)) {
+                                        borderRectangle.color = "yellow"
+                                    }
+                                    else {
+                                        borderRectangle.color = "#161637"
+                                    }
+                                }
+                            }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onDoubleClicked: {
-                                selectedScreenIndex = index
-                                focusScreen = !focusScreen
+                            MouseArea {
+                                anchors.fill: parent
+                                onDoubleClicked: {
+                                    selectedScreenIndex = index
+                                    focusScreen = !focusScreen
+                                }
                             }
                         }
                     }
 
+
+
                     Item {
                         Timer {
                             interval: 41; running: true; repeat: true
-                            onTriggered:liveImage.reload();
+                            onTriggered: liveImage.reload();
                         }
                     }
                 }

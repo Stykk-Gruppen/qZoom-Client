@@ -295,6 +295,7 @@ void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString 
 void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
+
     //Stopping videoplaybackhandler
     mVideoMutexVector[index]->lock();
     mVideoPlaybackHandlerVector[index]->stop();
@@ -304,6 +305,13 @@ void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
     mVideoHeaderVector[index]->clear();
     mVideoMutexVector[index]->unlock();
 
+    mImageHandler->setPeerVideoAsDisabled(index);
+}
+
+void InputStreamHandler::setPeerToAudioDisabled(QString streamId)
+{
+    uint8_t index = findStreamIdIndex(streamId);
+
     //Stopping audioPlaybackhandler:
     mAudioMutexVector[index]->lock();
     mAudioPlaybackHandlerVector[index]->stop();
@@ -312,15 +320,7 @@ void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
     mAudioBufferVector[index]->clear();
     mAudioMutexVector[index]->unlock();
 
-
-
-    mImageHandler->setPeerVideoAsDisabled(index);
-}
-
-void InputStreamHandler::setPeerToAudioDisabled(QString streamId)
-{
-    //uint8_t index = findStreamIdIndex(streamId);
-    //mImageHandler->setPeerToMuted((index + 1));
+    mImageHandler->setPeerAudioIsDisabled(index, true);
 }
 
 

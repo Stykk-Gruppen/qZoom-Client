@@ -54,17 +54,19 @@ void SessionHandler::disableVideo()
 
 bool SessionHandler::enableAudio()
 {
+    mImageHandler->setPeerAudioIsDisabled(255, false);
     return mOutputStreamHandler->enableAudio() >= 0;
 }
 
 void SessionHandler::disableAudio()
 {
     mOutputStreamHandler->disableAudio();
+    mImageHandler->setPeerAudioIsDisabled(255, true);
 }
 
 int SessionHandler::initOtherStuff()
 {
-    QString streamId = (isGuest()) ? getUser()->getGuestName() : getUser()->getStreamId();
+    QString streamId = (isGuest()) ? getUser()->getGuestStreamId() : getUser()->getStreamId();
     QString roomId = getRoomId();
     QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;
@@ -76,7 +78,10 @@ int SessionHandler::initOtherStuff()
     //Init tcpServerHandler
     //mTcpServerHandler->init();
     //Init sending of our header, empty or not
-    if(mTcpSocketHandler->init() < 0) return -1;
+    if(mTcpSocketHandler->init() < 0)
+    {
+        return -1;
+    }
 
     mOutputStreamHandler->init();
 }
@@ -295,7 +300,7 @@ bool SessionHandler::addGuestUserToDatabase()
 {
     qDebug() << mUser->getGuestName();
     QSqlQuery q(mDb->mDb);
-    q.prepare("INSERT INTO user (streamId, username, password) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16))");
+    q.prepare("INSERT INTO user (streamId, username, password, isGuest) VALUES (substring(MD5(RAND()),1,16), :username, substring(MD5(RAND()),1,16), TRUE)");
     q.bindValue(":username", mUser->getGuestName());
     if (q.exec())
     {

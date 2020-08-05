@@ -8,6 +8,7 @@
 #include <QQuickImageProvider>
 #include <QtConcurrent/QtConcurrent>
 #include "settings.h"
+#include "participant.h"
 extern "C" {
 #include "libavutil/frame.h"
 #include "libavformat/avformat.h"
@@ -30,7 +31,13 @@ public:
     void updatePeerDisplayName(uint8_t index, QString displayName);
     void removeAllPeers();
     void setPeerVideoAsDisabled(uint8_t index);
+    //void setPeerAudioAsDisabled(uint8_t index);
+    void setPeerAudioIsDisabled(uint8_t index, bool val);
     Q_INVOKABLE int getNumberOfScreens();
+    //Q_INVOKABLE int getFrameWidth(int index);
+    //Q_INVOKABLE int getFrameHeight(int index);
+    Q_INVOKABLE bool getIsTalking(int index);
+    Q_INVOKABLE bool getAudioIsDisabled(int index);
     std::mutex imgLock;
     void toggleBorder(bool talking, int index);
 public slots:
@@ -41,7 +48,9 @@ signals:
     void refreshScreens();
 private:
     QImage generateGenericImage(QString username);
-    std::map<uint8_t, std::pair<QImage, QString>> mImageMap;
+    uint8_t getCorrectIndex(int index);
+    //std::map<uint8_t, std::pair<QImage, QString>> mImageMap;
+    std::map<uint8_t, Participant*> mImageMap;
     QImage mDefaultImage;
     Settings* mSettings;
 };
