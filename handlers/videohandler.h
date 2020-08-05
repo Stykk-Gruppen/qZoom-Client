@@ -78,5 +78,6 @@ private:
     bool mAbortGrabFrames = false;
     int mScreenWidth;
     int mScreenHeight;
+    QString buildScreenDeviceName();
 };
 #endif // VideoHandler_H

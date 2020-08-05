@@ -9,16 +9,6 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 {
     mScreenCapture = screenShare;
 
-    /*ScreenSharing stuff*/
-    QScreen* screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen->geometry();
-    mScreenHeight = screenGeometry.height();
-    mScreenWidth = screenGeometry.width();
-    QString screenDeviceName = ":0.0+" + QString(mScreenWidth) + "," + QString(mScreenHeight);
-    mSource = "v4l2";
-
-
-
     mBufferSize = bufferSize;
     writeToFile = false;
     socketHandler = _socketHandler;
@@ -26,13 +16,19 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     //std::ofstream outfile("video.ismv", std::ostream::binary);
     //socketHandler = new SocketHandler();
     //socketHandler->initSocket();
-    this->cDeviceName = cDeviceName;
+
 
     /*ScreenSharing stuff*/
     if(mScreenCapture)
     {
         mSource = "x11grab";
-        this->cDeviceName = screenDeviceName;
+        this->cDeviceName = buildScreenDeviceName();
+    }
+    else
+    {
+        this->cDeviceName = cDeviceName;
+        mSource = "v4l2";
+
     }
 
 
@@ -45,6 +41,23 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     mStruct->udpSocket = socketHandler;
     mStruct->tcpSocket = tcpSocketHandler;
     mStruct->headerSent = false;
+}
+
+QString VideoHandler::buildScreenDeviceName()
+{
+    QScreen* screen = QGuiApplication::primaryScreen();
+    int a, b, c, d;
+    screen->geometry().getCoords(&a,&b,&c,&d);
+
+    QRect screenGeometry = screen->geometry();
+
+    mScreenHeight = screenGeometry.height();
+    mScreenWidth = screenGeometry.width();
+
+    QString screenDeviceName = ":0.0+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
+    qDebug() << "ScreenDeviceName: " << screenDeviceName;
+
+    return screenDeviceName;
 }
 
 VideoHandler::~VideoHandler()
@@ -149,10 +162,16 @@ int VideoHandler::init()
         outputVideoCodecContext->height = in_stream->codecpar->height;
 
         //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
+        qDebug() << in_stream->codecpar->width;
+        qDebug() << in_stream->codecpar->height;
         outputVideoCodecContext->width = 640;
         outputVideoCodecContext->height = 360;
         if(mScreenCapture)
         {
+            //double ratio = in_stream->codecpar->width / in_stream->codecpar->height;
+
+            //outputVideoCodecContext->height = outputVideoCodecContext->width / ratio;
+
             //outputVideoCodecContext->bit_rate = 10000;
             //outputVideoCodecContext->framerate = (AVRational){10,1};
             //outputVideoCodecContext->width = in_stream->codecpar->width;
@@ -209,10 +228,10 @@ int VideoHandler::init()
 
     if(mScreenCapture)
     {
-        QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
+        /*QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
         std::string framerate = QString{}.setNum(2).toStdString();
         av_dict_set(&options, "framerate", framerate.c_str(), 0);
-        av_dict_set(&options, "video_size", videoSize.toUtf8().data(), 0);
+        av_dict_set(&options, "video_size", videoSize.toUtf8().data(), 0);*/
     }
 
     int avio_buffer_size = mBufferSize;
