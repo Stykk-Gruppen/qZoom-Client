@@ -24,7 +24,8 @@ public:
     Q_INVOKABLE bool checkVideoEnabled();
     Q_INVOKABLE bool checkAudioEnabled();
     Q_INVOKABLE int enableAudio();
-    Q_INVOKABLE int enableVideo();
+    Q_INVOKABLE int enableVideo(bool screenShare = false);
+
     void close();
 
 private:

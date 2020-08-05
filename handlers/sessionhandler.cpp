@@ -25,8 +25,24 @@ UserHandler* SessionHandler::getUser()
     return mUser;
 }
 
+bool SessionHandler::enableScreenShare()
+{
+
+    if(mOutputStreamHandler->checkVideoEnabled())
+    {
+        mOutputStreamHandler->disableVideo();
+    }
+    return mOutputStreamHandler->enableVideo(true) >= 0;
+}
+
+
+
 bool SessionHandler::enableVideo()
 {
+    if(mOutputStreamHandler->checkVideoEnabled())
+    {
+        mOutputStreamHandler->disableVideo();
+    }
     return mOutputStreamHandler->enableVideo() >= 0;
 
 }

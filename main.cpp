@@ -6,6 +6,7 @@
 #include "handlers/videohandler.h"
 #include "handlers/audiohandler.h"
 #include <QVariant>
+#include <QScreen>
 #include <libavutil/opt.h>
 #include <libavformat/avformat.h>
 #include <QAudioInput>

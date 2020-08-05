@@ -4,7 +4,10 @@
 #include <QUdpSocket>
 #include <QObject>
 #include <QtConcurrent/QtConcurrent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <string.h>
+//#include <X11/Xlib.h>
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavutil/pixfmt.h"
@@ -27,7 +30,7 @@ public:
     VideoHandler(QString cDeviceName, std::mutex* _writeLock,
                  int64_t time, ImageHandler* imageHandler,
                  UdpSocketHandler* _socketHandler,
-                 int bufferSize, TcpSocketHandler* tcpSocketHandler,
+                 int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare,
                  QObject* parent = 0);
     ~VideoHandler();
     int init();
@@ -55,7 +58,8 @@ private:
     };
     mSocketStruct* mStruct;
     bool mActive = false;
-
+    bool mScreenCapture = false;
+    const char* mSource;
     int64_t time;
     int mBufferSize;
     int skipped_frames = 0;
@@ -72,5 +76,7 @@ private:
     struct SwsContext* img_convert_ctx;
     ImageHandler* imageHandler;
     bool mAbortGrabFrames = false;
+    int mScreenWidth;
+    int mScreenHeight;
 };
 #endif // VideoHandler_H

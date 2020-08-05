@@ -1,11 +1,24 @@
 #include "videohandler.h"
+
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
                            ImageHandler* imageHandler, UdpSocketHandler* _socketHandler,
-                           int bufferSize, TcpSocketHandler* tcpSocketHandler, QObject* parent): QObject(parent)
+                           int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare, QObject* parent): QObject(parent)
 {
+    mScreenCapture = screenShare;
+
+    /*ScreenSharing stuff*/
+    QScreen* screen = QGuiApplication::primaryScreen();
+    QRect screenGeometry = screen->geometry();
+    mScreenHeight = screenGeometry.height();
+    mScreenWidth = screenGeometry.width();
+    QString screenDeviceName = ":0.0+" + QString(mScreenWidth) + "," + QString(mScreenHeight);
+    mSource = "v4l2";
+
+
+
     mBufferSize = bufferSize;
     writeToFile = false;
     socketHandler = _socketHandler;
@@ -14,6 +27,15 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
     //socketHandler = new SocketHandler();
     //socketHandler->initSocket();
     this->cDeviceName = cDeviceName;
+
+    /*ScreenSharing stuff*/
+    if(mScreenCapture)
+    {
+        mSource = "x11grab";
+        this->cDeviceName = screenDeviceName;
+    }
+
+
     //this->aDeviceName = aDeviceName;
     this->imageHandler = imageHandler;
     writeLock = _writeLock;
@@ -38,14 +60,31 @@ int VideoHandler::init()
     int ret;
 
     //Find input video formats
-    AVInputFormat* videoInputFormat = av_find_input_format("v4l2");
+    AVInputFormat* videoInputFormat = av_find_input_format(mSource);
+
     if(videoInputFormat == NULL)
     {
         qDebug() << "Not found videoFormat\n";
         return -1;
     }
+
+    AVDictionary* screenOpt = NULL;
+    //std::string videoSize = QStringLiteral("%1x%2").arg(mScreenWidth).arg(mScreenHeight).toStdString();
+
+    //std::string framerate = QString{}.setNum(1).toStdString();
+    //av_dict_set(&screenOpt, "framerate", framerate.c_str(), 0);
+    if(mScreenCapture)
+    {
+        QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
+        std::string framerate = QString{}.setNum(1).toStdString();
+        //av_dict_set(&screenOpt, "framerate", framerate.c_str(), 0);
+        av_dict_set(&screenOpt, "video_size", videoSize.toUtf8().data(), 0);
+        av_dict_set(&screenOpt, "probesize", "800000000", 0);
+    }
+
     //Open VideoInput
-    if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, NULL) < 0)
+
+    if (avformat_open_input(&ifmt_ctx, cDeviceName.toUtf8().data(), videoInputFormat, &screenOpt) < 0)
     {
         fprintf(stderr, "Could not open input file '%s'", cDeviceName.toUtf8().data());
         return -1;
@@ -104,13 +143,21 @@ int VideoHandler::init()
         //Denne trenger vi egentlig ikke lenger
         videoStream = i;
         //Setter div parametere.
-        // outputVideoCodecContext->bit_rate = 1000;//in_stream->codecpar->bit_rate;
+        //Denne krasher vanlig video også
+         //outputVideoCodecContext->bit_rate = in_stream->codecpar->bit_rate;
         outputVideoCodecContext->width = in_stream->codecpar->width;
         outputVideoCodecContext->height = in_stream->codecpar->height;
 
         //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
         outputVideoCodecContext->width = 640;
         outputVideoCodecContext->height = 360;
+        if(mScreenCapture)
+        {
+            //outputVideoCodecContext->bit_rate = 10000;
+            //outputVideoCodecContext->framerate = (AVRational){10,1};
+            //outputVideoCodecContext->width = in_stream->codecpar->width;
+            //outputVideoCodecContext->height = in_stream->codecpar->height;
+        }
 
         outputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
         outputVideoCodecContext->time_base = inputVideoCodecContext->time_base;
@@ -159,6 +206,15 @@ int VideoHandler::init()
     }
 
     AVDictionary *options = NULL;
+
+    if(mScreenCapture)
+    {
+        QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
+        std::string framerate = QString{}.setNum(2).toStdString();
+        av_dict_set(&options, "framerate", framerate.c_str(), 0);
+        av_dict_set(&options, "video_size", videoSize.toUtf8().data(), 0);
+    }
+
     int avio_buffer_size = mBufferSize;
     void* avio_buffer = av_malloc(avio_buffer_size);
     AVIOContext* custom_io = avio_alloc_context (
@@ -506,6 +562,8 @@ void VideoHandler::toggleGrabFrames(bool a)
 {
     mAbortGrabFrames = !a;
 }
+
+
 
 
 
