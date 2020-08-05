@@ -30,6 +30,7 @@ void UdpSocketHandler::closeSocket()
     mUdpSocket->abort();
     mUdpSocket->close();
     delete mUdpSocket;
+    mUdpSocket = nullptr;
 }
 
 /**
@@ -153,6 +154,7 @@ int UdpSocketHandler::findStreamIdIndex(QString streamId)
  */
 int UdpSocketHandler::sendDatagram(QByteArray arr)
 {
+    if(mUdpSocket == nullptr) return AVERROR_EXIT;
     int ret = 0;
     /*
      * In order for the dividing to work, we need to remove the audioOrVideo byte

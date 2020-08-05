@@ -233,11 +233,11 @@ void AudioPlaybackHandler::start()
                 QString silenceEnd = "lavfi.silence_end";
                 if(silenceEnd.compare(silenceData->key)==0)
                 {
-                    imageHandler->toggleBorder(false,mIndex);
+                    imageHandler->toggleBorder(true,mIndex);
                 }
                 if(silenceStart.compare(silenceData->key)==0)
                 {
-                    imageHandler->toggleBorder(true,mIndex);
+                    imageHandler->toggleBorder(false,mIndex);
                 }
             }
         }
