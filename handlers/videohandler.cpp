@@ -219,7 +219,7 @@ int VideoHandler::init()
         mOutputVideoCodecContext->gop_size = 0;
 
         av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryslow", 0);
-        av_opt_set(mOutputVideoCodecContext->priv_data, "crf", "32", 0);//0 is lossless, 53 is worst possible quality
+        av_opt_set(mOutputVideoCodecContext->priv_data, "crf", "36", 0);//0 is lossless, 53 is worst possible quality
         //av_opt_set(outputVideoCodecContext->priv_data, "qmin", "15", 0);
         //av_opt_set(outputVideoCodecContext->priv_data, "qmax", "35", 0);
 
