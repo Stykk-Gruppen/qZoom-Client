@@ -251,10 +251,6 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
     {
         mImageMap[index]->setImage(image);
     }
-    else
-    {
-        qDebug() << "Same Image";
-    }
     imgLock.unlock();
 }
 

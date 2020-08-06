@@ -37,16 +37,8 @@ extern "C"
 
 ErrorHandler* errorHandler;
 
-
-
-
-
-
-
-
 int main(int argc, char *argv[])
 {
-
     //Registrer div ting, deprecated, men uten disse så blir det ffmpeg codec errors
     av_register_all();
     avcodec_register_all();
