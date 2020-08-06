@@ -192,12 +192,12 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
             arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
-            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, 1336);
+            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, 1336);
+            ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
             break;
         }
 
