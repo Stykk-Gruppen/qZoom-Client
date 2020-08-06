@@ -13,7 +13,7 @@ class VideoPlaybackHandler : public Playback
     Q_OBJECT
 public:
     VideoPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
-                         size_t bufferSize, ImageHandler* imageHandler,
+                         size_t bufferSize, ImageHandler* mImageHandler,
                          int index, QObject *parent = nullptr);
     ~VideoPlaybackHandler();
     void start();

@@ -108,7 +108,7 @@ int OutputStreamHandler::enableAudio()
     }
 
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
-    audioFuture = QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
+    mAudioFuture = QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
     return 0;
 }
 
@@ -118,7 +118,7 @@ void OutputStreamHandler::disableAudio()
     {
         mAudioEnabled = false;
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
-        audioFuture.waitForFinished();
+        mAudioFuture.waitForFinished();
         qDebug() << "Audiohandler not active, deleting it";
         delete mAudioHandler;
         mAudioHandler = nullptr;
@@ -155,7 +155,7 @@ int OutputStreamHandler::enableVideo(bool screenShare)
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
     qDebug() << "Before grab frames";
-    videoFuture = QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
+    mVideoFuture = QtConcurrent::run(mVideoHandler, &VideoHandler::grabFrames);
     qDebug() << "Grab frames started";
     return 0;
 }
@@ -174,7 +174,7 @@ void OutputStreamHandler::disableVideo()
             av_usleep(500);
             qDebug() << "VideoHandler is still active";
         }*/
-        videoFuture.waitForFinished();
+        mVideoFuture.waitForFinished();
         qDebug() << "Videohandler not active, deleting it";
 
         delete mVideoHandler;

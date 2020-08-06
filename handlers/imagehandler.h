@@ -45,7 +45,7 @@ signals:
     void refreshScreens();
 
 private:
-    std::mutex imgLock;
+    std::mutex mImageLock;
     QImage generateGenericImage(QString username) const;
     uint8_t getCorrectIndex(int index) const;
     std::map<uint8_t, Participant*> mImageMap;

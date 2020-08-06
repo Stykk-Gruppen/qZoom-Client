@@ -158,6 +158,11 @@ void TcpSocketHandler::readyRead()
     };
 }
 
+QByteArray TcpSocketHandler::getHeader() const
+{
+    return mHeader;
+}
+
 
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()

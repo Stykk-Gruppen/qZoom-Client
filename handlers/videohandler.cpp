@@ -68,7 +68,6 @@ QString VideoHandler::buildScreenDeviceName()
         }
     }
 
-
     QScreen* screen = QGuiApplication::primaryScreen();
     int a, b, c, d;
     screen->geometry().getCoords(&a, &b, &c, &d);

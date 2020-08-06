@@ -32,6 +32,8 @@ public:
     bool isReady() const;
     QByteArray getReply() const;
 
+    QByteArray getHeader() const;
+
 public slots:
     void connected();
     void disconnected();

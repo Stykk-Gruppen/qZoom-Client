@@ -230,6 +230,37 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found, or 0 if not found
  */
+
+/*
+int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
+{
+    qDebug() << "InputStreamHandler findStreamId index: " << streamId;
+    if(mStreamIdVector.size() >= 1)
+    {
+        for(size_t i = 0; i < mStreamIdVector.size(); i++)
+        {
+            if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
+            {
+                return i;
+            }
+        }
+        //If the streamId does not exist, push it and buffers/locks
+        addStreamToVector(mStreamIdVector.size(), streamId, displayName);
+        return mStreamIdVector.size() - 1;
+    }
+    else
+    {
+        //If this stream is the first to join, push it and buffer/locks
+        addStreamToVector(0, streamId, displayName);
+        return 0;
+    }
+}
+*/
+/**
+ * Goes through the mStreamIdVector and locates the streamId
+ * @param streamId
+ * @return int index where the streamId is located in the vector
+ */
 int InputStreamHandler::findStreamIdIndex(QString streamId) const
 {
     if(mStreamIdVector.size() >= 1)
@@ -245,6 +276,66 @@ int InputStreamHandler::findStreamIdIndex(QString streamId) const
     return -1;
 }
 
+std::vector<std::mutex *> InputStreamHandler::getAudioMutexVector() const
+{
+    return mAudioMutexVector;
+}
+
+std::vector<std::mutex *> InputStreamHandler::getVideoMutexVector() const
+{
+    return mVideoMutexVector;
+}
+
+std::vector<QByteArray *> InputStreamHandler::getAudioBufferVector() const
+{
+    return mAudioBufferVector;
+}
+
+std::vector<QByteArray *> InputStreamHandler::getVideoBufferVector() const
+{
+    return mVideoBufferVector;
+}
+
+std::vector<bool> InputStreamHandler::getVideoPlaybackStartedVector() const
+{
+    return mVideoPlaybackStartedVector;
+}
+
+std::vector<bool> InputStreamHandler::getAudioPlaybackStartedVector() const
+{
+    return mAudioPlaybackStartedVector;
+}
+
+std::vector<QFuture<void> *> InputStreamHandler::getAudioFutures() const
+{
+    return mAudioFutures;
+}
+
+std::vector<QFuture<void> *> InputStreamHandler::getVideoFutures() const
+{
+    return mVideoFutures;
+}
+
+std::vector<AudioPlaybackHandler *> InputStreamHandler::getAudioPlaybackHandlerVector() const
+{
+    return mAudioPlaybackHandlerVector;
+}
+
+std::vector<VideoPlaybackHandler *> InputStreamHandler::getVideoPlaybackHandlerVector() const
+{
+    return mVideoPlaybackHandlerVector;
+}
+
+std::vector<QString> InputStreamHandler::getStreamIdVector() const
+{
+    return mStreamIdVector;
+}
+
+/**
+ * @brief InputStreamHandler::updateParticipantDisplayName
+ * @param streamId QString
+ * @param displayName
+ */
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
     uint8_t index = findStreamIdIndex(streamId);
