@@ -33,7 +33,10 @@ void AudioPlaybackHandler::initAudio(QObject *parent)
 }
 
 
-
+/**
+ * Initialize input contexts and starts reading packets from the
+ * buffer, applying the filter, resampling the audio and sending it to the speakers
+ */
 void AudioPlaybackHandler::start()
 {
     mStopPlayback = false;
@@ -301,8 +304,8 @@ int AudioPlaybackHandler::initFilterGraph(AVFilterGraph **graph, AVFilterContext
     AVFilterGraph *filter_graph;
     AVFilterContext *abuffer_ctx;
     const AVFilter  *abuffer;
-    AVFilterContext *volume_ctx;
-    const AVFilter  *volume;
+   // AVFilterContext *volume_ctx;
+    //const AVFilter  *volume;
     AVFilterContext *silcence_ctx;
     const AVFilter  *silcence;
     AVFilterContext *gate_ctx;
