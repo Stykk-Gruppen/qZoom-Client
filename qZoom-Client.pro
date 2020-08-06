@@ -20,7 +20,6 @@ SOURCES += \
         core/systemcall.cpp \
         handlers/audiohandler.cpp \
         handlers/audioplaybackhandler.cpp \
-        config.cpp \
         handlers/errorhandler.cpp \
         handlers/outputstreamhandler.cpp \
         handlers/sessionhandler.cpp \

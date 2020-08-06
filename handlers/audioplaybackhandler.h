@@ -35,7 +35,7 @@ private:
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
 
-    int init_filter_graph(AVFilterGraph **graph, AVFilterContext **src,
+    int initFilterGraph(AVFilterGraph **graph, AVFilterContext **src,
                                         AVCodecContext *ctx,AVFilterContext **sink);
 
 };

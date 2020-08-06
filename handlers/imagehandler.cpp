@@ -8,6 +8,11 @@ ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImage
     this->blockSignals(false);
 }
 
+/**
+ * Will toggle the specificed QML rectangle's border on or off
+ * @param talking bool
+ * @param index int to which QML rectangle to change the border
+ */
 void ImageHandler::toggleBorder(bool talking, int index)
 {
     qDebug() << "index: " << index << " talking signal: " << talking;
@@ -15,12 +20,22 @@ void ImageHandler::toggleBorder(bool talking, int index)
     mImageMap[index]->setIsTalking(talking);
 }
 
+/**
+ * Returns a bool to describe if the specified participant is talking
+ * @param index int to get the correct participant from the map
+ * @return bool
+ */
 bool ImageHandler::getIsTalking(int index)
 {
     uint8_t i = getCorrectIndex(index);
     return mImageMap[i]->getIsTalking();
 }
 
+/**
+ * Returns a bool to describe if the specified index participant muted
+ * @param index int to get the correct participant from the map
+ * @return bool
+ */
 bool ImageHandler::getAudioIsDisabled(int index)
 {
     uint8_t i = getCorrectIndex(index);
@@ -28,6 +43,14 @@ bool ImageHandler::getAudioIsDisabled(int index)
     return mImageMap[i]->getAudioIsDisabled();
 }
 
+/**
+ * The index of the QML rectangles is different than the map.
+ * The client owner is stored at umeric_limits<uint8_t> in the map,
+ * but is located at index 0 in the GUI, this function will bridge the
+ * two different numbers together.
+ * @param index QML Rectangle index
+ * @return uint8_t map index
+ */
 uint8_t ImageHandler::getCorrectIndex(int index)
 {
     if (index == 0)
@@ -185,7 +208,7 @@ void ImageHandler::removePeer(uint8_t index)
 }
 
 /**
- * Updates the data at index in the mImageMap
+ * Updates the participant displayname at index in the mImageMap
  * @param index uint8_t
  * @param displayName QString
  */
@@ -195,13 +218,20 @@ void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
     mImageMap[index]->setDisplayName(displayName);
     mImageMap[index]->setImage(generateGenericImage(mImageMap[index]->getDisplayName()));
 }
-
+/**
+ * Updates the participant video muted at index in the mImageMap
+ * @param index uint8_t
+ */
 void ImageHandler::setPeerVideoAsDisabled(uint8_t index)
 {
     qDebug() << "Set peer video as disabled for index: " << index;
     mImageMap[index]->setImage(generateGenericImage(mImageMap[index]->getDisplayName()));
 }
-
+/**
+ * Updates the participant audio muted at index in the mImageMap
+ * @param index uint8_t
+ * @param val bool
+ */
 void ImageHandler::setPeerAudioIsDisabled(uint8_t index, bool val)
 {
     qDebug() << "Audio is disabled for index: " << index << val;
@@ -331,13 +361,21 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     //av_packet_unref(&packet);
 }
 
-
+/**
+ * Returns how large the mImageMap is
+ * @return int how many particpants in the map
+ */
 int ImageHandler::getNumberOfScreens()
 {
     return mImageMap.size();
     //return 5;
 }
 
+/**
+ * @brief ImageHandler::generateGenericImage
+ * @param displayName
+ * @return
+ */
 QImage ImageHandler::generateGenericImage(QString displayName)
 {
     QImage image(QSize(1280, 720), QImage::Format_RGB32);
