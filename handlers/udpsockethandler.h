@@ -21,19 +21,19 @@ public:
     explicit UdpSocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     void closeSocket();
-    QTcpSocket* mTCPSocket;
-    QUdpSocket* mUdpSocket;
     int sendDatagram(QByteArray arr);
-    QHostAddress mAddress;
-    int mPort;
 
 public slots:
     void readPendingDatagrams();
 
 private:
     void addStreamToVector(QString, int);
-    int findStreamIdIndex(QString);
+    //int findStreamIdIndex(QString);
     int mBufferSize;
+    QTcpSocket* mTcpSocket;
+    QUdpSocket* mUdpSocket;
+    QHostAddress mAddress;
+    int mPort;
     QString mRoomId;
     QString mStreamId;
     InputStreamHandler* mInputStreamHandler;

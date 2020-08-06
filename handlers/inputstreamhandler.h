@@ -25,18 +25,24 @@ public:
     void setPeerToVideoDisabled(QString streamId);
     void setPeerToAudioDisabled(QString streamId);
     void handleHeader(QByteArray header);
+    void lockAudioMutex(int index);
+    void appendToAudioBuffer(int index, const QByteArray& data);
+    void unlockAudioMutex(int index);
+    void lockVideoMutex(int index);
+    void appendToVideoBuffer(int index, const QByteArray& data);
+    void setAudioPlaybackStarted(int index, bool val);
+    void unlockVideoMutex(int index);
+    void setVideoPlaybackStarted(int index, bool val);
     int findStreamIdIndex(QString streamId) const;
-    std::vector<std::mutex*> getAudioMutexVector() const;
-    std::vector<std::mutex *> getVideoMutexVector() const;
-    std::vector<QByteArray*> getAudioBufferVector() const;
-     std::vector<QByteArray *> getVideoBufferVector() const;
-    std::vector<bool> getVideoPlaybackStartedVector() const;
-    std::vector<bool> getAudioPlaybackStartedVector() const;
-    std::vector<QFuture<void>*> getAudioFutures() const;
-    std::vector<QFuture<void>*> getVideoFutures() const;
-    std::vector<AudioPlaybackHandler *> getAudioPlaybackHandlerVector() const;
-    std::vector<VideoPlaybackHandler *> getVideoPlaybackHandlerVector() const;
+    int getAudioBufferSize(int index) const;
+    int getVideoBufferSize(int index) const;
+    bool audioPlaybackStarted(int index) const;
+    bool videoPlaybackStarted(int index) const;
+    QFuture<void>* getAudioFutures(int index);
+    QFuture<void>* getVideoFutures(int index);
     std::vector<QString> getStreamIdVector() const;
+    AudioPlaybackHandler* getAudioPlaybackHandler(int index) const;
+    VideoPlaybackHandler* getVideoPlaybackHandler(int index) const;
 
 private:
     std::vector<QFuture<void>*> mAudioFutures;

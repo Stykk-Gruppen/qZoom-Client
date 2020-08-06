@@ -20,10 +20,12 @@ SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler
     mSessionIsActive = false;
 }
 
+/*
 UserHandler* SessionHandler::getUser() const
 {
     return mUser;
 }
+*/
 
 bool SessionHandler::enableScreenShare()
 {
@@ -62,7 +64,7 @@ void SessionHandler::disableAudio()
 
 int SessionHandler::initOtherStuff()
 {
-    const QString streamId = (isGuest()) ? getUser()->getGuestStreamId() : getUser()->getStreamId();
+    const QString streamId = isGuest() ? mUser->getGuestStreamId() : mUser->getStreamId();
     const QString roomId = getRoomId();
     const QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;

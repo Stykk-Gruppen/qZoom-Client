@@ -158,12 +158,6 @@ void TcpSocketHandler::readyRead()
     };
 }
 
-QByteArray TcpSocketHandler::getHeader() const
-{
-    return mHeader;
-}
-
-
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
@@ -248,6 +242,11 @@ void TcpSocketHandler::sendDisabledAudioSignal()
 
     mSocket->write(header);
     header.clear();
+}
+
+void TcpSocketHandler::appendToHeader(const QByteArray &data)
+{
+    mHeader.append(data);
 }
 
 

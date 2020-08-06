@@ -24,6 +24,7 @@ public:
     void sendChangedDisplayNameSignal();
     void sendDisabledVideoSignal();
     void sendDisabledAudioSignal();
+    void appendToHeader(const QByteArray& data);
     void close();
     void wait();
     int init();
@@ -31,8 +32,6 @@ public:
     bool isOpen() const;
     bool isReady() const;
     QByteArray getReply() const;
-
-    QByteArray getHeader() const;
 
 public slots:
     void connected();

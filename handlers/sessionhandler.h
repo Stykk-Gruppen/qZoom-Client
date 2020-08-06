@@ -42,7 +42,6 @@ public:
     Q_INVOKABLE QString getRoomPassword() const;
     Q_INVOKABLE QString getRoomHostUsername() const;
     Q_INVOKABLE QVariantList getAudioInputDevices() const;
-    UserHandler* getUser() const;
 
 private:
     ServerTcpQueries* mServerTcpQueries;

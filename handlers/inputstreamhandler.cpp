@@ -276,60 +276,93 @@ int InputStreamHandler::findStreamIdIndex(QString streamId) const
     return -1;
 }
 
-std::vector<std::mutex *> InputStreamHandler::getAudioMutexVector() const
-{
-    return mAudioMutexVector;
-}
-
-std::vector<std::mutex *> InputStreamHandler::getVideoMutexVector() const
-{
-    return mVideoMutexVector;
-}
-
-std::vector<QByteArray *> InputStreamHandler::getAudioBufferVector() const
-{
-    return mAudioBufferVector;
-}
-
-std::vector<QByteArray *> InputStreamHandler::getVideoBufferVector() const
-{
-    return mVideoBufferVector;
-}
-
-std::vector<bool> InputStreamHandler::getVideoPlaybackStartedVector() const
-{
-    return mVideoPlaybackStartedVector;
-}
-
-std::vector<bool> InputStreamHandler::getAudioPlaybackStartedVector() const
-{
-    return mAudioPlaybackStartedVector;
-}
-
-std::vector<QFuture<void> *> InputStreamHandler::getAudioFutures() const
-{
-    return mAudioFutures;
-}
-
-std::vector<QFuture<void> *> InputStreamHandler::getVideoFutures() const
-{
-    return mVideoFutures;
-}
-
-std::vector<AudioPlaybackHandler *> InputStreamHandler::getAudioPlaybackHandlerVector() const
-{
-    return mAudioPlaybackHandlerVector;
-}
-
-std::vector<VideoPlaybackHandler *> InputStreamHandler::getVideoPlaybackHandlerVector() const
-{
-    return mVideoPlaybackHandlerVector;
-}
-
 std::vector<QString> InputStreamHandler::getStreamIdVector() const
 {
     return mStreamIdVector;
 }
+
+AudioPlaybackHandler* InputStreamHandler::getAudioPlaybackHandler(int index) const
+{
+    return mAudioPlaybackHandlerVector[index];
+}
+
+VideoPlaybackHandler* InputStreamHandler::getVideoPlaybackHandler(int index) const
+{
+    return mVideoPlaybackHandlerVector[index];
+}
+
+void InputStreamHandler::lockAudioMutex(int index)
+{
+    mAudioMutexVector[index]->lock();
+}
+
+void InputStreamHandler::appendToAudioBuffer(int index, const QByteArray& data)
+{
+    mAudioBufferVector[index]->append(data);
+}
+
+void InputStreamHandler::unlockAudioMutex(int index)
+{
+    mAudioMutexVector[index]->unlock();
+}
+
+void InputStreamHandler::lockVideoMutex(int index)
+{
+    mVideoMutexVector[index]->lock();
+}
+
+void InputStreamHandler::appendToVideoBuffer(int index, const QByteArray& data)
+{
+    mVideoBufferVector[index]->append(data);
+}
+
+bool InputStreamHandler::audioPlaybackStarted(int index) const
+{
+    return mAudioPlaybackStartedVector[index];
+}
+
+int InputStreamHandler::getAudioBufferSize(int index) const
+{
+    return mAudioBufferVector[index]->size();
+}
+
+void InputStreamHandler::setAudioPlaybackStarted(int index, bool val)
+{
+    mAudioPlaybackStartedVector[index] = val;
+}
+
+void InputStreamHandler::unlockVideoMutex(int index)
+{
+    mVideoMutexVector[index]->lock();
+}
+
+bool InputStreamHandler::videoPlaybackStarted(int index) const
+{
+    return mVideoPlaybackStartedVector[index];
+}
+
+void InputStreamHandler::setVideoPlaybackStarted(int index, bool val)
+{
+    mVideoPlaybackStartedVector[index] = val;
+}
+
+int InputStreamHandler::getVideoBufferSize(int index) const
+{
+    return mVideoBufferVector[index]->size();
+}
+
+QFuture<void>* InputStreamHandler::getAudioFutures(int index)
+{
+    return mAudioFutures.at(index);
+}
+
+QFuture<void> *InputStreamHandler::getVideoFutures(int index)
+{
+    return mVideoFutures.at(index);
+}
+
+
+
 
 /**
  * @brief InputStreamHandler::updateParticipantDisplayName

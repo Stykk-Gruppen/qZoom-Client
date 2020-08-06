@@ -75,7 +75,7 @@ QString VideoHandler::buildScreenDeviceName()
     mScreenHeight = screenGeometry.height();
     mScreenWidth = screenGeometry.width();
 
-    QString screenDeviceName = ":0.0+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
+    QString screenDeviceName = ":" + displayName + "." + displayNumber + "+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
     qDebug() << "ScreenDeviceName: " << screenDeviceName;
 
     return screenDeviceName;
@@ -606,7 +606,7 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     if(!s->headerSent)
     {
         qDebug() << "INNE I HEADERSEND";
-        s->tcpSocket->getHeader().append(send);
+        s->tcpSocket->appendToHeader(send);
         return 0;
     }
     else

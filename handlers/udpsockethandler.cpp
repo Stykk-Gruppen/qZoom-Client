@@ -70,7 +70,7 @@ void UdpSocketHandler::readPendingDatagrams()
         QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
-        const int index = findStreamIdIndex(streamId);
+        const int index = mInputStreamHandler->findStreamIdIndex(streamId);
         if(index < 0)
         {
             continue;
@@ -82,30 +82,28 @@ void UdpSocketHandler::readPendingDatagrams()
 
         if(audioOrVideoInt == 0)
         {
-            mInputStreamHandler->getAudioMutexVector()[index]->lock();
-            mInputStreamHandler->getAudioBufferVector()[index]->append(data);
-            mInputStreamHandler->getAudioMutexVector()[index]->unlock();
-            if(!mInputStreamHandler->getAudioPlaybackStartedVector()[index] && mInputStreamHandler->getAudioBufferVector()[index]->size() >= (mBufferSize / 8))
+            mInputStreamHandler->lockAudioMutex(index);
+            mInputStreamHandler->appendToAudioBuffer(index, data);
+            mInputStreamHandler->unlockAudioMutex(index);
+            if(!mInputStreamHandler->audioPlaybackStarted(index) && mInputStreamHandler->getAudioBufferSize(index) >= (mBufferSize / 8))
             {
-                *mInputStreamHandler->getAudioFutures().at(index) = QtConcurrent::run(mInputStreamHandler->getAudioPlaybackHandlerVector()[index], &AudioPlaybackHandler::start);
+                *mInputStreamHandler->getAudioFutures(index) = QtConcurrent::run(mInputStreamHandler->getAudioPlaybackHandler(index), &AudioPlaybackHandler::start);
                 qDebug() << "Starting AudioPlaybackHandler for streamId: " << streamId;
-                mInputStreamHandler->getAudioPlaybackStartedVector()[index] = true;
+                mInputStreamHandler->setAudioPlaybackStarted(index, true);
             }
             //qDebug() << "audio buffer size " << mInputStreamHandler->mAudioBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else if (audioOrVideoInt == 1)
         {
-            mInputStreamHandler->getVideoMutexVector()[index]->lock();
-
-            mInputStreamHandler->getVideoBufferVector()[index]->append(data);
-
-            mInputStreamHandler->getVideoMutexVector()[index]->unlock();
-            if(!mInputStreamHandler->getVideoPlaybackStartedVector()[index] && mInputStreamHandler->getVideoBufferVector()[index]->size() >= mBufferSize)
+            mInputStreamHandler->lockVideoMutex(index);
+            mInputStreamHandler->appendToVideoBuffer(index, data);
+            mInputStreamHandler->unlockVideoMutex(index);
+            if(!mInputStreamHandler->videoPlaybackStarted(index) && mInputStreamHandler->getVideoBufferSize(index) >= mBufferSize)
             {
                 //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
-                *mInputStreamHandler->getVideoFutures().at(index) = QtConcurrent::run(mInputStreamHandler->getVideoPlaybackHandlerVector()[index], &VideoPlaybackHandler::start);
+                *mInputStreamHandler->getVideoFutures(index) = QtConcurrent::run(mInputStreamHandler->getVideoPlaybackHandler(index), &VideoPlaybackHandler::start);
                 qDebug() << "STARTING VIDEOPLAYBACKHANDLER!!!";
-                mInputStreamHandler->getVideoPlaybackStartedVector()[index] = true;
+                mInputStreamHandler->setVideoPlaybackStarted(index, true);
             }
             //qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
@@ -125,6 +123,7 @@ void UdpSocketHandler::readPendingDatagrams()
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found
  */
+/*
 int UdpSocketHandler::findStreamIdIndex(QString streamId)
 {
     if(mInputStreamHandler->getStreamIdVector().size() >= 1)
@@ -144,6 +143,7 @@ int UdpSocketHandler::findStreamIdIndex(QString streamId)
     qDebug() << "StreamIdVector: " << mInputStreamHandler->getStreamIdVector();
     return -1;
 }
+*/
 /**
  * Send the QByteArray through the current udpSocket,
  * if the size is larger than 512, it will be divided into smaller arrays.

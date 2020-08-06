@@ -20,7 +20,7 @@ public:
     Q_INVOKABLE QString getPersonalRoomId() const;
     Q_INVOKABLE QString getPersonalRoomPassword() const;
     int getUserId() const;
-     int getGuestId() const;
+    int getGuestId() const;
     QString getStreamId() const;
     QString getGuestName() const;
     QString getGuestStreamId() const;
