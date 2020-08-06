@@ -154,13 +154,14 @@ int UdpSocketHandler::findStreamIdIndex(QString streamId)
  */
 int UdpSocketHandler::sendDatagram(QByteArray arr)
 {
+    int datagramMaxSize = 2*512;
     if(mUdpSocket == nullptr) return AVERROR_EXIT;
     int ret = 0;
     /*
      * In order for the dividing to work, we need to remove the audioOrVideo byte
      * at the start of the arr, and prepend it to the smaller arrays
     */
-    //qDebug() << arr.size();
+    qDebug() << arr.size();
 
     //Creats a new QByteArray from the first byte in arr, which should be the audioOrVideo byte.
     //Then it removes the byte from arr
@@ -178,22 +179,22 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
 
     while(arr.size() > 0)
     {
-        if(arr.size() > (512 - arrToPrepend.size()))
+        if(arr.size() > (datagramMaxSize - arrToPrepend.size()))
         {
             /*
              * Creates a deep copy of x bytes in arr.
              * Prepends the QByteArray containing roomId, streamId, audioOrVideoByte.
              * Then removes x bytes from arr.
              */
-            QByteArray temp = QByteArray(arr, (512 - arrToPrepend.size()));
+            QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
-            arr.remove(0, (512 - arrToPrepend.size()));
-            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
+            arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
+            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, 1336);
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
+            ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, 1336);
             break;
         }
 

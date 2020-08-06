@@ -3,9 +3,6 @@
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 
-
-
-
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
                            ImageHandler* imageHandler, UdpSocketHandler* _socketHandler,
                            int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare, QObject* parent): QObject(parent)
@@ -46,29 +43,6 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 QString VideoHandler::buildScreenDeviceName()
 {
-    //Use system calls to find displayName and number for X11grab
-    QString displayName = SystemCall::exec("xdpyinfo | grep 'name of display:'");
-    QString displayNumber = SystemCall::exec("xdpyinfo | grep 'default screen number:'");
-    qDebug() << "ScreenInfo system call: " << displayName;
-    qDebug() << "ScreenInfo system call: " << displayNumber;
-    for(int i = 0; i < displayName.length(); i++)
-    {
-        if(displayName.at(i).isDigit())
-        {
-            displayName = displayName.at(i);
-            break;
-        }
-    }
-    for(int i = 0; i < displayNumber.length(); i++)
-    {
-        if(displayNumber.at(i).isDigit())
-        {
-            displayNumber = displayNumber.at(i);
-            break;
-        }
-    }
-
-
     QScreen* screen = QGuiApplication::primaryScreen();
     int a, b, c, d;
     screen->geometry().getCoords(&a,&b,&c,&d);
@@ -78,7 +52,7 @@ QString VideoHandler::buildScreenDeviceName()
     mScreenHeight = screenGeometry.height();
     mScreenWidth = screenGeometry.width();
 
-    QString screenDeviceName = ":" + displayName + "." + displayNumber + "+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
+    QString screenDeviceName = ":0.0+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
     qDebug() << "ScreenDeviceName: " << screenDeviceName;
 
     return screenDeviceName;
@@ -104,7 +78,6 @@ int VideoHandler::init()
         qDebug() << "Not found videoFormat\n";
         return -1;
     }
-
 
     AVDictionary* screenOpt = NULL;
     //std::string videoSize = QStringLiteral("%1x%2").arg(mScreenWidth).arg(mScreenHeight).toStdString();
@@ -140,16 +113,22 @@ int VideoHandler::init()
     av_dump_format(ifmt_ctx, 0, NULL, 0);
 
 
+
     ret = avformat_alloc_output_context2(&ofmt_ctx, NULL,"ismv", NULL);
     if (ret < 0)
     {
         fprintf(stderr, "Could not alloc output context with file '%s'", filename);
         exit(1);
     }
+
+    //av_opt_set(ofmt_ctx, "preset", "slow", 0);
+    //av_opt_set(ofmt_ctx, "crf", "40", 0);
+
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
 
-
+   // av_opt_set(outputVideoCodec, "preset", "slow", 0);
+   //` av_opt_set(outputVideoCodec, "crf", "28", 0);
 
     //Allocate CodecContext for outputstreams
     outputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
@@ -186,6 +165,7 @@ int VideoHandler::init()
         outputVideoCodecContext->width = in_stream->codecpar->width;
         outputVideoCodecContext->height = in_stream->codecpar->height;
 
+
         //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
         //EDIT: gjelder antakelig alle etter skjermdeling ble lagt til.
         qDebug() << in_stream->codecpar->width;
@@ -215,10 +195,10 @@ int VideoHandler::init()
         //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
         outputVideoCodecContext->gop_size = 0;
 
-        av_opt_set(outputVideoCodecContext, "preset", "slow", 0);
-        av_opt_set(outputVideoCodecContext, "crf", "28", 0);
-        //av_opt_set(outputVideoCodecContext, "qmin", "15", 0);
-        //av_opt_set(outputVideoCodecContext, "qmax", "35", 0);
+        //av_opt_set(outputVideoCodecContext->priv_data, "preset", "veryslow", 0);
+        //av_opt_set(outputVideoCodecContext->priv_data, "crf", "32", 0);//0 is lossless, 53 is worst possible quality
+        //av_opt_set(outputVideoCodecContext->priv_data, "qmin", "15", 0);
+        //av_opt_set(outputVideoCodecContext->priv_data, "qmax", "35", 0);
 
 
         //qDebug() << outputVideoCodecContext-
