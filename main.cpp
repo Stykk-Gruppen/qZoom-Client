@@ -16,6 +16,7 @@
 #include "settings.h"
 #include "handlers/imagehandler.h"
 #include <QQuickView>
+#include <stdio.h>
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -38,7 +39,6 @@ ErrorHandler* errorHandler;
 
 int main(int argc, char *argv[])
 {
-
     //Registrer div ting, deprecated, men uten disse så blir det ffmpeg codec errors
     av_register_all();
     avcodec_register_all();

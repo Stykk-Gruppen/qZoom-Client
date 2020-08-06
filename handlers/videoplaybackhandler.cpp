@@ -93,7 +93,7 @@ void VideoPlaybackHandler::start()
     while (!mStopPlayback) {
         //qDebug() << "About to call av read frame";
         //av_read_frame(fmt_ctx, NULL);
-        error = av_read_frame(inputFormatContext,&packet);
+        error = av_read_frame(inputFormatContext, &packet);
         //qDebug() << "AVREADFRAME: " << ret;
         if(error < 0)
         {

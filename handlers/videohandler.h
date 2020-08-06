@@ -20,6 +20,7 @@ extern "C" {
 }
 #include "handlers/udpsockethandler.h"
 #include "handlers/imagehandler.h"
+#include "core/systemcall.h"
 class UdpSocketHandler;
 class TcpSocketHandler;
 

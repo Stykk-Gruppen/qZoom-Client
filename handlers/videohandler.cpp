@@ -3,6 +3,9 @@
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 
+
+
+
 VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _time,
                            ImageHandler* imageHandler, UdpSocketHandler* _socketHandler,
                            int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare, QObject* parent): QObject(parent)
@@ -43,6 +46,29 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 QString VideoHandler::buildScreenDeviceName()
 {
+    //Use system calls to find displayName and number for X11grab
+    QString displayName = SystemCall::exec("xdpyinfo | grep 'name of display:'");
+    QString displayNumber = SystemCall::exec("xdpyinfo | grep 'default screen number:'");
+    qDebug() << "ScreenInfo system call: " << displayName;
+    qDebug() << "ScreenInfo system call: " << displayNumber;
+    for(int i = 0; i < displayName.length(); i++)
+    {
+        if(displayName.at(i).isDigit())
+        {
+            displayName = displayName.at(i);
+            break;
+        }
+    }
+    for(int i = 0; i < displayNumber.length(); i++)
+    {
+        if(displayNumber.at(i).isDigit())
+        {
+            displayNumber = displayNumber.at(i);
+            break;
+        }
+    }
+
+
     QScreen* screen = QGuiApplication::primaryScreen();
     int a, b, c, d;
     screen->geometry().getCoords(&a,&b,&c,&d);
@@ -52,7 +78,7 @@ QString VideoHandler::buildScreenDeviceName()
     mScreenHeight = screenGeometry.height();
     mScreenWidth = screenGeometry.width();
 
-    QString screenDeviceName = ":0.0+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
+    QString screenDeviceName = ":" + displayName + "." + displayNumber + "+" + QString::number(a) + ", " + QString::number(b) + "," +  QString::number(mScreenWidth) + "," + QString::number(mScreenHeight);
     qDebug() << "ScreenDeviceName: " << screenDeviceName;
 
     return screenDeviceName;
@@ -78,6 +104,7 @@ int VideoHandler::init()
         qDebug() << "Not found videoFormat\n";
         return -1;
     }
+
 
     AVDictionary* screenOpt = NULL;
     //std::string videoSize = QStringLiteral("%1x%2").arg(mScreenWidth).arg(mScreenHeight).toStdString();
