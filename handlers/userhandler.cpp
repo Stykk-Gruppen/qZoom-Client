@@ -23,6 +23,19 @@ bool UserHandler::isGuest()
 bool UserHandler::login(QString username, QString password)
 {
     QVariantList queryData = mServerTcpQueries->querySelectFrom_user1(username);
+    //Hvis lista er tom, så fant man ikke brukeren
+    if(queryData.isEmpty())
+    {
+        errorHandler->giveErrorDialog("Username or password is wrong");
+
+        return false;
+
+    }
+    else if(queryData[0].toInt() == -1)
+    {
+        errorHandler->giveErrorDialog("Could not connect to server");
+        return false;
+    }
     int userId = queryData[0].toInt();
     //qDebug() << "login userId " << userId;
     //We have to do some hashing here someday

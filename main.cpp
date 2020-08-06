@@ -16,6 +16,7 @@
 #include "settings.h"
 #include "handlers/imagehandler.h"
 #include <QQuickView>
+#include <stdio.h>
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -35,6 +36,13 @@ extern "C"
 #include "handlers/errorhandler.h"
 
 ErrorHandler* errorHandler;
+
+
+
+
+
+
+
 
 int main(int argc, char *argv[])
 {

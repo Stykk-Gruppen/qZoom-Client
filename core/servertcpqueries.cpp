@@ -68,7 +68,15 @@ QVariantList ServerTcpQueries::querySelectFrom_room1(QString _roomId, QString _r
             qDebug() << "tcp sql 0 reading data; " << response;
             returnList = parseData(response);
         }
+        else
+        {
+            returnList.append(-1);
+        }
 
+    }
+    else
+    {
+        returnList.append(-1);
     }
     disconnect();
     //qDebug() << returnList;
@@ -178,7 +186,17 @@ QVariantList ServerTcpQueries::querySelectFrom_user1(QString _username)
             qDebug() << "tcp sql 4 reading data; " << response;
             returnList = parseData(response);
         }
+        else
+        {
+            returnList.prepend(-1);
+        }
 
+    }
+    //Vet ikke om vi vil havne her noen gang?
+    else
+    {
+
+        returnList.prepend(-1);
     }
     disconnect();
     //returns [id,password]

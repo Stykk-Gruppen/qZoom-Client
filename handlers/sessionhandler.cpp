@@ -119,6 +119,12 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
     QVariantList response = mServerTcpQueries->querySelectFrom_room1(_roomId,_roomPassword);
     if(response.size()>0)
     {
+        if(response[0].toInt() == -1)
+        {
+            errorHandler->giveErrorDialog("Could not connect to server");
+            return false;
+        }
+
         mRoomId = response[0].toString();
         mRoomPassword = response[1].toString();
         qDebug() << "mRoomPassword: " << mRoomPassword;
@@ -132,6 +138,7 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
         if(initOtherStuff() < 0)
         {
             closeOtherStuff();
+            errorHandler->giveErrorDialog("An unknown error occured when initializing stream");
             return false;
         }
         return true;

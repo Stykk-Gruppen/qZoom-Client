@@ -17,6 +17,7 @@ TARGET.CAPABILITY += SwEvent
 
 SOURCES += \
         core/servertcpqueries.cpp \
+        core/systemcall.cpp \
         handlers/audiohandler.cpp \
         handlers/audioplaybackhandler.cpp \
         config.cpp \
@@ -56,6 +57,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     core/servertcpqueries.h \
+    core/systemcall.h \
     handlers/audiohandler.h \
     handlers/audioplaybackhandler.h \
     handlers/errorhandler.h \
