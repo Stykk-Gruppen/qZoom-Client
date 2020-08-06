@@ -15,31 +15,28 @@ UserHandler::~UserHandler()
 
 }
 
-bool UserHandler::isGuest()
+bool UserHandler::isGuest() const
 {
     return mIsGuest;
 }
 
 bool UserHandler::login(QString username, QString password)
 {
-
     QVariantList vars;
     vars.append(username);
-    QVariantList queryData = mServerTcpQueries->RQuery(4, vars);
+    const QVariantList queryData = mServerTcpQueries->RQuery(4, vars);
     //Hvis lista er tom, så fant man ikke brukeren
     if(queryData.isEmpty())
     {
         errorHandler->giveErrorDialog("Username or password is wrong");
-
         return false;
-
     }
     else if(queryData[0].toInt() == -1)
     {
         errorHandler->giveErrorDialog("Could not connect to server");
         return false;
     }
-    int userId = queryData[0].toInt();
+    const int userId = queryData[0].toInt();
     //qDebug() << "login userId " << userId;
     //We have to do some hashing here someday
     if (password == queryData[1].toString())
@@ -72,7 +69,7 @@ bool UserHandler::fillUser(int userId)
 {
     QVariantList vars;
     vars.append(QString::number(userId));
-    QVariantList queryData = mServerTcpQueries->RQuery(5, vars);
+    const QVariantList queryData = mServerTcpQueries->RQuery(5, vars);
     if(queryData.size() > 0)
     {
         mUserId = userId;
@@ -89,8 +86,8 @@ bool UserHandler::getPersonalRoom()
 {
     QVariantList vars;
     vars.append(QString::number(mUserId));
-    QVariantList queryData = mServerTcpQueries->RQuery(6, vars);
-    if(queryData.size()>0)
+    const QVariantList queryData = mServerTcpQueries->RQuery(6, vars);
+    if(queryData.size() > 0)
     {
         mPersonalRoomId = queryData[0].toString();
         mPersonalRoomPassword = queryData[1].toString();
@@ -109,8 +106,8 @@ bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
     vars.append(roomId);
     vars.append(roomPassword);
     vars.append(QString::number(mUserId));
-    int numberOfRowsAffected = mServerTcpQueries->CUDQuery(7, vars);
-    if(numberOfRowsAffected<=0)
+    const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(7, vars);
+    if(numberOfRowsAffected <= 0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;
         return false;
@@ -120,28 +117,28 @@ bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
     return true;
 }
 
-QString UserHandler::getErrorMessage()
+QString UserHandler::getErrorMessage() const
 {
     return mErrorMessage;
 }
 
-int UserHandler::getUserId()
+int UserHandler::getUserId() const
 {
     return mUserId;
 }
 
-QString UserHandler::getStreamId()
+QString UserHandler::getStreamId() const
 {
     return mStreamId;
 }
 
-QString UserHandler::getPersonalRoomId()
+QString UserHandler::getPersonalRoomId() const
 {
     return mPersonalRoomId;
     qDebug() << "personal room id" << mPersonalRoomId;
 }
 
-QString UserHandler::getPersonalRoomPassword()
+QString UserHandler::getPersonalRoomPassword() const
 {
     return mPersonalRoomPassword;
 }
@@ -151,17 +148,17 @@ bool UserHandler::hasRoom()
     return mHasRoom;
 }
 
-QString UserHandler::getGuestName()
+QString UserHandler::getGuestName() const
 {
     return mGuestName;
 }
 
-QString UserHandler::getGuestStreamId()
+QString UserHandler::getGuestStreamId() const
 {
     QVariantList vars;
     vars.append(QString::number(getGuestId()));
-    QVariantList returnList = mServerTcpQueries->RQuery(8, vars);
-    QString queryData = returnList[0].toString();
+    const QVariantList returnList = mServerTcpQueries->RQuery(8, vars);
+    const QString queryData = returnList[0].toString();
     if(!queryData.isEmpty())
     {
         return queryData;
@@ -170,7 +167,7 @@ QString UserHandler::getGuestStreamId()
     return "getGuestStreamIdFailed";
 }
 
-int UserHandler::getGuestId()
+int UserHandler::getGuestId() const
 {
     QVariantList vars;
     vars.append(mGuestName);

@@ -12,10 +12,10 @@ public:
     void setDisplayName(QString val);
     void setIsTalking(bool val);
     void setAudioIsDisabled(bool val);
-    QImage getImage();
-    QString getDisplayName();
-    bool getIsTalking();
-    bool getAudioIsDisabled();
+    bool getIsTalking() const;
+    bool getAudioIsDisabled() const;
+    QImage getImage() const;
+    QString getDisplayName() const;
 
 private:
     QImage mImage;

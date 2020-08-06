@@ -5,7 +5,6 @@ ServerTcpQueries::ServerTcpQueries(int _port, QHostAddress serverAddress, QObjec
     mServerAddress = serverAddress;
     mPortNumber = _port;
     mMillisWait = 2000;
-
 }
 /**
  * Connects to the server, waits mMillisWait
@@ -19,7 +18,6 @@ bool ServerTcpQueries::connect()
     {
         qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
         return false;
-
     }
     return true;
 }
@@ -42,7 +40,7 @@ bool ServerTcpQueries::disconnect()
  * @param arr QByteArray response from the server
  * @return QVariantList containing all the QStrings
  */
-QVariantList ServerTcpQueries::parseData(QByteArray arr)
+QVariantList ServerTcpQueries::parseData(QByteArray arr) const
 {
     QVariantList vec;
     int size = arr[0];
@@ -58,11 +56,12 @@ QVariantList ServerTcpQueries::parseData(QByteArray arr)
     }
     return vec;
 }
+
 int ServerTcpQueries::CUDQuery(int code, QVariantList vars)
 {
     int numberOfRowsAffected = -1;
     QByteArray data;
-    for(int i=0;i<vars.size();i++)
+    for(int i = 0; i < vars.size(); i++)
     {
         data.prepend(vars[i].toString().toLocal8Bit().data());
         data.prepend(vars[i].toString().size());
@@ -82,11 +81,12 @@ int ServerTcpQueries::CUDQuery(int code, QVariantList vars)
     disconnect();
     return numberOfRowsAffected;
 }
+
 QVariantList ServerTcpQueries::RQuery(int code, QVariantList vars)
 {
     QVariantList returnList;
     QByteArray data;
-    for(int i=0;i<vars.size();i++)
+    for(int i = 0; i < vars.size(); i++)
     {
         data.prepend(vars[i].toString().toLocal8Bit().data());
         data.prepend(vars[i].toString().size());
@@ -102,7 +102,6 @@ QVariantList ServerTcpQueries::RQuery(int code, QVariantList vars)
             QByteArray response = this->readAll();
             returnList = parseData(response);
         }
-
     }
     disconnect();
     return returnList;

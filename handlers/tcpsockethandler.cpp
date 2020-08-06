@@ -1,11 +1,13 @@
 #include "tcpsockethandler.h"
 
 
-TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QString streamId, QString roomId, QString displayName, QHostAddress address, int port, QObject* parent): QObject(parent)
+TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId,
+                                   QString roomId, QString displayName,
+                                   QHostAddress address, int port,
+                                   QObject* parent): QObject(parent)
 {
     mAddress = address;
-    //mPort = port;
-    mPort = 1338;
+    mPort = port;
     qDebug() << mAddress;
     qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
@@ -16,10 +18,8 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler,  QStr
 
 TcpSocketHandler::~TcpSocketHandler()
 {
+
 }
-
-
-
 
 int TcpSocketHandler::init()
 {
@@ -38,11 +38,11 @@ int TcpSocketHandler::init()
         qDebug() << "TcpSocketError: " << mSocket->errorString();
         errorHandler->giveErrorDialog("Could not connect to server");
         return -1;
-
     }
+    return 0;
 }
 
-bool TcpSocketHandler::isOpen()
+bool TcpSocketHandler::isOpen() const
 {
     qDebug() << "isOpen is returning: " << (mSocket != nullptr);
     return mSocket != nullptr;
@@ -54,7 +54,6 @@ void TcpSocketHandler::close()
     mSocket->close();
     delete mSocket;
     mSocket = nullptr;
-
 }
 
 void TcpSocketHandler::readyRead()
@@ -65,7 +64,6 @@ void TcpSocketHandler::readyRead()
     QByteArray data = mSocket->readAll();
 
     qDebug() << "Data received: " << data;
-
 
     int code = data[0];
     data.remove(0, 1);
@@ -160,87 +158,33 @@ void TcpSocketHandler::readyRead()
     };
 }
 
+QByteArray TcpSocketHandler::getHeader() const
+{
+    return mHeader;
+}
+
 
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
-    //qDebug() << "About to write header";
-    //mSocket->connectToHost(mAddress, mPort);
+    mHeader.prepend(mStreamId.toLocal8Bit().data());
+    mHeader.prepend(mStreamId.size());
 
-    myHeader.prepend(mStreamId.toLocal8Bit().data());
-    myHeader.prepend(mStreamId.size());
-
-    myHeader.prepend(mDisplayName.toLocal8Bit().data());
-    myHeader.prepend(mDisplayName.size());
+    mHeader.prepend(mDisplayName.toLocal8Bit().data());
+    mHeader.prepend(mDisplayName.size());
 
     //Puts the roomId and its size at the front of the array
-    myHeader.prepend(mRoomId.toLocal8Bit().data());
-    myHeader.prepend(mRoomId.size());
+    mHeader.prepend(mRoomId.toLocal8Bit().data());
+    mHeader.prepend(mRoomId.size());
 
-    qDebug() << "My Header: " << myHeader.length() << "\n" << myHeader;
+    qDebug() << "My Header: " << mHeader.length() << "\n" << mHeader;
 
-    mSocket->write(myHeader);
-    myHeader.clear();
-    //mSocket->write("HEAD / HTTP/1.0\r\n\r\n\r\n\r\n");
-    //while (mSocket->waitForReadyRead(3000));
-
-    /*QByteArray reply = mSocket->readAll();
-
-    //qDebug() << "Reply from Server: \n" << reply;
-    if(reply.size() <= 0)
-    {
-        qDebug() << "Reply from tcp request was empty or timeout, should not happen @ " << Q_FUNC_INFO;
-        return;
-    }
-    else if(reply.size()==1)
-    {
-        int returnCode = reply[0];
-        switch(returnCode)
-        {
-        case mTcpReturnValues::SESSION_STARTED:
-            //TODO how to handle session started and nothing returned from server
-            qDebug() << "Server responded with session started";
-            return;
-        case mTcpReturnValues::ROOM_ID_NOT_FOUND:
-            //TODO handle wrong roomId
-            qDebug() << "Server did not find roomId";
-            return;
-        case mTcpReturnValues::STREAM_ID_NOT_FOUND:
-            qDebug() << "Server did not find streamId";
-            //TODO handle wrong streamId
-            return;
-        default:
-            qDebug() << "Unkown return code from tcp server @ " << Q_FUNC_INFO;
-            exit(-1);
-        }
-    }*/
-
-    /*int numOfHeaders = reply[0];
-    qDebug() << "number of headers recieved from server: " << numOfHeaders;
-    reply.remove(0,1);
-    //QString data(reply);
-
-
-    //qDebug() << "DataString: " << data;
-    //qDebug() << reply.indexOf(27);
-
-
-    for(int i = 0; i < numOfHeaders; i++)
-    {
-        QByteArray temp = QByteArray(reply, reply.indexOf(27));
-        //qDebug() << "Temp: " << temp;
-        mInputStreamHandler->handleHeader(temp);
-        reply.remove(0, reply.indexOf(27));
-    }
-    */
-
-    //mSocket->write("0");
-
+    mSocket->write(mHeader);
+    mHeader.clear();
 }
 
 void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
-    //QByteArray header = QString("DISPLAY_NAME_UPDATE").toUtf8();
     QByteArray header;
     header.append(NEW_DISPLAY_NAME);
 
@@ -330,17 +274,17 @@ void TcpSocketHandler::wait()
     while (mSocket->waitForReadyRead(1000));
 }
 
-int TcpSocketHandler::getBytesWritten()
+int TcpSocketHandler::getBytesWritten() const
 {
     return mBytesWritten;
 }
 
-QByteArray TcpSocketHandler::getReply()
+QByteArray TcpSocketHandler::getReply() const
 {
     return mReply;
 }
 
-bool TcpSocketHandler::isReady()
+bool TcpSocketHandler::isReady() const
 {
     return mReady;
 }

@@ -143,7 +143,7 @@ void VideoPlaybackHandler::start()
             exit(1);
         }
 
-        imageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
+        mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
 
         av_frame_unref(frame);
         av_packet_unref(&packet);

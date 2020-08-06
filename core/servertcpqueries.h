@@ -17,15 +17,16 @@ public:
     int query7UpdateRoom(QString roomId, QString roomPassword, QString _host);
     QString query8SelectFromUser(QString _userId);
     int query9SelectFromUser(QString _username);*/
-    QVariantList RQuery(int code, QVariantList vars);
     int CUDQuery(int code, QVariantList vars);
+    QVariantList RQuery(int code, QVariantList vars);
+
 private:
-    int mPortNumber;
-    QVariantList parseData(QByteArray arr);
-    QHostAddress mServerAddress;
     bool connect();
     bool disconnect();
+    QVariantList parseData(QByteArray arr) const;
+    int mPortNumber;
     int mMillisWait;
+    QHostAddress mServerAddress;
 };
 
 #endif // SERVERTCPQUERIES_H

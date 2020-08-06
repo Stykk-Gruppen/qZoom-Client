@@ -18,14 +18,27 @@ class InputStreamHandler : public QObject
 public:
     explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent = nullptr);
     void addStreamToVector(int index, QString streamId, QString displayName);
-    //int findStreamIdIndex(QString streamId, QString displayName);
-    int findStreamIdIndex(QString streamId);
     void init();
     void close();
     void removeStream(QString streamId);
     void updateParticipantDisplayName(QString streamId, QString displayName);
     void setPeerToVideoDisabled(QString streamId);
     void setPeerToAudioDisabled(QString streamId);
+    void handleHeader(QByteArray header);
+    int findStreamIdIndex(QString streamId) const;
+    std::vector<std::mutex*> getAudioMutexVector() const;
+    std::vector<std::mutex *> getVideoMutexVector() const;
+    std::vector<QByteArray*> getAudioBufferVector() const;
+     std::vector<QByteArray *> getVideoBufferVector() const;
+    std::vector<bool> getVideoPlaybackStartedVector() const;
+    std::vector<bool> getAudioPlaybackStartedVector() const;
+    std::vector<QFuture<void>*> getAudioFutures() const;
+    std::vector<QFuture<void>*> getVideoFutures() const;
+    std::vector<AudioPlaybackHandler *> getAudioPlaybackHandlerVector() const;
+    std::vector<VideoPlaybackHandler *> getVideoPlaybackHandlerVector() const;
+    std::vector<QString> getStreamIdVector() const;
+
+private:
     std::vector<QFuture<void>*> mAudioFutures;
     std::vector<QFuture<void>*> mVideoFutures;
     std::vector<QByteArray*> mVideoHeaderVector;
@@ -38,7 +51,6 @@ public:
     std::vector<VideoPlaybackHandler*> mVideoPlaybackHandlerVector;
     std::vector<bool> mVideoPlaybackStartedVector;
     std::vector<bool> mAudioPlaybackStartedVector;
-    void handleHeader(QByteArray header);
     ImageHandler* mImageHandler;
     int mBufferSize;
     QHostAddress mAddress;

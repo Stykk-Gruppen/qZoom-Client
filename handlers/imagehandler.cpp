@@ -51,7 +51,7 @@ bool ImageHandler::getAudioIsDisabled(int index)
  * @param index QML Rectangle index
  * @return uint8_t map index
  */
-uint8_t ImageHandler::getCorrectIndex(int index)
+uint8_t ImageHandler::getCorrectIndex(int index) const
 {
     if (index == 0)
     {
@@ -77,7 +77,6 @@ uint8_t ImageHandler::getCorrectIndex(int index)
  */
 QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    //qDebug() << id;
     uint8_t index = 0;
     QStringList onlyId = id.split("=");
     if(onlyId.size() >= 2)
@@ -89,16 +88,9 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
             index = idIndex[1].toUInt();
         }
     }
-    //This means the screen for the user, which is stored in numeric_value_max in the map
-    if(index == 0)
-    {
-        index = std::numeric_limits<uint8_t>::max();
-    }
-    else
-    {
-        //All other participants are located in the map at their screen index-1
-        index--;
-    }
+
+    index = getCorrectIndex(index);
+
     QImage result = mImageMap[index]->getImage();
 
     if(result.isNull())
@@ -130,37 +122,13 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 void ImageHandler::addPeer(uint8_t index, QString displayName)
 {
     qDebug() << "Added peer to ImageHandler map: " << index << Q_FUNC_INFO;
-    imgLock.lock();
+    mImageLock.lock();
     mImageMap[index] = new Participant();
     mImageMap[index]->setImage(generateGenericImage(displayName));
     mImageMap[index]->setDisplayName(displayName);
-    imgLock.unlock();
+    mImageLock.unlock();
     emit refreshScreens();
 }
-
-/*
-int ImageHandler::getFrameWidth(int index)
-{
-    qDebug() << "index: " << index;
-    if(index == 0)
-    {
-        index = 255;
-    }
-    qDebug() << "Frame width:" << mImageMap[index].first.width();
-    return mImageMap[index].first.width();
-}
-
-int ImageHandler::getFrameHeight(int index)
-{
-    qDebug() << "index: " << index;
-    if(index == 0)
-    {
-        index = 255;
-    }
-    qDebug() << "Frame height:" << mImageMap[index].first.height();
-    return mImageMap[index].first.height();
-}
-*/
 
 /**
  * Removes everything from the map
@@ -168,9 +136,9 @@ int ImageHandler::getFrameHeight(int index)
 void ImageHandler::removeAllPeers()
 {
     qDebug() << "Removing all peers";
-    imgLock.lock();
+    mImageLock.lock();
     mImageMap.clear();
-    imgLock.unlock();
+    mImageLock.unlock();
 }
 
 /**
@@ -181,7 +149,7 @@ void ImageHandler::removeAllPeers()
 void ImageHandler::removePeer(uint8_t index)
 {
     qDebug() << "Removing peer from ImageHandler map: " << index;
-    imgLock.lock();
+    mImageLock.lock();
     mImageMap.erase(index);
 
     //Might need to move the other participants down a place.
@@ -203,7 +171,7 @@ void ImageHandler::removePeer(uint8_t index)
         }
         counter++;
     }
-    imgLock.unlock();
+    mImageLock.unlock();
     emit refreshScreens();
 }
 
@@ -246,12 +214,12 @@ void ImageHandler::setPeerAudioIsDisabled(uint8_t index, bool val)
  */
 void ImageHandler::updateImage(const QImage &image, uint8_t index)
 {
-    imgLock.lock();
+    mImageLock.lock();
     if(mImageMap[index]->getImage() != image)
     {
         mImageMap[index]->setImage(image);
     }
-    imgLock.unlock();
+    mImageLock.unlock();
 }
 
 /**
@@ -259,7 +227,7 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
  */
 void ImageHandler::veryFunStianLoop()
 {
-    /*QtConcurrent::run([this]()
+    QtConcurrent::run([this]()
     {
         int ms = 41; //1000/24
         int i = 1;
@@ -280,7 +248,7 @@ void ImageHandler::veryFunStianLoop()
             }
             QString str = "/home/stian/Downloads/testtttt/" + overhead + QString::number(i) + ".jpg";
             QImage test = QImage(str);
-            updateImage(test);
+            updateImage(test, getCorrectIndex(0));
             if (i == 382)
             {
                 i = 1;
@@ -290,7 +258,7 @@ void ImageHandler::veryFunStianLoop()
             struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
             nanosleep(&ts, NULL);
         }
-    });*/
+    });
 }
 
 /**
@@ -305,7 +273,6 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
     SwsContext *imgConvertCtx = nullptr;
     AVFrame	*frameRGB = av_frame_alloc();
 
-
     if(codecContext == nullptr)
     {
         updateImage(generateGenericImage(mSettings->getDisplayName()), std::numeric_limits<uint8_t>::max());
@@ -314,13 +281,11 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
     QImage img(frame->width, frame->height, QImage::Format_RGB888);
 
-
     frameRGB->format = AV_PIX_FMT_RGB24;
     frameRGB->width = frame->width;
     frameRGB->height = frame->height;
 
-    //avpicture_alloc((AVPicture*)frameRGB, A frame->width, frame->height);
-    av_image_alloc(frameRGB->data,frameRGB->linesize,frame->width,frame->height,AV_PIX_FMT_RGB24,1);
+    av_image_alloc(frameRGB->data, frameRGB->linesize, frame->width,frame->height, AV_PIX_FMT_RGB24, 1);
 
     imgConvertCtx = sws_getContext(codecContext->width, codecContext->height,
                                    codecContext->pix_fmt, frame->width, frame->height, AV_PIX_FMT_RGB24,
@@ -333,38 +298,28 @@ void ImageHandler::readImage(AVCodecContext* codecContext, AVFrame* frame, uint8
 
         for (int y = 0; y < frame->height; ++y)
         {
-            memcpy( img.scanLine(y), frameRGB->data[0]+y * frameRGB->linesize[0], frameRGB->linesize[0]);
+            memcpy( img.scanLine(y), frameRGB->data[0] + y * frameRGB->linesize[0], frameRGB->linesize[0]);
         }
     }
-    //av_freep(&frame->data[0]);
-    //av_frame_unref(frame);
 
     av_freep(&frameRGB->data[0]);
     av_frame_unref(frameRGB);
 
     sws_freeContext(imgConvertCtx);
 
-    //av_frame_free(&frameRGB);
     updateImage(img, index);
-    //av_frame_unref(frameRGB);
-    //av_frame_free(&frameRGB);
-    //delete frameRGB;
-    //sws_freeContext(imgConvertCtx);
     av_freep(&frameRGB->data[0]);
 
     av_frame_free(&frameRGB);
-
-    //av_packet_unref(&packet);
 }
 
 /**
  * Returns how large the mImageMap is
  * @return int how many particpants in the map
  */
-int ImageHandler::getNumberOfScreens()
+int ImageHandler::getNumberOfScreens() const
 {
     return mImageMap.size();
-    //return 5;
 }
 
 /**
@@ -372,17 +327,15 @@ int ImageHandler::getNumberOfScreens()
  * @param displayName
  * @return
  */
-QImage ImageHandler::generateGenericImage(QString displayName)
+QImage ImageHandler::generateGenericImage(QString displayName) const
 {
     QImage image(QSize(1280, 720), QImage::Format_RGB32);
     QPainter painter(&image);
     painter.setBrush(QBrush(Qt::green));
     painter.fillRect(QRectF(0, 0, 1280, 720), QColor(27, 29, 54, 255));
-    //painter.fillRect(QRectF(200,150,800,600), Qt::blue);
 
     painter.setPen(QPen(Qt::white));
     painter.setFont(QFont("Helvetica [Cronyx]", 26, QFont::Bold));
-    //QString text = displayName + " hat seinen Kamera ausgeschaltet";
     QString text = displayName + "\n (Screen Disabled)";
     painter.drawText(QRectF(0, 0, 1280, 720), Qt::AlignCenter | Qt::AlignTop, text);
     return image;

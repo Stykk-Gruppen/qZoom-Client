@@ -26,22 +26,22 @@ void Participant::setAudioIsDisabled(bool val)
     mAudioIsDisabled = val;
 }
 
-QImage Participant::getImage()
+QImage Participant::getImage() const
 {
     return mImage;
 }
 
-QString Participant::getDisplayName()
+QString Participant::getDisplayName() const
 {
     return mDisplayName;
 }
 
-bool Participant::getIsTalking()
+bool Participant::getIsTalking() const
 {
     return mIsTalking;
 }
 
-bool Participant::getAudioIsDisabled()
+bool Participant::getAudioIsDisabled() const
 {
     return mAudioIsDisabled;
 }

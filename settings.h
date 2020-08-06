@@ -15,13 +15,6 @@ public:
     Q_INVOKABLE void loadSettings();
     Q_INVOKABLE void loadAndSaveDefaultSettings();
     Q_INVOKABLE void saveSettings();
-    Q_INVOKABLE bool getAudioOn();
-    Q_INVOKABLE bool getVideoOn();
-    Q_INVOKABLE bool getSaveLastRoom();
-    Q_INVOKABLE QString getDisplayName();
-    Q_INVOKABLE QString getDefaultAudioInput();
-    Q_INVOKABLE QString getLastRoomId();
-    Q_INVOKABLE QString getLastRoomPassword();
     Q_INVOKABLE void setAudioOn(bool val);
     Q_INVOKABLE void setVideoOn(bool val);
     Q_INVOKABLE void setDisplayName(QString val);
@@ -29,6 +22,13 @@ public:
     Q_INVOKABLE void setSaveLastRoom(bool val);
     Q_INVOKABLE void setLastRoomId(QString val);
     Q_INVOKABLE void setLastRoomPassword(QString val);
+    Q_INVOKABLE bool getAudioOn() const;
+    Q_INVOKABLE bool getVideoOn() const;
+    Q_INVOKABLE bool getSaveLastRoom() const;
+    Q_INVOKABLE QString getDisplayName() const;
+    Q_INVOKABLE QString getDefaultAudioInput() const;
+    Q_INVOKABLE QString getLastRoomId() const;
+    Q_INVOKABLE QString getLastRoomPassword() const;
 
 private:
     bool mAudioOn;

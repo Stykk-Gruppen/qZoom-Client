@@ -76,32 +76,32 @@ void Settings::saveSettings()
     qDebug() << "Saved Settings to file";
 }
 
-bool Settings::getAudioOn()
+bool Settings::getAudioOn() const
 {
     return mAudioOn;
 }
 
-bool Settings::getVideoOn()
+bool Settings::getVideoOn() const
 {
     return mVideoOn;
 }
 
-QString Settings::getDisplayName()
+QString Settings::getDisplayName() const
 {
     return mDisplayName;
 }
 
-QString Settings::getDefaultAudioInput()
+QString Settings::getDefaultAudioInput() const
 {
     return mDefaultAudioInput;
 }
 
-QString Settings::getLastRoomId()
+QString Settings::getLastRoomId() const
 {
     return mLastRoomId;
 }
 
-QString Settings::getLastRoomPassword()
+QString Settings::getLastRoomPassword() const
 {
     return mLastRoomPassword;
 }
@@ -131,7 +131,7 @@ void Settings::setSaveLastRoom(bool val)
     mSaveLastRoom = val;
 }
 
-bool Settings::getSaveLastRoom()
+bool Settings::getSaveLastRoom() const
 {
     return mSaveLastRoom;
 }

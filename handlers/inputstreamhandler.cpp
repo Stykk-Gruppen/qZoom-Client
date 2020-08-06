@@ -92,22 +92,7 @@ void InputStreamHandler::close()
 void InputStreamHandler::removeStream(QString streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
-    //int index = -1;
     int index = findStreamIdIndex(streamId);
-
-
-    /*
-    for(size_t i = 0; i < mStreamIdVector.size(); i++)
-    {
-        if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
-        {
-            index = i;
-        }
-    }
-<<<<<<< HEAD:inputstreamhandler.cpp
-    */
-
-
 
     /* Kan dette slettes uten at mutex er locked?
     Eg fikk en segmentation fault pga customRead
@@ -245,6 +230,7 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found, or 0 if not found
  */
+
 /*
 int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
 {
@@ -275,7 +261,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
  * @param streamId
  * @return int index where the streamId is located in the vector
  */
-int InputStreamHandler::findStreamIdIndex(QString streamId)
+int InputStreamHandler::findStreamIdIndex(QString streamId) const
 {
     if(mStreamIdVector.size() >= 1)
     {
@@ -288,6 +274,61 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
         }
     }
     return -1;
+}
+
+std::vector<std::mutex *> InputStreamHandler::getAudioMutexVector() const
+{
+    return mAudioMutexVector;
+}
+
+std::vector<std::mutex *> InputStreamHandler::getVideoMutexVector() const
+{
+    return mVideoMutexVector;
+}
+
+std::vector<QByteArray *> InputStreamHandler::getAudioBufferVector() const
+{
+    return mAudioBufferVector;
+}
+
+std::vector<QByteArray *> InputStreamHandler::getVideoBufferVector() const
+{
+    return mVideoBufferVector;
+}
+
+std::vector<bool> InputStreamHandler::getVideoPlaybackStartedVector() const
+{
+    return mVideoPlaybackStartedVector;
+}
+
+std::vector<bool> InputStreamHandler::getAudioPlaybackStartedVector() const
+{
+    return mAudioPlaybackStartedVector;
+}
+
+std::vector<QFuture<void> *> InputStreamHandler::getAudioFutures() const
+{
+    return mAudioFutures;
+}
+
+std::vector<QFuture<void> *> InputStreamHandler::getVideoFutures() const
+{
+    return mVideoFutures;
+}
+
+std::vector<AudioPlaybackHandler *> InputStreamHandler::getAudioPlaybackHandlerVector() const
+{
+    return mAudioPlaybackHandlerVector;
+}
+
+std::vector<VideoPlaybackHandler *> InputStreamHandler::getVideoPlaybackHandlerVector() const
+{
+    return mVideoPlaybackHandlerVector;
+}
+
+std::vector<QString> InputStreamHandler::getStreamIdVector() const
+{
+    return mStreamIdVector;
 }
 
 /**

@@ -20,22 +20,19 @@ SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler
     mSessionIsActive = false;
 }
 
-UserHandler* SessionHandler::getUser()
+UserHandler* SessionHandler::getUser() const
 {
     return mUser;
 }
 
 bool SessionHandler::enableScreenShare()
 {
-
     if(mOutputStreamHandler->checkVideoEnabled())
     {
         mOutputStreamHandler->disableVideo();
     }
     return mOutputStreamHandler->enableVideo(true) >= 0;
 }
-
-
 
 bool SessionHandler::enableVideo()
 {
@@ -44,7 +41,6 @@ bool SessionHandler::enableVideo()
         mOutputStreamHandler->disableVideo();
     }
     return mOutputStreamHandler->enableVideo() >= 0;
-
 }
 
 void SessionHandler::disableVideo()
@@ -54,21 +50,21 @@ void SessionHandler::disableVideo()
 
 bool SessionHandler::enableAudio()
 {
-    mImageHandler->setPeerAudioIsDisabled(255, false);
+    mImageHandler->setPeerAudioIsDisabled(std::numeric_limits<uint8_t>::max(), false);
     return mOutputStreamHandler->enableAudio() >= 0;
 }
 
 void SessionHandler::disableAudio()
 {
     mOutputStreamHandler->disableAudio();
-    mImageHandler->setPeerAudioIsDisabled(255, true);
+    mImageHandler->setPeerAudioIsDisabled(std::numeric_limits<uint8_t>::max(), true);
 }
 
 int SessionHandler::initOtherStuff()
 {
-    QString streamId = (isGuest()) ? getUser()->getGuestStreamId() : getUser()->getStreamId();
-    QString roomId = getRoomId();
-    QString displayName = mSettings->getDisplayName();
+    const QString streamId = (isGuest()) ? getUser()->getGuestStreamId() : getUser()->getStreamId();
+    const QString roomId = getRoomId();
+    const QString displayName = mSettings->getDisplayName();
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
     mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
@@ -84,6 +80,7 @@ int SessionHandler::initOtherStuff()
     }
 
     mOutputStreamHandler->init();
+    return 0;
 }
 
 void SessionHandler::closeOtherStuff()
@@ -107,10 +104,9 @@ void SessionHandler::closeOtherStuff()
     mImageHandler->removeAllPeers();
 }
 
-QVariantList SessionHandler::getAudioInputDevices()
+QVariantList SessionHandler::getAudioInputDevices() const
 {
     return AudioHandler::getAudioInputDevices();
-
 }
 
 bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
@@ -119,8 +115,8 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
     QVariantList vars;
     vars.append(_roomPassword);
     vars.append(_roomId);
-    QVariantList response = mServerTcpQueries->RQuery(0, vars);
-    if(response.size()>0)
+    const QVariantList response = mServerTcpQueries->RQuery(0, vars);
+    if(response.size() > 0)
     {
         if(response[0].toInt() == -1)
         {
@@ -136,8 +132,9 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
         mSettings->setLastRoomId(mRoomId);
         mSettings->setLastRoomPassword(mRoomPassword);
         mSettings->saveSettings();
-        uint8_t userIndex = std::numeric_limits<uint8_t>::max();
+        const uint8_t userIndex = std::numeric_limits<uint8_t>::max();
         mImageHandler->addPeer(userIndex, mSettings->getDisplayName());
+
         if(initOtherStuff() < 0)
         {
             closeOtherStuff();
@@ -147,15 +144,14 @@ bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
         return true;
     }
     return false;
-
 }
 
-QString SessionHandler::getRoomId()
+QString SessionHandler::getRoomId() const
 {
     return mRoomId;
 }
 
-QString SessionHandler::getRoomPassword()
+QString SessionHandler::getRoomPassword() const
 {
     return mRoomPassword;
 }
@@ -169,8 +165,8 @@ void SessionHandler::addUser()
     if (!mUser->isGuest())
     {
         vars.prepend(QString::number(mUser->getUserId()));
-        int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
-        if(numberOfRowsAffected<=0)
+        const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
+        if(numberOfRowsAffected <= 0)
         {
             qDebug() << "Failed Query" << Q_FUNC_INFO;
         }
@@ -180,8 +176,8 @@ void SessionHandler::addUser()
         if (addGuestUserToDatabase())
         {
             vars.prepend(QString::number(mUser->getGuestId()));
-            int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
-            if(numberOfRowsAffected<=0)
+            const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
+            if(numberOfRowsAffected <= 0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
             }
@@ -193,6 +189,7 @@ bool SessionHandler::leaveSession()
 {
     //CLose all that is opened;
     closeOtherStuff();
+    return true;
 }
 
 bool SessionHandler::createSession(QString roomId, QString roomPassword)
@@ -221,12 +218,12 @@ bool SessionHandler::createSession(QString roomId, QString roomPassword)
     return false;
 }
 
-bool SessionHandler::isGuest()
+bool SessionHandler::isGuest() const
 {
     return mUser->isGuest();
 }
 
-QString SessionHandler::getRoomHostUsername()
+QString SessionHandler::getRoomHostUsername() const
 {
     return mRoomHostUsername;
 }
@@ -263,12 +260,12 @@ void SessionHandler::updateDisplayName()
     }
 }
 
-bool SessionHandler::checkVideoEnabled()
+bool SessionHandler::checkVideoEnabled() const
 {
     return mOutputStreamHandler->checkVideoEnabled();
 }
 
-bool SessionHandler::checkAudioEnabled()
+bool SessionHandler::checkAudioEnabled() const
 {
     return mOutputStreamHandler->checkAudioEnabled();
 }

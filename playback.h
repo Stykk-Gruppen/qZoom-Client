@@ -22,11 +22,11 @@ protected:
         std::mutex* writeLock;
         bool* stopPlayback;
     };
+    int mIndex;
+    bool mStopPlayback = false;
     size_t mBufferSize;
     mBufferAndLockStruct* mStruct;
-    bool mStopPlayback = false;
-    int mIndex;
-    ImageHandler* imageHandler;
+    ImageHandler* mImageHandler;
 };
 
 #endif // PLAYBACK_H

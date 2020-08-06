@@ -13,19 +13,21 @@ public:
     ~UserHandler();
     Q_INVOKABLE bool login(QString username, QString password);
     Q_INVOKABLE bool logout();
-    Q_INVOKABLE QString getErrorMessage();
-    Q_INVOKABLE QString getPersonalRoomId();
-    Q_INVOKABLE QString getPersonalRoomPassword();
     Q_INVOKABLE bool hasRoom();
     Q_INVOKABLE bool updatePersonalRoom(QString roomId, QString roomPassword);
-    Q_INVOKABLE bool isGuest();
-    int getUserId();
-    QString getStreamId();
-    QString getGuestName();
-    int getGuestId();
-    QString getGuestStreamId();
+    Q_INVOKABLE bool isGuest() const;
+    Q_INVOKABLE QString getErrorMessage() const;
+    Q_INVOKABLE QString getPersonalRoomId() const;
+    Q_INVOKABLE QString getPersonalRoomPassword() const;
+    int getUserId() const;
+     int getGuestId() const;
+    QString getStreamId() const;
+    QString getGuestName() const;
+    QString getGuestStreamId() const;
+
 private:
     ServerTcpQueries* mServerTcpQueries;
+    int mUserId;
     bool fillUser(int userId);
     bool getPersonalRoom();
     bool mIsGuest;
@@ -39,7 +41,6 @@ private:
     QString mTimeCreated;
     QString mGuestName;
     QString mGuestId;
-    int mUserId;
     Settings* mSettings;
 
 signals:

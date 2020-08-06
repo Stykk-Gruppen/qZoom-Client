@@ -28,29 +28,21 @@ class VideoHandler : public QObject
 {
     Q_OBJECT
 public:
-    VideoHandler(QString cDeviceName, std::mutex* _writeLock,
-                 int64_t time, ImageHandler* imageHandler,
+    VideoHandler(QString mCameraDeviceName, std::mutex* _writeLock,
+                 int64_t mTime, ImageHandler* mImageHandler,
                  UdpSocketHandler* _socketHandler,
                  int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare,
                  QObject* parent = 0);
     ~VideoHandler();
-    int init();
     void grabFrames();
     void close();
-    bool writeToFile = true;
-    bool isActive();
-    int numberOfFrames;
-    const char* filename = "nyTest.ismv";
-    QString aDeviceName;
-    QString cDeviceName;
-    std::mutex* writeLock;
-    bool firstPacket = true;
-    int start_pts;
-    int start_dts;
-    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
     void toggleGrabFrames(bool a);
+    int init();
+    static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
+    bool isActive() const;
 
 private:
+    QString buildScreenDeviceName();
     //Trenger kanskje ikke denne likevel?
     struct mSocketStruct {
         UdpSocketHandler* udpSocket;
@@ -58,27 +50,34 @@ private:
         bool headerSent;
     };
     mSocketStruct* mStruct;
+    struct SwsContext* img_convert_ctx;
+    int mBufferSize;
+    int mNumberOfSkippedFrames = 0;
+    int mVideoStream;
+    int mNumberOfFrames;
+    int mScreenWidth;
+    int mScreenHeight;
+    int mStart_pts;
+    int mStart_dts;
     bool mActive = false;
     bool mScreenCapture = false;
+    bool mAbortGrabFrames = false;
+    bool mWriteToFile = true;
+    bool mIsFirstPacket = true;
     const char* mSource;
-    int64_t time;
-    int mBufferSize;
-    int skipped_frames = 0;
-    //std::ofstream outfile;
-    AVCodecContext* inputVideoCodecContext;
-    AVCodecContext* outputVideoCodecContext;
-    AVFrame* videoFrame;
-    AVFrame* scaledFrame;
+    const char* mFileName = "nyTest.ismv";
+    int64_t mTime;
+    AVCodecContext* mInputVideoCodecContext;
+    AVCodecContext* mOutputVideoCodecContext;
+    AVFrame* mVideoFrame;
+    AVFrame* mScaledFrame;
     AVFormatContext *ifmt_ctx, *ofmt_ctx;
     AVCodec* inputVideoCodec;
     AVCodec* outputVideoCodec;
-    int videoStream;
-    UdpSocketHandler *socketHandler;
-    struct SwsContext* img_convert_ctx;
-    ImageHandler* imageHandler;
-    bool mAbortGrabFrames = false;
-    int mScreenWidth;
-    int mScreenHeight;
-    QString buildScreenDeviceName();
+    UdpSocketHandler *mSocketHandler;
+    ImageHandler* mImageHandler;
+    QString mAudioDeviceName;
+    QString mCameraDeviceName;
+    std::mutex* mWriteLock;
 };
 #endif // VideoHandler_H

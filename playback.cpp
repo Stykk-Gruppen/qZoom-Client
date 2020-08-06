@@ -10,7 +10,7 @@ Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
     mStruct->writeLock = _writeLock;
     mStruct->stopPlayback = &mStopPlayback;
     mIndex = index;
-    imageHandler = _imageHandler;
+    mImageHandler = _imageHandler;
 }
 Playback::~Playback()
 {
@@ -48,7 +48,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
     s->writeLock->lock();
     QByteArray tempBuffer = QByteArray(s->buffer->data(), buf_size);
-    s->buffer->remove(0,buf_size);
+    s->buffer->remove(0, buf_size);
     s->writeLock->unlock();
 
 
