@@ -71,6 +71,7 @@ int ServerTcpQueries::CUDQuery(int code, QVariantList vars)
     data.prepend(code);
     if(connect())
     {
+        qDebug() <<"SQL TCP Query(" << code << ")" << " Sending data: " << data;
         this->write(data);
         if(this->waitForReadyRead(mMillisWait))
         {

@@ -168,7 +168,7 @@ void SessionHandler::addUser()
     qDebug() << "User is guest: " << mUser->isGuest();
     if (!mUser->isGuest())
     {
-        vars.append(QString::number(mUser->getUserId()));
+        vars.prepend(QString::number(mUser->getUserId()));
         int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
         if(numberOfRowsAffected<=0)
         {
@@ -179,7 +179,7 @@ void SessionHandler::addUser()
     {
         if (addGuestUserToDatabase())
         {
-            vars.append(QString::number(mUser->getGuestId()));
+            vars.prepend(QString::number(mUser->getGuestId()));
             int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
             if(numberOfRowsAffected<=0)
             {

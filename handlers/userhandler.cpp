@@ -160,7 +160,8 @@ QString UserHandler::getGuestStreamId()
 {
     QVariantList vars;
     vars.append(QString::number(getGuestId()));
-    QString queryData = mServerTcpQueries->RQuery(8, vars)[0].toString();
+    QVariantList returnList = mServerTcpQueries->RQuery(8, vars);
+    QString queryData = returnList[0].toString();
     if(!queryData.isEmpty())
     {
         return queryData;
@@ -173,7 +174,8 @@ int UserHandler::getGuestId()
 {
     QVariantList vars;
     vars.append(mGuestName);
-    return mServerTcpQueries->RQuery(9, vars)[0].toInt();
+    QVariantList returnList = mServerTcpQueries->RQuery(9, vars);
+    return returnList[0].toInt();
 }
 
 bool UserHandler::logout()
