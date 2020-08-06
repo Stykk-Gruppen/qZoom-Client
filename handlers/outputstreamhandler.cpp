@@ -60,18 +60,13 @@ void OutputStreamHandler::close()
     if(mAudioHandler != nullptr)
     {
         disableAudio();
-
-
     }
 
     if(mVideoHandler != nullptr)
     {
         disableVideo();
-
     }
 }
-
-
 
 void OutputStreamHandler::grabVideoHeader()
 {
@@ -92,10 +87,6 @@ void OutputStreamHandler::grabVideoHeader()
     mVideoHandler = nullptr;
 }
 
-
-
-
-
 int OutputStreamHandler::enableAudio()
 {
     mAudioEnabled = true;
@@ -103,20 +94,18 @@ int OutputStreamHandler::enableAudio()
     if (mAudioHandler == nullptr)
     {
         qDebug() << "creating mAudioHandler";
-        //int64_t time = av_gettime();
         mAudioHandler = new AudioHandler(mAudioDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mSocketHandler, mBufferSize, mImageHandler);
     }
 
-    int error = mAudioHandler->init();
-    if(error<0)
+    const int error = mAudioHandler->init();
+    if(error < 0)
     {
         fprintf(stderr, "Could not init audiohandler");
         errorHandler->giveErrorDialog("Could not stream audio");
 
         return error;
     }
-
 
     mAudioHandler->toggleGrabFrames(mAudioEnabled);
     audioFuture = QtConcurrent::run(mAudioHandler, &AudioHandler::grabFrames);
@@ -129,12 +118,6 @@ void OutputStreamHandler::disableAudio()
     {
         mAudioEnabled = false;
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
-        //delete mAudioHandler;
-        /*while(mAudioHandler->isActive())
-        {
-            av_usleep(500);
-            qDebug() << "Audio handler is still active";
-        }*/
         audioFuture.waitForFinished();
         qDebug() << "Audiohandler not active, deleting it";
         delete mAudioHandler;
@@ -160,7 +143,7 @@ int OutputStreamHandler::enableVideo(bool screenShare)
                                          mBufferSize, mTcpSocketHandler, screenShare);
     }
 
-    int error = mVideoHandler->init();
+    const int error = mVideoHandler->init();
     mTcpSocketHandler->writeHeader();
     if(error < 0)
     {
@@ -204,7 +187,7 @@ void OutputStreamHandler::disableVideo()
     }
 }
 
-QVariantList OutputStreamHandler::getAudioInputDevices()
+QVariantList OutputStreamHandler::getAudioInputDevices() const
 {
     return AudioHandler::getAudioInputDevices();
 }
@@ -218,17 +201,17 @@ void OutputStreamHandler::changeAudioInputDevice(QString deviceName)
     enableAudio();
 }
 
-QString OutputStreamHandler::getDefaultAudioInputDevice()
+QString OutputStreamHandler::getDefaultAudioInputDevice() const
 {
     return "default";
 }
 
-bool OutputStreamHandler::checkVideoEnabled()
+bool OutputStreamHandler::checkVideoEnabled() const
 {
     return mVideoEnabled;
 }
 
-bool OutputStreamHandler::checkAudioEnabled()
+bool OutputStreamHandler::checkAudioEnabled() const
 {
     return mAudioEnabled;
 }

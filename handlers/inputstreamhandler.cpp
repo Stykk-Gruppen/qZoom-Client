@@ -92,22 +92,7 @@ void InputStreamHandler::close()
 void InputStreamHandler::removeStream(QString streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
-    //int index = -1;
     int index = findStreamIdIndex(streamId);
-
-
-    /*
-    for(size_t i = 0; i < mStreamIdVector.size(); i++)
-    {
-        if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
-        {
-            index = i;
-        }
-    }
-<<<<<<< HEAD:inputstreamhandler.cpp
-    */
-
-
 
     /* Kan dette slettes uten at mutex er locked?
     Eg fikk en segmentation fault pga customRead
@@ -245,33 +230,7 @@ void InputStreamHandler::addStreamToVector(int index, QString streamId, QString 
  * @param streamId QString to find in mStreamIdVector
  * @return int index where streamId was found, or 0 if not found
  */
-/*
-int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
-{
-    qDebug() << "InputStreamHandler findStreamId index: " << streamId;
-    if(mStreamIdVector.size() >= 1)
-    {
-        for(size_t i = 0; i < mStreamIdVector.size(); i++)
-        {
-            if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
-            {
-                return i;
-            }
-        }
-        //If the streamId does not exist, push it and buffers/locks
-        addStreamToVector(mStreamIdVector.size(), streamId, displayName);
-        return mStreamIdVector.size() - 1;
-    }
-    else
-    {
-        //If this stream is the first to join, push it and buffer/locks
-        addStreamToVector(0, streamId, displayName);
-        return 0;
-    }
-}
-*/
-
-int InputStreamHandler::findStreamIdIndex(QString streamId)
+int InputStreamHandler::findStreamIdIndex(QString streamId) const
 {
     if(mStreamIdVector.size() >= 1)
     {

@@ -29,21 +29,20 @@ public:
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE void disableAudio();
-
     Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool createSession(QString _roomId, QString _roomPassword);
     Q_INVOKABLE bool leaveSession();
-    Q_INVOKABLE bool isGuest();
+    Q_INVOKABLE bool isGuest() const;
     Q_INVOKABLE bool enableVideo();
     Q_INVOKABLE bool enableAudio();
-    Q_INVOKABLE bool checkVideoEnabled();
-    Q_INVOKABLE bool checkAudioEnabled();
+    Q_INVOKABLE bool checkVideoEnabled() const;
+    Q_INVOKABLE bool checkAudioEnabled() const;
     Q_INVOKABLE bool enableScreenShare();
-    Q_INVOKABLE QString getRoomId();
-    Q_INVOKABLE QString getRoomPassword();
-    Q_INVOKABLE QString getRoomHostUsername();
-    Q_INVOKABLE QVariantList getAudioInputDevices();
-    UserHandler* getUser();
+    Q_INVOKABLE QString getRoomId() const;
+    Q_INVOKABLE QString getRoomPassword() const;
+    Q_INVOKABLE QString getRoomHostUsername() const;
+    Q_INVOKABLE QVariantList getAudioInputDevices() const;
+    UserHandler* getUser() const;
 
 private:
     ServerTcpQueries* mServerTcpQueries;

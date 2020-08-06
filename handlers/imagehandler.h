@@ -31,25 +31,23 @@ public:
     void updatePeerDisplayName(uint8_t index, QString displayName);
     void removeAllPeers();
     void setPeerVideoAsDisabled(uint8_t index);
-    //void setPeerAudioAsDisabled(uint8_t index);
     void setPeerAudioIsDisabled(uint8_t index, bool val);
-    Q_INVOKABLE int getNumberOfScreens();
-    //Q_INVOKABLE int getFrameWidth(int index);
-    //Q_INVOKABLE int getFrameHeight(int index);
+    void toggleBorder(bool talking, int index);
+    Q_INVOKABLE int getNumberOfScreens() const;
     Q_INVOKABLE bool getIsTalking(int index);
     Q_INVOKABLE bool getAudioIsDisabled(int index);
-    std::mutex imgLock;
-    void toggleBorder(bool talking, int index);
+
 public slots:
     void updateImage(const QImage &image, uint8_t index);
 
 signals:
     void imageChanged();
     void refreshScreens();
+
 private:
-    QImage generateGenericImage(QString username);
-    uint8_t getCorrectIndex(int index);
-    //std::map<uint8_t, std::pair<QImage, QString>> mImageMap;
+    std::mutex imgLock;
+    QImage generateGenericImage(QString username) const;
+    uint8_t getCorrectIndex(int index) const;
     std::map<uint8_t, Participant*> mImageMap;
     QImage mDefaultImage;
     Settings* mSettings;

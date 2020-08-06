@@ -15,7 +15,6 @@ bool ServerTcpQueries::connect()
     {
         qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
         return false;
-
     }
     return true;
 }
@@ -28,7 +27,7 @@ bool ServerTcpQueries::disconnect()
     qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
     return false;
 }
-QVariantList ServerTcpQueries::parseData(QByteArray arr)
+QVariantList ServerTcpQueries::parseData(QByteArray arr) const
 {
     QVariantList vec;
     int size = arr[0];
