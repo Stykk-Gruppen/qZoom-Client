@@ -22,7 +22,9 @@ bool UserHandler::isGuest()
 
 bool UserHandler::login(QString username, QString password)
 {
-    QVariantList queryData = mServerTcpQueries->querySelectFrom_user1(username);
+    QVariantList vars;
+    vars.append(username);
+    QVariantList queryData = mServerTcpQueries->RQuery(4, vars);
     int userId = queryData[0].toInt();
     //qDebug() << "login userId " << userId;
     //We have to do some hashing here someday
@@ -54,7 +56,9 @@ bool UserHandler::login(QString username, QString password)
 
 bool UserHandler::fillUser(int userId)
 {
-    QVariantList queryData = mServerTcpQueries->querySelectFrom_user2(QString::number(userId));
+    QVariantList vars;
+    vars.append(QString::number(userId));
+    QVariantList queryData = mServerTcpQueries->RQuery(5, vars);
     if(queryData.size() > 0)
     {
         mUserId = userId;
@@ -69,8 +73,9 @@ bool UserHandler::fillUser(int userId)
 
 bool UserHandler::getPersonalRoom()
 {
-   // qDebug() << "mUserId " << mUserId;
-    QVariantList queryData = mServerTcpQueries->querySelectFrom_room2(QString::number(mUserId));
+    QVariantList vars;
+    vars.append(QString::number(mUserId));
+    QVariantList queryData = mServerTcpQueries->RQuery(6, vars);
     if(queryData.size()>0)
     {
         mPersonalRoomId = queryData[0].toString();
@@ -86,7 +91,11 @@ bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
     {
         return false;
     }
-    int numberOfRowsAffected = mServerTcpQueries->queryUpdate_room(roomId,roomPassword,QString::number(mUserId));
+    QVariantList vars;
+    vars.append(roomId);
+    vars.append(roomPassword);
+    vars.append(QString::number(mUserId));
+    int numberOfRowsAffected = mServerTcpQueries->CUDQuery(7, vars);
     if(numberOfRowsAffected<=0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;
@@ -135,7 +144,9 @@ QString UserHandler::getGuestName()
 
 QString UserHandler::getGuestStreamId()
 {
-    QString queryData = mServerTcpQueries->querySelectFrom_user3(QString::number(getGuestId()));
+    QVariantList vars;
+    vars.append(QString::number(getGuestId()));
+    QString queryData = mServerTcpQueries->RQuery(8, vars)[0].toString();
     if(!queryData.isEmpty())
     {
         return queryData;
@@ -146,7 +157,9 @@ QString UserHandler::getGuestStreamId()
 
 int UserHandler::getGuestId()
 {
-    return mServerTcpQueries->querySelectFrom_user4(mGuestName);
+    QVariantList vars;
+    vars.append(mGuestName);
+    return mServerTcpQueries->RQuery(9, vars)[0].toInt();
 }
 
 bool UserHandler::logout()

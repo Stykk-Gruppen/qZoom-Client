@@ -270,7 +270,11 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
     }
 }
 */
-
+/**
+ * Goes through the mStreamIdVector and locates the streamId
+ * @param streamId
+ * @return int index where the streamId is located in the vector
+ */
 int InputStreamHandler::findStreamIdIndex(QString streamId)
 {
     if(mStreamIdVector.size() >= 1)
@@ -286,6 +290,11 @@ int InputStreamHandler::findStreamIdIndex(QString streamId)
     return -1;
 }
 
+/**
+ * @brief InputStreamHandler::updateParticipantDisplayName
+ * @param streamId QString
+ * @param displayName
+ */
 void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
 {
     uint8_t index = findStreamIdIndex(streamId);
