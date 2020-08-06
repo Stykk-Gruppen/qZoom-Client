@@ -37,7 +37,7 @@ private:
     int64_t mTime;
     QString mAudioDeviceName;
     std::mutex* mWriteLock;
-    int init_filter_graph(AVFilterGraph **graph,
+    int initFilterGraph(AVFilterGraph **mFilterGraph,
                           AVFilterContext **src,
                           AVFilterContext **sink);
     int openInputStream();
@@ -67,9 +67,10 @@ private:
     bool mAbortGrabFrames = false;
 
 
-    AVFilterGraph *graph;
-    AVFilterContext *buffersrc_ctx, *buffersink_ctx;
-    AVFrame *filt_frame = av_frame_alloc();
+    AVFilterGraph *mFilterGraph;
+    AVFilterContext *mBufferSourceContext;
+    AVFilterContext *mBufferSinkContext;
+    AVFrame *mFilteredFrame = av_frame_alloc();
 
 
 };

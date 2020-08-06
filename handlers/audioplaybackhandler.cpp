@@ -150,7 +150,7 @@ void AudioPlaybackHandler::start()
     AVFrame *filt_frame = av_frame_alloc();
 
     /* Set up the filtergraph. */
-    error = init_filter_graph(&graph, &buffersrc_ctx, audioDecoderCodecContext, &buffersink_ctx);
+    error = initFilterGraph(&graph, &buffersrc_ctx, audioDecoderCodecContext, &buffersink_ctx);
     if (error < 0) {
         fprintf(stderr, "Unable to init filter graph:");
         exit(-1);
@@ -286,7 +286,16 @@ void AudioPlaybackHandler::start()
 
 }
 
-int AudioPlaybackHandler::init_filter_graph(AVFilterGraph **graph, AVFilterContext **src,
+/**
+ * Initialize filter graph for reducing noise
+ * and displaying border around the person talking
+ * @param ctx AVCodecContext decoder codec context for setting options
+ * @param[out] graph AVFilterGraph
+ * @param[out] src AVFilterContext
+ * @param[out] sink AVFilterContext
+ * @return Error code (0 if successful)
+ */
+int AudioPlaybackHandler::initFilterGraph(AVFilterGraph **graph, AVFilterContext **src,
                                             AVCodecContext *ctx, AVFilterContext **sink)
 {
     AVFilterGraph *filter_graph;

@@ -590,16 +590,23 @@ int AudioHandler::initOutputFrame(AVFrame **frame, int frame_size)
 
     return 0;
 }
-
-int AudioHandler::init_filter_graph(AVFilterGraph **graph,
+/**
+ * Initialize filter graph for reducing noise
+ * and displaying border around the person talking
+ * @param[out] graph AVFilterGraph
+ * @param[out] src AVFilterContext
+ * @param[out] sink AVFilterContext
+ * @return Error code (0 if successful)
+ */
+int AudioHandler::initFilterGraph(AVFilterGraph **graph,
                                      AVFilterContext **src,
                                      AVFilterContext **sink)
 {
     AVFilterGraph *filter_graph;
     AVFilterContext *abuffer_ctx;
     const AVFilter  *abuffer;
-    AVFilterContext *volume_ctx;
-    const AVFilter  *volume;
+    //AVFilterContext *volume_ctx;
+    //const AVFilter  *volume;
     AVFilterContext *silcence_ctx;
     const AVFilter  *silcence;
     AVFilterContext *gate_ctx;
@@ -807,7 +814,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     int error;
 
     /* push the audio data from decoded frame into the filtergraph */
-    error = av_buffersrc_add_frame_flags(buffersrc_ctx, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
+    error = av_buffersrc_add_frame_flags(mBufferSourceContext, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
     if(error<0){
         char* errbuff = (char *)malloc((1000)*sizeof(char));
         av_strerror(error,errbuff,1000);
@@ -816,7 +823,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     }
 
     // pull filtered audio from the filtergraph
-    error = av_buffersink_get_frame(buffersink_ctx, filt_frame);
+    error = av_buffersink_get_frame(mBufferSinkContext, mFilteredFrame);
     if(error<0){
         char* errbuff = (char *)malloc((1000)*sizeof(char));
         av_strerror(error,errbuff,1000);
@@ -824,7 +831,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
         exit(1);
     }
 
-    AVDictionary *meta = filt_frame->metadata;
+    AVDictionary *meta = mFilteredFrame->metadata;
     if(meta)
     {
         AVDictionaryEntry* silenceData = av_dict_get(meta, "", NULL, AV_DICT_IGNORE_SUFFIX);
@@ -907,15 +914,11 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
 
     /* Write one audio frame from the temporary packet to the output file. */
     mWriteLock->lock();
-    //    qDebug() << "**********AUDIO*****************";
-    //    qDebug() << "PTS:" << output_packet.pts;
-    //    qDebug() << "DTS:" << output_packet.dts;
-    //    qDebug() << output_packet.stream_index;
-    //qDebug() << "writing interleaved";
     if (*data_present &&
             (error = av_interleaved_write_frame(mOutputFormatContext, &output_packet)) < 0)
     {
         fprintf(stderr, "Could not write audio frame");
+        mWriteLock->unlock();
         goto cleanup;
     }
     //qDebug() << error;
@@ -967,7 +970,9 @@ int AudioHandler::loadEncodeAndWrite()
     return 0;
 }
 
-
+/**
+ * Free and close all open contexts and fifo
+ */
 void AudioHandler::cleanup()
 {
     if (mFifo)
@@ -993,6 +998,10 @@ void AudioHandler::cleanup()
     }
     exit(0);
 }
+/**
+ * Initialize input, filtergraph, output, fifo and resampler contexts
+ * @return Error code (0 if successful)
+ */
 int AudioHandler::init()
 {
     int ret = AVERROR_EXIT;
@@ -1032,32 +1041,24 @@ int AudioHandler::init()
     }
 
     /* Set up the filtergraph. */
-    ret = init_filter_graph(&graph, &buffersrc_ctx, &buffersink_ctx);
+    ret = initFilterGraph(&mFilterGraph, &mBufferSourceContext, &mBufferSinkContext);
     if (ret < 0) {
         fprintf(stderr, "Unable to init filter graph:");
         exit(-1);
     }
-    //qDebug() << "Fifo init";
-    /* Write the header of the output file container. */
-    /*if (writeOutputFileHeader())
-    {
-        cleanup();
-    }
-    qDebug() << "Header written";*/
-    /* Loop as long as we have input samples to read or output samples
-     * to write; abort as soon as we have neither. */
-    // int looping = 0;
     return 0;
 }
 
+/**
+ * Start grabbing audio from ALSA, decode, resample,
+ * filter, encode and send over UDP to the server.
+ * @return Error code (0 if successful)
+ */
 int AudioHandler::grabFrames()
 {
-    int count = 0;
     mActive = true;
     while (!mAbortGrabFrames)
     {
-        count++;
-        //qDebug() << count;
         /* Use the encoder's desired frame size for processing. */
         const int output_frame_size = mOutputCodecContext->frame_size;
         int finished = 0;
@@ -1129,19 +1130,6 @@ int AudioHandler::grabFrames()
 
     //cleanup();
     return 0;
-    /**
-     * Write the trailer of the output file container.
-     * @param outputFormatContext Format context of the output file
-     * @return Error code (0 if successful)
-     */
-    /*
-    if ((av_write_trailer(outputFormatContext)) < 0)
-    {
-        fprintf(stderr, "Could not write output file trailer");
-        cleanup();
-    }
-    return 0;
-    */
 
 }
 
@@ -1156,17 +1144,31 @@ QVariantList AudioHandler::getAudioInputDevices()
     }
     return q;
 }
-
+/**
+ * Returns the mActive bool, it describes if
+ * the grabFrames loop is running
+ * @return bool
+ */
 bool AudioHandler::isActive()
 {
     return mActive;
 }
+
 
 void AudioHandler::changeAudioInputDevice(QString deviceName)
 {
     mAudioDeviceName = deviceName;
     qDebug() << "Changed audio device";
 }
+
+/**
+ * Custom writePacket function for av_interleaved_write_frame.
+ * Prepends a int(0) telling the udpSocketHandler it is a audio packet.
+ * @param buf_size int how many bytes to send
+ * @param buffer uint8_t* bytes to send
+ * @param opaque void* pointer set by avio_alloc_context
+ * @return int how many bytes were sent
+ */
 int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buffer_size)
 {
     UdpSocketHandler* socketHandler = reinterpret_cast<UdpSocketHandler*>(opaque);
@@ -1178,9 +1180,14 @@ int AudioHandler::audioCustomSocketWrite(void* opaque, uint8_t *buffer, int buff
     return socketHandler->sendDatagram(send);
 }
 
-void AudioHandler::toggleGrabFrames(bool a)
+/**
+ * Changes the mAbortGrabFrames bool, if set to
+ * false it will stop the grabFrames loop
+ * @param newBool bool
+ */
+void AudioHandler::toggleGrabFrames(bool newBool)
 {
-    mAbortGrabFrames = !a;
+    mAbortGrabFrames = !newBool;
 }
 
 
