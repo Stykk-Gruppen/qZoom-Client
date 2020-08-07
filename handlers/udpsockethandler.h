@@ -11,6 +11,16 @@
 #include "handlers/videoplaybackhandler.h"
 #include "handlers/audioplaybackhandler.h"
 
+#include<stdio.h>	//printf
+#include<string.h> //memset
+#include<stdlib.h> //exit(0);
+#include<arpa/inet.h>
+#include<sys/socket.h>
+
+#define SERVER "46.250.220.57"
+#define BUFLEN 512	//Max length of buffer
+#define PORT 1337	//The port on which to send data
+
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
 class InputStreamHandler;
@@ -27,6 +37,9 @@ public slots:
     void readPendingDatagrams();
 
 private:
+
+    struct sockaddr_in si_other;
+    int s, i, slen=sizeof(si_other);
     void addStreamToVector(QString, int);
     //int findStreamIdIndex(QString);
     int mBufferSize;

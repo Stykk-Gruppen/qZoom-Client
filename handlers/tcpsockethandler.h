@@ -19,7 +19,6 @@ class TcpSocketHandler : public QObject
 public:
     explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QString displayName, QHostAddress address, int port = 1338, QObject* parent = nullptr);
     ~TcpSocketHandler();
-    void writeHeader();
     void updateDisplayName(const QString& displayName);
     void sendChangedDisplayNameSignal();
     void sendDisabledVideoSignal();
@@ -34,6 +33,8 @@ public:
     QByteArray getReply() const;
 
 public slots:
+    void writeHeader();
+
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);

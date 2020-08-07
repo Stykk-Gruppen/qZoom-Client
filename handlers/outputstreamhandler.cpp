@@ -143,15 +143,15 @@ int OutputStreamHandler::enableVideo(bool screenShare)
                                          mBufferSize, mTcpSocketHandler, screenShare);
     }
 
-    const int error = mVideoHandler->init();
-    mTcpSocketHandler->writeHeader();
-    if(error < 0)
+    //const int error = mVideoHandler->init();
+    //mTcpSocketHandler->writeHeader();
+    /*if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");
         errorHandler->giveErrorDialog("Could not stream video");
         qDebug() << "Error: " << error;
         return (int)error;
-    }
+    }*/
 
     mVideoHandler->toggleGrabFrames(mVideoEnabled);
     qDebug() << "Before grab frames";

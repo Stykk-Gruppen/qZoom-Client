@@ -41,6 +41,11 @@ public:
     static int custom_io_write(void* opaque, uint8_t *buffer, int buffer_size);
     bool isActive() const;
 
+signals:
+    void callWriteHeader();
+
+
+
 private:
     QString buildScreenDeviceName();
     //Trenger kanskje ikke denne likevel?
@@ -80,5 +85,6 @@ private:
     QString mAudioDeviceName;
     QString mCameraDeviceName;
     std::mutex* mWriteLock;
+    TcpSocketHandler* mTcpSocketHandler;
 };
 #endif // VideoHandler_H
