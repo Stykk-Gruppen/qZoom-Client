@@ -107,6 +107,7 @@ void VideoPlaybackHandler::start()
         //av_read_frame(fmt_ctx, NULL);
 
         inputFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
+        qDebug() << inputFormatContext->interrupt_callback.callback;
 
         error = av_read_frame(inputFormatContext, &packet);
         qDebug() << "AVREADFRAME: " << error;

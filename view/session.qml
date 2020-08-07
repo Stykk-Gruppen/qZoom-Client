@@ -71,6 +71,7 @@ Rectangle {
                         width: parent.width
                         height: parent.height
                         anchors.verticalCenter: parent.verticalCenter
+                    }
 
                         Image {
                             id: liveImage
@@ -84,6 +85,16 @@ Rectangle {
                             source: "image://live/10"
                             fillMode: Image.PreserveAspectFit
                             cache: false
+                            onWidthChanged: {
+                                borderRectangle.width = paintedWidth + 6
+                                borderRectangle.height = paintedHeight + 6
+                            }
+                            onHeightChanged: {
+                                borderRectangle.width = paintedWidth + 6
+                                borderRectangle.height = paintedHeight + 6
+                            }
+                            //onHeightChanged: borderRectangle.height = paintedHeight + 2
+                            //onWindowChanged: console.log("AAAA");
 
                             function reload() {
                                 counter = !counter
@@ -105,6 +116,8 @@ Rectangle {
                                         //QColor(27, 29, 54, 255)
                                     }
                                 }
+                                //console.log(paintedHeight)
+                                //console.log(paintedWidth)
                             }
 
                             MouseArea {
@@ -117,7 +130,7 @@ Rectangle {
                                 }
                             }
                         }
-                    }
+
 
                     Item {
                         Timer {
