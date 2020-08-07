@@ -164,7 +164,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
      * In order for the dividing to work, we need to remove the audioOrVideo byte
      * at the start of the arr, and prepend it to the smaller arrays
     */
-    qDebug() << arr.size();
+    //qDebug() << arr.size();
 
     //Creats a new QByteArray from the first byte in arr, which should be the audioOrVideo byte.
     //Then it removes the byte from arr

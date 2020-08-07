@@ -12,6 +12,13 @@ VideoPlaybackHandler::~VideoPlaybackHandler()
 
 }
 
+static int interruptCallBack(void* ctx)
+{
+    qDebug() << "inside interrupt";
+    return 0;
+}
+
+static const AVIOInterruptCB icb = {interruptCallBack, NULL};
 
 void VideoPlaybackHandler::start()
 {
@@ -19,6 +26,11 @@ void VideoPlaybackHandler::start()
     int error = 0;
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
+
+
+    inputFormatContext->interrupt_callback = icb;
+    //inputFormatContext->interrupt_callback.callback = interruptCallBack;
+    //inputFormatContext->interrupt_callback.opaque = NULL;
 
     uint8_t *avioContextBuffer = reinterpret_cast<uint8_t*>(av_malloc(mBufferSize));
     Q_ASSERT(avioContextBuffer);
@@ -28,7 +40,7 @@ void VideoPlaybackHandler::start()
 
     inputFormatContext->pb = avioContext;
 
-    error = avformat_open_input(&inputFormatContext, nullptr, nullptr, nullptr);
+    error = avformat_open_input(&inputFormatContext, NULL, NULL, NULL);
     qDebug() << "HEADER RECEIVED" << Q_FUNC_INFO;
 
     if(error < 0)
@@ -93,8 +105,11 @@ void VideoPlaybackHandler::start()
     while (!mStopPlayback) {
         //qDebug() << "About to call av read frame";
         //av_read_frame(fmt_ctx, NULL);
+
+        inputFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
+
         error = av_read_frame(inputFormatContext, &packet);
-        //qDebug() << "AVREADFRAME: " << ret;
+        qDebug() << "AVREADFRAME: " << error;
         if(error < 0)
         {
             char* errbuff = (char *)malloc((1000)*sizeof(char));
@@ -158,3 +173,6 @@ void VideoPlaybackHandler::decreaseIndex()
 {
     mIndex--;
 }
+
+
+

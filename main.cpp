@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
     avcodec_register_all();
     avdevice_register_all();
 
-
     errorHandler = new ErrorHandler;
 
     int bufferSize = 8*1024;

@@ -33,6 +33,7 @@ void Playback::stop()
  */
 int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
+    static int counter = 0;
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
     while (s->buffer->size() <= buf_size)
     {
@@ -55,5 +56,8 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     memcpy(buf, tempBuffer.constData(), buf_size);
 
     //Since return value is fixed it will never stop reading, should not be a problem for us?
+    //qDebug() << tempBuffer.size();
+    counter++;
+    qDebug() << counter;
     return buf_size;
 }

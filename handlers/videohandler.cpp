@@ -264,6 +264,16 @@ int VideoHandler::init()
         {
             out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         }
+
+        /*
+        if (ofmt_ctx->oformat->flags & AVFMT_FLAG_NONBLOCK)
+        {
+            qDebug() << "AAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+            out_stream->codec->flags |= AVFMT_FLAG_NONBLOCK;
+            return AVERROR(EAGAIN);
+        }
+        out_stream->codec->flags |= AVFMT_FLAG_NONBLOCK;
+        */
     }
 
     AVDictionary *options = NULL;
