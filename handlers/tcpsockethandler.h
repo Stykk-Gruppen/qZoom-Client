@@ -31,10 +31,12 @@ public:
     bool isOpen() const;
     bool isReady() const;
     QByteArray getReply() const;
+    QByteArray getHeader();
+    QTcpSocket *getSocket();
+
 
 public slots:
     void writeHeader();
-
     void connected();
     void disconnected();
     void bytesWritten(qint64 bytes);

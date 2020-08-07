@@ -158,6 +158,11 @@ void TcpSocketHandler::readyRead()
     };
 }
 
+QTcpSocket *TcpSocketHandler::getSocket()
+{
+    return mSocket;
+}
+
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
@@ -175,6 +180,21 @@ void TcpSocketHandler::writeHeader()
 
     mSocket->write(mHeader);
     mHeader.clear();
+}
+
+QByteArray TcpSocketHandler::getHeader()
+{
+    mHeader.prepend(mStreamId.toLocal8Bit().data());
+    mHeader.prepend(mStreamId.size());
+
+    mHeader.prepend(mDisplayName.toLocal8Bit().data());
+    mHeader.prepend(mDisplayName.size());
+
+    //Puts the roomId and its size at the front of the array
+    mHeader.prepend(mRoomId.toLocal8Bit().data());
+    mHeader.prepend(mRoomId.size());
+
+    return mHeader;
 }
 
 void TcpSocketHandler::sendChangedDisplayNameSignal()

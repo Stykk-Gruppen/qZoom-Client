@@ -9,9 +9,8 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 {
     mScreenCapture = screenShare;
     mTcpSocketHandler = tcpSocketHandler;
-    //connect(mTcpSocketHandler, mTcpSocketHandler->writeHeader(), this, callWriteHeader());
-    connect(mTcpSocketHandler, &TcpSocketHandler::writeHeader, this, &VideoHandler::callWriteHeader);
 
+    connect(this, &VideoHandler::callWriteHeader, mTcpSocketHandler, &TcpSocketHandler::writeHeader);
 
     mBufferSize = bufferSize;
     mWriteToFile = false;
@@ -156,8 +155,8 @@ int VideoHandler::init()
     //Set Output codecs from guess
     outputVideoCodec = avcodec_find_encoder(ofmt_ctx->oformat->video_codec);
 
-   // av_opt_set(outputVideoCodec, "preset", "slow", 0);
-   //` av_opt_set(outputVideoCodec, "crf", "28", 0);
+    // av_opt_set(outputVideoCodec, "preset", "slow", 0);
+    //` av_opt_set(outputVideoCodec, "crf", "28", 0);
 
     //Allocate CodecContext for outputstreams
     mOutputVideoCodecContext = avcodec_alloc_context3(outputVideoCodec);
@@ -190,7 +189,7 @@ int VideoHandler::init()
         mVideoStream = i;
         //Setter div parametere.
         //Denne krasher vanlig video også
-         //outputVideoCodecContext->bit_rate = in_stream->codecpar->bit_rate;
+        //outputVideoCodecContext->bit_rate = in_stream->codecpar->bit_rate;
         mOutputVideoCodecContext->width = in_stream->codecpar->width;
         mOutputVideoCodecContext->height = in_stream->codecpar->height;
 
@@ -324,8 +323,7 @@ int VideoHandler::init()
 void VideoHandler::grabFrames()
 {
     init();
-    mTcpSocketHandler->writeHeader();
-
+    emit callWriteHeader();
 
     mActive = true;
     AVPacket* pkt = av_packet_alloc();
