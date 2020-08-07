@@ -10,6 +10,24 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
     mStreamId = streamId;
     mRoomId = roomId;
     initSocket();
+
+    //char buf[BUFLEN];
+    //char *message = "test message very many bytes to send with this message";
+
+    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+    {
+        exit(1);
+    }
+
+    memset((char *) &si_other, 0, sizeof(si_other));
+    si_other.sin_family = AF_INET;
+    si_other.sin_port = htons(PORT);
+
+    if (inet_aton(SERVER , &si_other.sin_addr) == 0)
+    {
+        fprintf(stderr, "inet_aton() failed\n");
+        exit(1);
+    }
 }
 /**
  * Creates a new QUdepSocket and makes it listen to port and QHostAddress::Any.
@@ -42,7 +60,7 @@ void UdpSocketHandler::readPendingDatagrams()
 {
     while (mUdpSocket->hasPendingDatagrams())
     {
-        const QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address())
         {
             continue;
@@ -63,7 +81,7 @@ void UdpSocketHandler::readPendingDatagrams()
         }*/
 
         const int streamIdLength = data[0];
-        data.remove(0, 1);
+        data.remove(0,1);
 
         //Finds the streamId header, stores it and removes it;
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
@@ -164,7 +182,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
      * In order for the dividing to work, we need to remove the audioOrVideo byte
      * at the start of the arr, and prepend it to the smaller arrays
     */
-    qDebug() << arr.size();
+    //qDebug() << arr.size();
 
     //Creats a new QByteArray from the first byte in arr, which should be the audioOrVideo byte.
     //Then it removes the byte from arr
@@ -192,12 +210,20 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
             arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
-            ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
+            //ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
+            if (sendto(s, temp, temp.size(), 0 , (struct sockaddr *) &si_other, slen)==-1)
+            {
+                return 0;
+            }
         }
         else
         {
             arr.prepend(arrToPrepend);
-            ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
+            //ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
+            if (sendto(s, arr, arr.size(), 0 , (struct sockaddr *) &si_other, slen)==-1)
+            {
+                return 0;
+            }
             break;
         }
 
