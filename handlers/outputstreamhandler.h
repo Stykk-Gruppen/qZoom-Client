@@ -18,7 +18,7 @@ public:
                         QObject *parent = nullptr);
     Q_INVOKABLE void disableAudio();
     Q_INVOKABLE void disableVideo();
-    Q_INVOKABLE void changeAudioInputDevice(QString deviceName);
+    Q_INVOKABLE void changeAudioInputDevice(const QString& deviceName);
     Q_INVOKABLE void init();
     Q_INVOKABLE QVariantList getAudioInputDevices() const;
     Q_INVOKABLE QString getDefaultAudioInputDevice() const;

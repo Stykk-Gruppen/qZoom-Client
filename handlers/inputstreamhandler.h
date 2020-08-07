@@ -17,13 +17,13 @@ class InputStreamHandler : public QObject
     Q_OBJECT
 public:
     explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent = nullptr);
-    void addStreamToVector(int index, QString streamId, QString displayName);
+    void addStreamToVector(int index, const QString& streamId, const QString& displayName);
     void init();
     void close();
-    void removeStream(QString streamId);
-    void updateParticipantDisplayName(QString streamId, QString displayName);
-    void setPeerToVideoDisabled(QString streamId);
-    void setPeerToAudioDisabled(QString streamId);
+    void removeStream(const QString& streamId);
+    void updateParticipantDisplayName(const QString& streamId, const QString& displayName);
+    void setPeerToVideoDisabled(const QString& streamId);
+    void setPeerToAudioDisabled(const QString& streamId);
     void handleHeader(QByteArray header);
     void lockAudioMutex(int index);
     void appendToAudioBuffer(int index, const QByteArray& data);
@@ -33,7 +33,7 @@ public:
     void setAudioPlaybackStarted(int index, bool val);
     void unlockVideoMutex(int index);
     void setVideoPlaybackStarted(int index, bool val);
-    int findStreamIdIndex(QString streamId) const;
+    int findStreamIdIndex(const QString& streamId) const;
     int getAudioBufferSize(int index) const;
     int getVideoBufferSize(int index) const;
     bool audioPlaybackStarted(int index) const;

@@ -29,8 +29,8 @@ public:
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
     Q_INVOKABLE void disableAudio();
-    Q_INVOKABLE bool joinSession(QString _roomId, QString _roomPassword);
-    Q_INVOKABLE bool createSession(QString _roomId, QString _roomPassword);
+    Q_INVOKABLE bool joinSession(const QString& roomId, const QString& roomPassword);
+    Q_INVOKABLE bool createSession(const QString& roomId, const QString& roomPassword);
     Q_INVOKABLE bool leaveSession();
     Q_INVOKABLE bool isGuest() const;
     Q_INVOKABLE bool enableVideo();

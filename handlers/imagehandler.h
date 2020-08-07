@@ -26,16 +26,16 @@ public:
     void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
-    void addPeer(uint8_t index, QString displayName);
+    void addPeer(uint8_t index, const QString& displayName);
     void removePeer(uint8_t index);
-    void updatePeerDisplayName(uint8_t index, QString displayName);
+    void updatePeerDisplayName(uint8_t index, const QString& displayName);
     void removeAllPeers();
     void setPeerVideoAsDisabled(uint8_t index);
     void setPeerAudioIsDisabled(uint8_t index, bool val);
     void toggleBorder(bool talking, int index);
     Q_INVOKABLE int getNumberOfScreens() const;
-    Q_INVOKABLE bool getIsTalking(int index);
-    Q_INVOKABLE bool getAudioIsDisabled(int index);
+    Q_INVOKABLE bool getIsTalking(int index) const;
+    Q_INVOKABLE bool getAudioIsDisabled(int index) const;
 
 public slots:
     void updateImage(const QImage &image, uint8_t index);
@@ -46,7 +46,7 @@ signals:
 
 private:
     std::mutex mImageLock;
-    QImage generateGenericImage(QString username) const;
+    QImage generateGenericImage(const QString& username) const;
     uint8_t getCorrectIndex(int index) const;
     std::map<uint8_t, Participant*> mImageMap;
     QImage mDefaultImage;

@@ -57,7 +57,7 @@ QVariantList ServerTcpQueries::parseData(QByteArray arr) const
     return vec;
 }
 
-int ServerTcpQueries::CUDQuery(int code, QVariantList vars)
+int ServerTcpQueries::CUDQuery(int code, const QVariantList& vars)
 {
     int numberOfRowsAffected = -1;
     QByteArray data;
@@ -82,7 +82,7 @@ int ServerTcpQueries::CUDQuery(int code, QVariantList vars)
     return numberOfRowsAffected;
 }
 
-QVariantList ServerTcpQueries::RQuery(int code, QVariantList vars)
+QVariantList ServerTcpQueries::RQuery(int code, const QVariantList& vars)
 {
     QVariantList returnList;
     QByteArray data;

@@ -25,10 +25,10 @@ void ImageHandler::toggleBorder(bool talking, int index)
  * @param index int to get the correct participant from the map
  * @return bool
  */
-bool ImageHandler::getIsTalking(int index)
+bool ImageHandler::getIsTalking(int index) const
 {
     uint8_t i = getCorrectIndex(index);
-    return mImageMap[i]->getIsTalking();
+    return mImageMap.at(i)->getIsTalking();
 }
 
 /**
@@ -36,11 +36,10 @@ bool ImageHandler::getIsTalking(int index)
  * @param index int to get the correct participant from the map
  * @return bool
  */
-bool ImageHandler::getAudioIsDisabled(int index)
+bool ImageHandler::getAudioIsDisabled(int index) const
 {
     uint8_t i = getCorrectIndex(index);
-    //qDebug() << i << "Audio is disabled?" << mImageMap[i]->getAudioIsDisabled();
-    return mImageMap[i]->getAudioIsDisabled();
+    return mImageMap.at(i)->getAudioIsDisabled();
 }
 
 /**
@@ -91,11 +90,11 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
 
     index = getCorrectIndex(index);
 
-    QImage result = mImageMap[index]->getImage();
+    QImage result = mImageMap.at(index)->getImage();
 
     if(result.isNull())
     {
-        result = generateGenericImage(mImageMap[index]->getDisplayName());
+        result = generateGenericImage(mImageMap.at(index)->getDisplayName());
     }
 
     //Lets QML know how large the QImage is
@@ -119,7 +118,7 @@ QImage ImageHandler::requestImage(const QString &id, QSize *size, const QSize &r
  * @param index uint8_t
  * @param displayName QString
  */
-void ImageHandler::addPeer(uint8_t index, QString displayName)
+void ImageHandler::addPeer(uint8_t index, const QString& displayName)
 {
     qDebug() << "Added peer to ImageHandler map: " << index << Q_FUNC_INFO;
     mImageLock.lock();
@@ -180,7 +179,7 @@ void ImageHandler::removePeer(uint8_t index)
  * @param index uint8_t
  * @param displayName QString
  */
-void ImageHandler::updatePeerDisplayName(uint8_t index, QString displayName)
+void ImageHandler::updatePeerDisplayName(uint8_t index, const QString& displayName)
 {
     qDebug() << index << "Updated their display name to:" << displayName;
     mImageMap[index]->setDisplayName(displayName);
@@ -327,7 +326,7 @@ int ImageHandler::getNumberOfScreens() const
  * @param displayName
  * @return
  */
-QImage ImageHandler::generateGenericImage(QString displayName) const
+QImage ImageHandler::generateGenericImage(const QString& displayName) const
 {
     QImage image(QSize(1280, 720), QImage::Format_RGB32);
     QPainter painter(&image);

@@ -11,10 +11,10 @@ class UserHandler : public QObject
 public:
     explicit UserHandler(ServerTcpQueries* _mServerTcpQueries, Settings* settings, QObject *parent = nullptr);
     ~UserHandler();
-    Q_INVOKABLE bool login(QString username, QString password);
+    Q_INVOKABLE bool login(const QString& username, const QString& password);
     Q_INVOKABLE bool logout();
     Q_INVOKABLE bool hasRoom();
-    Q_INVOKABLE bool updatePersonalRoom(QString roomId, QString roomPassword);
+    Q_INVOKABLE bool updatePersonalRoom(const QString& roomId, const QString& roomPassword);
     Q_INVOKABLE bool isGuest() const;
     Q_INVOKABLE QString getErrorMessage() const;
     Q_INVOKABLE QString getPersonalRoomId() const;

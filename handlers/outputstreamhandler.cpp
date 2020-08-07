@@ -192,7 +192,7 @@ QVariantList OutputStreamHandler::getAudioInputDevices() const
     return AudioHandler::getAudioInputDevices();
 }
 
-void OutputStreamHandler::changeAudioInputDevice(QString deviceName)
+void OutputStreamHandler::changeAudioInputDevice(const QString& deviceName)
 {
     qDebug() << "Changing Audio to: " << deviceName;
     mAudioDevice = deviceName;

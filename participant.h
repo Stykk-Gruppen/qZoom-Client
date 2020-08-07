@@ -8,8 +8,8 @@ class Participant
 {
 public:
     Participant();
-    void setImage(QImage val);
-    void setDisplayName(QString val);
+    void setImage(const QImage& val);
+    void setDisplayName(const QString& val);
     void setIsTalking(bool val);
     void setAudioIsDisabled(bool val);
     bool getIsTalking() const;

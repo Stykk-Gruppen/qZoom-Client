@@ -288,7 +288,7 @@ bool TcpSocketHandler::isReady() const
     return mReady;
 }
 
-void TcpSocketHandler::updateDisplayName(QString displayName)
+void TcpSocketHandler::updateDisplayName(const QString& displayName)
 {
     mDisplayName = displayName;
 }

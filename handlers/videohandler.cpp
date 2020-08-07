@@ -303,7 +303,7 @@ int VideoHandler::init()
     return ret;
 }
 
-static int64_t pts = 0;
+//static int64_t mPts = 0;
 
 void VideoHandler::grabFrames()
 {
@@ -402,14 +402,14 @@ void VideoHandler::grabFrames()
             }
             if(mIsFirstPacket)
             {
-                pts = mTime;
+                mPts = mTime;
                 mIsFirstPacket = false;
             }
 
             if (mScaledFrame)
             {
-                mScaledFrame->pts = pts;
-                pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
+                mScaledFrame->pts = mPts;
+                mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
             mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mScaledFrame);
@@ -426,14 +426,14 @@ void VideoHandler::grabFrames()
         {
             if(mIsFirstPacket)
             {
-                pts = mTime;
+                mPts = mTime;
                 mIsFirstPacket = false;
             }
 
             if (mVideoFrame)
             {
-                mVideoFrame->pts = pts;
-                pts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
+                mVideoFrame->pts = mPts;
+                mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
             mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mVideoFrame);

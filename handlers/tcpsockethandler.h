@@ -20,7 +20,7 @@ public:
     explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QString displayName, QHostAddress address, int port = 1338, QObject* parent = nullptr);
     ~TcpSocketHandler();
     void writeHeader();
-    void updateDisplayName(QString displayName);
+    void updateDisplayName(const QString& displayName);
     void sendChangedDisplayNameSignal();
     void sendDisabledVideoSignal();
     void sendDisabledAudioSignal();

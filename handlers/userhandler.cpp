@@ -20,7 +20,7 @@ bool UserHandler::isGuest() const
     return mIsGuest;
 }
 
-bool UserHandler::login(QString username, QString password)
+bool UserHandler::login(const QString& username, const QString& password)
 {
     QVariantList vars;
     vars.append(username);
@@ -96,7 +96,7 @@ bool UserHandler::getPersonalRoom()
     return false;
 }
 
-bool UserHandler::updatePersonalRoom(QString roomId, QString roomPassword)
+bool UserHandler::updatePersonalRoom(const QString& roomId, const QString& roomPassword)
 {
     if (roomId.length() == 0 || roomPassword.length() == 0)
     {

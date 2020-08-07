@@ -531,7 +531,7 @@ int AudioHandler::readDecodeConvertAndStore(int *finished)
         }
 
         /* Add the converted input samples to the FIFO buffer for later processing. */
-        if (addSamplesToFifo(converted_input_samples,input_frame->nb_samples))
+        if (addSamplesToFifo(converted_input_samples, input_frame->nb_samples))
         {
             goto cleanup;
         }

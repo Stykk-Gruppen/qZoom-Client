@@ -8,10 +8,8 @@ class ErrorHandler : public QObject
     Q_OBJECT
 public:
     explicit ErrorHandler(QObject *parent = nullptr);
-    void giveErrorDialog(QString error)
-    {
-        emit showError(error);
-    }
+    void giveErrorDialog(const QString& error);
+
 signals:
     void showError(QString error);
 };

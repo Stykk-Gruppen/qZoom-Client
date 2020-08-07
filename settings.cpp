@@ -116,12 +116,12 @@ void Settings::setVideoOn(bool val)
     mVideoOn = val;
 }
 
-void Settings::setDisplayName(QString val)
+void Settings::setDisplayName(const QString& val)
 {
     mDisplayName = val;
 }
 
-void Settings::setDefaultAudioInput(QString val)
+void Settings::setDefaultAudioInput(const QString& val)
 {
     mDefaultAudioInput = val;
 }
@@ -136,12 +136,12 @@ bool Settings::getSaveLastRoom() const
     return mSaveLastRoom;
 }
 
-void Settings::setLastRoomId(QString val)
+void Settings::setLastRoomId(const QString& val)
 {
     mLastRoomId = val;
 }
 
-void Settings::setLastRoomPassword(QString val)
+void Settings::setLastRoomPassword(const QString& val)
 {
     mLastRoomPassword = val;
 }

@@ -111,12 +111,12 @@ QVariantList SessionHandler::getAudioInputDevices() const
     return AudioHandler::getAudioInputDevices();
 }
 
-bool SessionHandler::joinSession(QString _roomId, QString _roomPassword)
+bool SessionHandler::joinSession(const QString& roomId, const QString& roomPassword)
 {
-    qDebug() << "RoomId: " << _roomId;
+    qDebug() << "RoomId: " << roomId;
     QVariantList vars;
-    vars.append(_roomPassword);
-    vars.append(_roomId);
+    vars.append(roomPassword);
+    vars.append(roomId);
     const QVariantList response = mServerTcpQueries->RQuery(0, vars);
     if(response.size() > 0)
     {
@@ -194,7 +194,7 @@ bool SessionHandler::leaveSession()
     return true;
 }
 
-bool SessionHandler::createSession(QString roomId, QString roomPassword)
+bool SessionHandler::createSession(const QString& roomId, const QString& roomPassword)
 {
     if (!mUser->isGuest())
     {
@@ -205,7 +205,7 @@ bool SessionHandler::createSession(QString roomId, QString roomPassword)
             vars.append(QString::number(mUser->getUserId()));
             vars.append(roomPassword);
             int numberOfRowsAffected = mServerTcpQueries->CUDQuery(2, vars);
-            if(numberOfRowsAffected<=0)
+            if(numberOfRowsAffected <= 0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
                 return false;
@@ -236,7 +236,7 @@ bool SessionHandler::addGuestUserToDatabase()
     QVariantList vars;
     vars.append(mUser->getGuestName());
     int numberOfRowsAffected = mServerTcpQueries->CUDQuery(3, vars);
-    if(numberOfRowsAffected<=0)
+    if(numberOfRowsAffected <= 0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;
         return false;

@@ -6,12 +6,12 @@ Participant::Participant()
     mIsTalking = false;
 }
 
-void Participant::setImage(QImage val)
+void Participant::setImage(const QImage& val)
 {
     mImage = val;
 }
 
-void Participant::setDisplayName(QString val)
+void Participant::setDisplayName(const QString& val)
 {
     mDisplayName = val;
 }

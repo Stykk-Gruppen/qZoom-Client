@@ -89,7 +89,7 @@ void InputStreamHandler::close()
     mAudioFutures.clear();
 }
 
-void InputStreamHandler::removeStream(QString streamId)
+void InputStreamHandler::removeStream(const QString& streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
     int index = findStreamIdIndex(streamId);
@@ -128,7 +128,7 @@ void InputStreamHandler::removeStream(QString streamId)
         mVideoFutures.erase(mVideoFutures.begin() + index);
         mAudioFutures.erase(mAudioFutures.begin() + index);
 
-        for(int i = index; i < mVideoPlaybackHandlerVector.size(); i++)
+        for(unsigned long i = index; i < mVideoPlaybackHandlerVector.size(); i++)
         {
             mVideoPlaybackHandlerVector.at(i)->decreaseIndex();
         }
@@ -191,7 +191,7 @@ void InputStreamHandler::handleHeader(QByteArray data)
  * @param index int to add a peer to ImageHandler
  * @param displayName QString to display on GUI
  */
-void InputStreamHandler::addStreamToVector(int index, QString streamId, QString displayName)
+void InputStreamHandler::addStreamToVector(int index, const QString& streamId, const QString& displayName)
 {
     qDebug() << "Adding streamId to Vectors: " << streamId;
     if(index >= std::numeric_limits<uint_8>::max())
@@ -261,7 +261,7 @@ int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
  * @param streamId
  * @return int index where the streamId is located in the vector
  */
-int InputStreamHandler::findStreamIdIndex(QString streamId) const
+int InputStreamHandler::findStreamIdIndex(const QString& streamId) const
 {
     if(mStreamIdVector.size() >= 1)
     {
@@ -281,26 +281,49 @@ std::vector<QString> InputStreamHandler::getStreamIdVector() const
     return mStreamIdVector;
 }
 
+/**
+ * @brief InputStreamHandler::getAudioPlaybackHandler
+ * @param index
+ * @return
+ */
 AudioPlaybackHandler* InputStreamHandler::getAudioPlaybackHandler(int index) const
 {
     return mAudioPlaybackHandlerVector[index];
 }
 
+/**
+ * @brief InputStreamHandler::getVideoPlaybackHandler
+ * @param index
+ * @return
+ */
 VideoPlaybackHandler* InputStreamHandler::getVideoPlaybackHandler(int index) const
 {
     return mVideoPlaybackHandlerVector[index];
 }
 
+/**
+ * @brief InputStreamHandler::lockAudioMutex
+ * @param index
+ */
 void InputStreamHandler::lockAudioMutex(int index)
 {
     mAudioMutexVector[index]->lock();
 }
 
+/**
+ * @brief InputStreamHandler::appendToAudioBuffer
+ * @param index
+ * @param data
+ */
 void InputStreamHandler::appendToAudioBuffer(int index, const QByteArray& data)
 {
     mAudioBufferVector[index]->append(data);
 }
 
+/**
+ * @brief InputStreamHandler::unlockAudioMutex
+ * @param index
+ */
 void InputStreamHandler::unlockAudioMutex(int index)
 {
     mAudioMutexVector[index]->unlock();
@@ -333,7 +356,7 @@ void InputStreamHandler::setAudioPlaybackStarted(int index, bool val)
 
 void InputStreamHandler::unlockVideoMutex(int index)
 {
-    mVideoMutexVector[index]->lock();
+    mVideoMutexVector[index]->unlock();
 }
 
 bool InputStreamHandler::videoPlaybackStarted(int index) const
@@ -369,13 +392,13 @@ QFuture<void> *InputStreamHandler::getVideoFutures(int index)
  * @param streamId QString
  * @param displayName
  */
-void InputStreamHandler::updateParticipantDisplayName(QString streamId, QString displayName)
+void InputStreamHandler::updateParticipantDisplayName(const QString& streamId, const QString& displayName)
 {
     uint8_t index = findStreamIdIndex(streamId);
     mImageHandler->updatePeerDisplayName(index, displayName);
 }
 
-void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
+void InputStreamHandler::setPeerToVideoDisabled(const QString& streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
 
@@ -391,7 +414,7 @@ void InputStreamHandler::setPeerToVideoDisabled(QString streamId)
     mImageHandler->setPeerVideoAsDisabled(index);
 }
 
-void InputStreamHandler::setPeerToAudioDisabled(QString streamId)
+void InputStreamHandler::setPeerToAudioDisabled(const QString& streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
 

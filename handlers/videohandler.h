@@ -67,6 +67,7 @@ private:
     const char* mSource;
     const char* mFileName = "nyTest.ismv";
     int64_t mTime;
+    int64_t mPts = 0;
     AVCodecContext* mInputVideoCodecContext;
     AVCodecContext* mOutputVideoCodecContext;
     AVFrame* mVideoFrame;

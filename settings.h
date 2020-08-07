@@ -17,11 +17,11 @@ public:
     Q_INVOKABLE void saveSettings();
     Q_INVOKABLE void setAudioOn(bool val);
     Q_INVOKABLE void setVideoOn(bool val);
-    Q_INVOKABLE void setDisplayName(QString val);
-    Q_INVOKABLE void setDefaultAudioInput(QString val);
+    Q_INVOKABLE void setDisplayName(const QString& val);
+    Q_INVOKABLE void setDefaultAudioInput(const QString& val);
     Q_INVOKABLE void setSaveLastRoom(bool val);
-    Q_INVOKABLE void setLastRoomId(QString val);
-    Q_INVOKABLE void setLastRoomPassword(QString val);
+    Q_INVOKABLE void setLastRoomId(const QString& val);
+    Q_INVOKABLE void setLastRoomPassword(const QString& val);
     Q_INVOKABLE bool getAudioOn() const;
     Q_INVOKABLE bool getVideoOn() const;
     Q_INVOKABLE bool getSaveLastRoom() const;

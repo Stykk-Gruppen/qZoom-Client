@@ -42,7 +42,7 @@ void UdpSocketHandler::readPendingDatagrams()
 {
     while (mUdpSocket->hasPendingDatagrams())
     {
-        QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
+        const QNetworkDatagram datagram = mUdpSocket->receiveDatagram();
         if(datagram.senderAddress().toIPv4Address() != mAddress.toIPv4Address())
         {
             continue;
@@ -63,7 +63,7 @@ void UdpSocketHandler::readPendingDatagrams()
         }*/
 
         const int streamIdLength = data[0];
-        data.remove(0,1);
+        data.remove(0, 1);
 
         //Finds the streamId header, stores it and removes it;
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
