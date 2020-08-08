@@ -20,6 +20,11 @@ void ImageHandler::toggleBorder(bool talking, int index)
     mImageMap[index]->setIsTalking(talking);
 }
 
+void ImageHandler::kickYourself()
+{
+    emit forceLeaveSession();
+}
+
 /**
  * Returns a bool to describe if the specified participant is talking
  * @param index int to get the correct participant from the map
@@ -40,6 +45,19 @@ bool ImageHandler::getAudioIsDisabled(int index) const
 {
     uint8_t i = getCorrectIndex(index);
     return mImageMap.at(i)->getAudioIsDisabled();
+}
+
+QList<QString> ImageHandler::getAllParticipantsDisplayNames() const
+{
+    QList<QString> ret;
+    std::map<uint8_t, Participant*>::const_iterator i;
+    for (i = mImageMap.begin(); i != mImageMap.end(); i++)
+    {
+        ret.append(i->second->getDisplayName());
+    }
+    //Remove yourself
+    ret.removeLast();
+    return ret;
 }
 
 /**

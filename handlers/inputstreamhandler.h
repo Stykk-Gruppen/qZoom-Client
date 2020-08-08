@@ -33,11 +33,13 @@ public:
     void setAudioPlaybackStarted(int index, bool val);
     void unlockVideoMutex(int index);
     void setVideoPlaybackStarted(int index, bool val);
+    void kickYourself();
     int findStreamIdIndex(const QString& streamId) const;
     int getAudioBufferSize(int index) const;
     int getVideoBufferSize(int index) const;
     bool audioPlaybackStarted(int index) const;
     bool videoPlaybackStarted(int index) const;
+    QString getStreamIdFromIndex(int index) const;
     QFuture<void>* getAudioFutures(int index);
     QFuture<void>* getVideoFutures(int index);
     std::vector<QString> getStreamIdVector() const;

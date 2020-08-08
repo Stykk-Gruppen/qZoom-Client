@@ -33,9 +33,11 @@ public:
     void setPeerVideoAsDisabled(uint8_t index);
     void setPeerAudioIsDisabled(uint8_t index, bool val);
     void toggleBorder(bool talking, int index);
+    void kickYourself();
     Q_INVOKABLE int getNumberOfScreens() const;
     Q_INVOKABLE bool getIsTalking(int index) const;
     Q_INVOKABLE bool getAudioIsDisabled(int index) const;
+    Q_INVOKABLE QList<QString> getAllParticipantsDisplayNames() const;
 
 public slots:
     void updateImage(const QImage &image, uint8_t index);
@@ -43,6 +45,7 @@ public slots:
 signals:
     void imageChanged();
     void refreshScreens();
+    void forceLeaveSession();
 
 private:
     std::mutex mImageLock;

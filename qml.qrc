@@ -5,7 +5,6 @@
         <file>view/main.qml</file>
         <file>view/home.qml</file>
         <file>components/PushButton.qml</file>
-        <file>components/Screen.qml</file>
         <file>view/Settings.qml</file>
         <file>view/host.qml</file>
         <file>view/RoomInfo.qml</file>
@@ -17,5 +16,6 @@
         <file>img/settings-icon.png</file>
         <file>img/login-icon.png</file>
         <file>img/logout-icon.png</file>
+        <file>components/KickUser.qml</file>
     </qresource>
 </RCC>

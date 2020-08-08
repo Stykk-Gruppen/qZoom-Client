@@ -51,8 +51,8 @@ int main(int argc, char *argv[])
     int portNumberUDP = 1337;
     int portNumberTCPQueries = 1339;
     QHostAddress address;
-    //address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
+    address = QHostAddress::LocalHost;
+    //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("46.250.220.237"); //feqzz.no
     //address = QHostAddress::LocalHost;
     //address = QHostAddress("2001:4da8:a:1:6000:100:000f:d37b:46.250.220.57"); //tarves.no ipv6 og ipv4

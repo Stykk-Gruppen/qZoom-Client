@@ -17,6 +17,10 @@ Rectangle {
         id: roomInfo
     }
 
+    C.KickUser {
+        id: kickUser
+    }
+
     Rectangle {
         id: screenGridArea
         width: window.width
@@ -140,6 +144,15 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+        target: imageHandler
+        function onForceLeaveSession() {
+            console.log("inside qml");
+            sessionHandler.leaveSession();
+            changePage("home");
         }
     }
 

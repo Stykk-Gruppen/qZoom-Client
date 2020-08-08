@@ -38,6 +38,8 @@ public:
     Q_INVOKABLE bool checkVideoEnabled() const;
     Q_INVOKABLE bool checkAudioEnabled() const;
     Q_INVOKABLE bool enableScreenShare();
+    Q_INVOKABLE void kickParticipant(const int& index) const;
+    Q_INVOKABLE bool isHost() const;
     Q_INVOKABLE QString getRoomId() const;
     Q_INVOKABLE QString getRoomPassword() const;
     Q_INVOKABLE QString getRoomHostUsername() const;

@@ -20,13 +20,6 @@ SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler
     mSessionIsActive = false;
 }
 
-/*
-UserHandler* SessionHandler::getUser() const
-{
-    return mUser;
-}
-*/
-
 bool SessionHandler::enableScreenShare()
 {
     if(mOutputStreamHandler->checkVideoEnabled())
@@ -34,6 +27,20 @@ bool SessionHandler::enableScreenShare()
         mOutputStreamHandler->disableVideo();
     }
     return mOutputStreamHandler->enableVideo(true) >= 0;
+}
+
+void SessionHandler::kickParticipant(const int &index) const
+{
+    QString streamId = mInputStreamHandler->getStreamIdFromIndex(index);
+    if (streamId.size() > 0)
+    {
+        mTcpSocketHandler->sendKickParticipantSignal(streamId);
+    }
+}
+
+bool SessionHandler::isHost() const
+{
+    return (mRoomHostUsername == mUser->getUsername());
 }
 
 bool SessionHandler::enableVideo()
