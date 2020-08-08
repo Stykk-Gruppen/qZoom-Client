@@ -14,7 +14,7 @@ ApplicationWindow {
     minimumWidth: 600
     title: qsTr("qZoom")
 
-    Settings {
+    C.Settings {
         id: settings
     }
 

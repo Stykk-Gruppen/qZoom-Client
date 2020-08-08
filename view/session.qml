@@ -13,7 +13,7 @@ Rectangle {
     property var focusScreen: false;
     property var selectedScreenIndex: 0
 
-    RoomInfo {
+    C.RoomInfo {
         id: roomInfo
     }
 
