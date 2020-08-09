@@ -84,92 +84,34 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/view/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
+                     &app, [url](QObject *obj, const QUrl &objUrl)
+    {
         if (!obj && url == objUrl)
+        {
             QCoreApplication::exit(-1);
+        }
     }, Qt::QueuedConnection);
-
 
     QScopedPointer<Settings> settings(new Settings());
 
-
     ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(portNumberTCPQueries, address);
-
-    //Database* databaseObject = new Database();
     UserHandler* userHandlerObject = new UserHandler(serverTcpQueries, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(serverTcpQueries, userHandlerObject,
                                                               imageHandlerObject, settings.data(),
                                                               bufferSize, address, portNumberTCP,portNumberUDP);
 
-    //InputStreamHandler* inputStreamHandlerObject = new InputStreamHandler(imageHandlerObject, bufferSize, address);
-    //SocketHandler* socketHandlerObject = new SocketHandler(bufferSize,port,inputStreamHandlerObject, sessionHandlerObject, address);
-    //TcpServerHandler* tcpServerHandlerObject = new TcpServerHandler(inputStreamHandlerObject, sessionHandlerObject, port);
-    //TcpSocketHandler* tcpSocketHandlerObject = new TcpSocketHandler(inputStreamHandlerObject, sessionHandlerObject, address, port);
-    //tcpSocketHandlerObject->init();
-
-
-
-    //QScopedPointer<VideoPlaybackHandler> videoPlaybackHandler(new VideoPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
-    //QScopedPointer<AudioPlaybackHandler> audioPlaybackHandler(new AudioPlaybackHandler(imageHandlerObject, socketHandlerObject, buffer_size, lastVideoPacketTime, lastAudioPacketTime));
-
-
-
-
-
-
-    //QScopedPointer<StreamHandler> streamHandler(new StreamHandler(imageHandlerObject, socketHandlerObject, bufferSize, settings.data(), tcpSocketHandlerObject));
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<UserHandler> userHandler(userHandlerObject);
     QScopedPointer<SessionHandler> sessionHandler(sessionHandlerObject);
-    //QScopedPointer<SocketHandler> socketHandler(socketHandlerObject);
-    //QScopedPointer<InputStreamHandler> inputStreamHandler(inputStreamHandlerObject);
-    //QScopedPointer<TcpServerHandler> tcpServerHandler(tcpServerHandlerObject);
-    //QScopedPointer<TcpSocketHandler> tcpSocketHandler(tcpSocketHandlerObject);
-    //QScopedPointer<ErrorHandler> errorHandler(errorHandler);
 
-
-
-
-
-
-
-    //streamHandler->record();
-    //streamHandler->finish();
-    //QScopedPointer<AudioHandler> audioHandler(new AudioHandler(NULL, NULL));
     engine.rootContext()->setContextProperty("imageHandler", imageHandler.data());
     engine.rootContext()->setContextProperty("sessionHandler", sessionHandler.data());
-    //engine.rootContext()->setContextProperty("streamHandler", streamHandler.data());
     engine.rootContext()->setContextProperty("backendSettings", settings.data());
     engine.rootContext()->setContextProperty("errorHandler", errorHandler);
     engine.rootContext()->setContextProperty("userHandler", userHandler.data());
     engine.addImageProvider("live", imageHandler.data());
 
-    //QScopedPointer<VideoHandler> videoHandler(new VideoHandler("/dev/video0", NULL));
-    //engine.rootContext()->setContextProperty("VideoHandler", videoHandler.data());
     engine.load(url);
-
-    //videoHandler->init();
-    //Denne klassen klarer å lagre audio stream til fil
-    //QScopedPointer<AudioHandler> pureAudio(new AudioHandler(NULL,"audioHandler.ismv"));
-    //pureAudio->main();
-
-    //Denne klassen klarer å lagre video stream til fil
-    //QScopedPointer<filetest> fil(new filetest);
-    //fil->main();
-    //exit(1337);
-
-    //VideoHandler->init();
-    //imageHandler->veryFunStianLoop();
-
-
-    //playbackHandler->start();
-
-    //AudioPlaybackHandler* ttt = new AudioPlaybackHandler();
-
-
-    //errorHandler->giveErrorDialog("This is a test of the backend error handling");
-
-
     return app.exec();
 }

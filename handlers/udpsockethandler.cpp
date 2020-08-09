@@ -1,7 +1,7 @@
 #include "udpsockethandler.h"
 
 UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler* inputStreamHandler,
-                             QString streamId, QString roomId, QHostAddress address,QObject *parent) : QObject(parent)
+                             QString streamId, QString roomId, QHostAddress address, QObject *parent) : QObject(parent)
 {
     mBufferSize = bufferSize;
     mInputStreamHandler = inputStreamHandler;
@@ -14,16 +14,16 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
     //char buf[BUFLEN];
     //char *message = "test message very many bytes to send with this message";
 
-    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+    if ((mCppUdpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
         exit(1);
     }
 
     memset((char *) &si_other, 0, sizeof(si_other));
     si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(PORT);
+    si_other.sin_port = htons(mPort);
 
-    if (inet_aton(SERVER , &si_other.sin_addr) == 0)
+    if (inet_aton(mAddress.toString().toUtf8() , &si_other.sin_addr) == 0)
     {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);
@@ -81,7 +81,7 @@ void UdpSocketHandler::readPendingDatagrams()
         }*/
 
         const int streamIdLength = data[0];
-        data.remove(0,1);
+        data.remove(0, 1);
 
         //Finds the streamId header, stores it and removes it;
         QByteArray streamIdArray = QByteArray(data, streamIdLength);
@@ -135,33 +135,6 @@ void UdpSocketHandler::readPendingDatagrams()
     signalCount++;
 }
 
-/**
- * When recieving a UDP datagram, we need to know who owns the stream.
- * The index will let readPendingDatagrams know which buffer, mutex and playbackhandler to use for both audio and video.
- * @param streamId QString to find in mStreamIdVector
- * @return int index where streamId was found
- */
-/*
-int UdpSocketHandler::findStreamIdIndex(QString streamId)
-{
-    if(mInputStreamHandler->getStreamIdVector().size() >= 1)
-    {
-        for(size_t i = 0; i < mInputStreamHandler->getStreamIdVector().size(); i++)
-        {
-            if(QString::compare(streamId, mInputStreamHandler->getStreamIdVector()[i], Qt::CaseSensitive) == 0)
-            {
-                return i;
-            }
-        }
-    }
-
-    //TODO handle this?
-    qDebug() << Q_FUNC_INFO << " failed to find streamId: " << streamId;
-    qDebug() << "This means the server is sending datagrams to people it should not";
-    qDebug() << "StreamIdVector: " << mInputStreamHandler->getStreamIdVector();
-    return -1;
-}
-*/
 /**
  * Send the QByteArray through the current udpSocket,
  * if the size is larger than 512, it will be divided into smaller arrays.
@@ -242,13 +215,13 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
  * @param data QByteArray containing data to be sent
  * @return int with how many bytes sent, or the error code
  */
-int UdpSocketHandler::sendArray(QByteArray data)
+int UdpSocketHandler::sendArray(const QByteArray& data)
 {
     static bool openPortWithQUDP = false;
     if(openPortWithQUDP)
     {
         //Returns number of bytes sent, or -1 or error
-        return sendto(s, data, data.size(), 0 , (struct sockaddr *) &si_other, slen);
+        return sendto(mCppUdpSocket, data, data.size(), 0 , (struct sockaddr *) &si_other, slen);
     }
     else
     {

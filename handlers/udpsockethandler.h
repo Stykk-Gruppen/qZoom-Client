@@ -17,10 +17,6 @@
 #include<arpa/inet.h>
 #include<sys/socket.h>
 
-#define SERVER "46.250.220.57"
-#define BUFLEN 512	//Max length of buffer
-#define PORT 1337	//The port on which to send data
-
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
 class InputStreamHandler;
@@ -37,20 +33,19 @@ public slots:
     void readPendingDatagrams();
 
 private:
-    int sendArray(QByteArray data);
-    struct sockaddr_in si_other;
-    int s, i, slen=sizeof(si_other);
-    void addStreamToVector(QString, int);
-    //int findStreamIdIndex(QString);
+    int sendArray(const QByteArray& data);
+    int mCppUdpSocket;
+    int slen = sizeof(si_other);
     int mBufferSize;
+    int mPort;
     QTcpSocket* mTcpSocket;
     QUdpSocket* mUdpSocket;
     QHostAddress mAddress;
-    int mPort;
     QString mRoomId;
     QString mStreamId;
     InputStreamHandler* mInputStreamHandler;
     uint signalCount = 0;
+    struct sockaddr_in si_other;
     struct mBufferAndLockStruct
     {
         QByteArray* buffer;

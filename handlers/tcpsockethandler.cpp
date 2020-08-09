@@ -172,15 +172,7 @@ QTcpSocket *TcpSocketHandler::getSocket()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
-    mHeader.prepend(mStreamId.toLocal8Bit().data());
-    mHeader.prepend(mStreamId.size());
-
-    mHeader.prepend(mDisplayName.toLocal8Bit().data());
-    mHeader.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    mHeader.prepend(mRoomId.toLocal8Bit().data());
-    mHeader.prepend(mRoomId.size());
+    prependDefaultHeader(mHeader);
 
     qDebug() << "My Header: " << mHeader.length() << "\n" << mHeader;
 
@@ -188,35 +180,12 @@ void TcpSocketHandler::writeHeader()
     mHeader.clear();
 }
 
-QByteArray TcpSocketHandler::getHeader()
-{
-    mHeader.prepend(mStreamId.toLocal8Bit().data());
-    mHeader.prepend(mStreamId.size());
-
-    mHeader.prepend(mDisplayName.toLocal8Bit().data());
-    mHeader.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    mHeader.prepend(mRoomId.toLocal8Bit().data());
-    mHeader.prepend(mRoomId.size());
-
-    return mHeader;
-}
-
 void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
     QByteArray header;
     header.append(NEW_DISPLAY_NAME);
 
-    header.prepend(mStreamId.toLocal8Bit().data());
-    header.prepend(mStreamId.size());
-
-    header.prepend(mDisplayName.toLocal8Bit().data());
-    header.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    header.prepend(mRoomId.toLocal8Bit().data());
-    header.prepend(mRoomId.size());
+    prependDefaultHeader(header);
 
     qDebug() << "My Header: " << header.length() << "\n" << header;
 
@@ -230,16 +199,7 @@ void TcpSocketHandler::sendDisabledVideoSignal()
     QByteArray header;
     header.append(VIDEO_DISABLED);
 
-    header.prepend(mStreamId.toLocal8Bit().data());
-    header.prepend(mStreamId.size());
-
-    //Don't really need this, but removing it would make the server parser struggle.
-    header.prepend(mDisplayName.toLocal8Bit().data());
-    header.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    header.prepend(mRoomId.toLocal8Bit().data());
-    header.prepend(mRoomId.size());
+    prependDefaultHeader(header);
 
     qDebug() << "My Header: " << header.length() << "\n" << header;
 
@@ -253,16 +213,7 @@ void TcpSocketHandler::sendDisabledAudioSignal()
     QByteArray header;
     header.append(AUDIO_DISABLED);
 
-    header.prepend(mStreamId.toLocal8Bit().data());
-    header.prepend(mStreamId.size());
-
-    //Don't really need this, but removing it would make the server parser struggle.
-    header.prepend(mDisplayName.toLocal8Bit().data());
-    header.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    header.prepend(mRoomId.toLocal8Bit().data());
-    header.prepend(mRoomId.size());
+    prependDefaultHeader(header);
 
     qDebug() << "My Header: " << header.length() << "\n" << header;
 
@@ -278,16 +229,7 @@ void TcpSocketHandler::sendKickParticipantSignal(const QString& streamId)
     header.append(streamId.size());
     header.append(streamId.toLocal8Bit().data());
 
-    header.prepend(mStreamId.toLocal8Bit().data());
-    header.prepend(mStreamId.size());
-
-    //Don't really need this, but removing it would make the server parser struggle.
-    header.prepend(mDisplayName.toLocal8Bit().data());
-    header.prepend(mDisplayName.size());
-
-    //Puts the roomId and its size at the front of the array
-    header.prepend(mRoomId.toLocal8Bit().data());
-    header.prepend(mRoomId.size());
+    prependDefaultHeader(header);
 
     qDebug() << "My Header: " << header.length() << "\n" << header;
 
@@ -295,12 +237,24 @@ void TcpSocketHandler::sendKickParticipantSignal(const QString& streamId)
     header.clear();
 }
 
+void TcpSocketHandler::prependDefaultHeader(QByteArray& data) const
+{
+    data.prepend(mStreamId.toLocal8Bit().data());
+    data.prepend(mStreamId.size());
+
+    //Don't really need this all the time, but removing it would make the server parser struggle.
+    data.prepend(mDisplayName.toLocal8Bit().data());
+    data.prepend(mDisplayName.size());
+
+    //Puts the roomId and its size at the front of the array
+    data.prepend(mRoomId.toLocal8Bit().data());
+    data.prepend(mRoomId.size());
+}
 
 void TcpSocketHandler::appendToHeader(const QByteArray &data)
 {
     mHeader.append(data);
 }
-
 
 void TcpSocketHandler::connected()
 {
