@@ -196,12 +196,12 @@ int VideoHandler::init()
 
         //HARDKODET WIDTH OG HEIGHT PGA at framerate osv hos v4l2 er bare piss!! Gjelder bare hos Kent
         //EDIT: gjelder antakelig alle etter skjermdeling ble lagt til.
-        qDebug() << in_stream->codecpar->width;
-        qDebug() << in_stream->codecpar->height;
+        //qDebug() << in_stream->codecpar->width;
+        //qDebug() << in_stream->codecpar->height;
         //outputVideoCodecContext->width = 960;
         //outputVideoCodecContext->height = 540;
-        //mOutputVideoCodecContext->width = 800;
-        //mOutputVideoCodecContext->height = 450;
+        mOutputVideoCodecContext->width = 800;
+        mOutputVideoCodecContext->height = 450;
         //outputVideoCodecContext->width = 640;
         //outputVideoCodecContext->height = 360;
         if(mScreenCapture)
@@ -219,12 +219,14 @@ int VideoHandler::init()
         mOutputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
         mOutputVideoCodecContext->time_base = mInputVideoCodecContext->time_base;
         //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
-        mOutputVideoCodecContext->max_b_frames = 2;
+        mOutputVideoCodecContext->max_b_frames = 0;
         //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-        mOutputVideoCodecContext->gop_size = 0;
+        mOutputVideoCodecContext->gop_size = 1;
+        mOutputVideoCodecContext->flags |= 0x00080000;
 
-        av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryslow", 0);
+        av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryfast", 0);
         //av_opt_set(mOutputVideoCodecContext->priv_data, "crf", "36", 0);//0 is lossless, 53 is worst possible quality
+        av_opt_set(mOutputVideoCodecContext->priv_data, "tune", "zerolatency", 0);//0 is lossless, 53 is worst possible quality
         //av_opt_set(outputVideoCodecContext->priv_data, "qmin", "15", 0);
         //av_opt_set(outputVideoCodecContext->priv_data, "qmax", "35", 0);
 

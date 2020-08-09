@@ -106,12 +106,12 @@ void VideoPlaybackHandler::start()
         //qDebug() << "About to call av read frame";
         //av_read_frame(fmt_ctx, NULL);
 
-        AVCodecContext *cctx;
+        //AVCodecContext *cctx;
         //inputFormatContext->
         //AVPacket *pkt;
         //AVFrame *frm;
-        uint8_t recvbuf[(int)10e5];
-        memset(recvbuf,0,10e5);
+        uint8_t recvbuf[(int)mBufferSize];
+        memset(recvbuf, 0, mBufferSize);
         int pos = 0;
 
         AVCodecParserContext * parser = av_parser_init(AV_CODEC_ID_H264);
