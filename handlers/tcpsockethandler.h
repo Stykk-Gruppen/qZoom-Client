@@ -23,6 +23,7 @@ public:
     void sendChangedDisplayNameSignal();
     void sendDisabledVideoSignal();
     void sendDisabledAudioSignal();
+    void sendKickParticipantSignal(const QString& streamId);
     void appendToHeader(const QByteArray& data);
     void close();
     void wait();
@@ -45,7 +46,7 @@ public slots:
 private:
     //Should match enum in Server::TcpServerHandler
     enum mTcpReturnValues { STREAM_ID_NOT_FOUND, ROOM_ID_NOT_FOUND, SESSION_STARTED };
-    enum mTcpHeaderCodes { VIDEO_HEADER, REMOVE_PARTICIPANT, NEW_DISPLAY_NAME, VIDEO_DISABLED, AUDIO_DISABLED };
+    enum mTcpHeaderCodes { VIDEO_HEADER, REMOVE_PARTICIPANT, NEW_DISPLAY_NAME, VIDEO_DISABLED, AUDIO_DISABLED, KICK_PARTICIPANT };
     QHostAddress mAddress;
     int mPort;
     int mBytesWritten;

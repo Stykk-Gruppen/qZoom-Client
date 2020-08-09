@@ -1,4 +1,6 @@
 #include "videoplaybackhandler.h"
+#define 	CODEC_CAP_TRUNCATED   0x0008
+#define     CODEC_FLAG_TRUNCATED 0x00010000
 
 VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer,
                                            size_t bufferSize, ImageHandler* _imageHandler,int index,
@@ -76,13 +78,23 @@ void VideoPlaybackHandler::start()
 
     int err;
     //Q_ASSERT(video_stream);
-    AVCodecContext *videoDecoderCodecContext;
+    AVCodecContext *videoDecoderCodecContext = video_stream->codec;
     if(video_stream)
     {
         // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
         AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
         AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
+
+        if (videoDecoderCodec->capabilities & CODEC_CAP_TRUNCATED)
+        {
+          videoDecoderCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+        }
+        videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
+        videoDecoderCodecContext->thread_count = 2;
+
+
+
         videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
         videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
         err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
@@ -102,7 +114,8 @@ void VideoPlaybackHandler::start()
     AVPacket* packet = av_packet_alloc();
     //AVFrame* resampled = 0;
 
-    while (!mStopPlayback) {
+    while (!mStopPlayback)
+    {
         //qDebug() << "About to call av read frame";
         //av_read_frame(fmt_ctx, NULL);
 
@@ -167,12 +180,15 @@ void VideoPlaybackHandler::start()
             packet->pos = parser->pos;
 
             //Set keyframe flag
-            if (parser->key_frame == 1 ||
-                (parser->key_frame == -1 &&
-                parser->pict_type == AV_PICTURE_TYPE_I))
+            if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
+            {
                 packet->flags |= AV_PKT_FLAG_KEY;
+            }
+
             if (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_NONE && (packet->flags & AV_PKT_FLAG_KEY))
+            {
                 packet->flags |= AV_PKT_FLAG_KEY;
+            }
             packet->duration = 96000; //Same result as in av_read_frame()
 
             //Decode:
@@ -214,46 +230,6 @@ void VideoPlaybackHandler::start()
             //…
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        inputFormatContext->flags |= AVFMT_FLAG_NONBLOCK;
         //qDebug() << inputFormatContext->interrupt_callback.callback;
         /*
 
@@ -291,5 +267,99 @@ void VideoPlaybackHandler::decreaseIndex()
     mIndex--;
 }
 
+/*
+int av_read_frame2(AVFormatContext *s, AVPacket *pkt)
+ {
+      const int genpts = s->flags & AVFMT_FLAG_GENPTS;
+      int eof = 0;
+      int ret;
+      AVStream *st;
+
+      if (!genpts) {
+          ret = s->internal->packet_buffer
+          ret = s->internal->packet_buffer
+                ? read_from_packet_buffer(&s->internal->packet_buffer,
+                                          &s->internal->packet_buffer_end, pkt)
+                : read_frame_internal(s, pkt);
+          if (ret < 0)
+              return ret;
+          goto return_packet;
+      }
+
+      for (;;) {
+          AVPacketList *pktl = s->internal->packet_buffer;
+
+          if (pktl) {
+              AVPacket *next_pkt = &pktl->pkt;
+
+              if (next_pkt->dts != AV_NOPTS_VALUE) {
+                  int wrap_bits = s->streams[next_pkt->stream_index]->pts_wrap_bits;
+                  // last dts seen for this stream. if any of packets following
+                  // current one had no dts, we will set this to AV_NOPTS_VALUE.
+                  int64_t last_dts = next_pkt->dts;
+                  while (pktl && next_pkt->pts == AV_NOPTS_VALUE) {
+                      if (pktl->pkt.stream_index == next_pkt->stream_index &&
+                          (av_compare_mod(next_pkt->dts, pktl->pkt.dts, 2LL << (wrap_bits - 1)) < 0)) {
+                          if (av_compare_mod(pktl->pkt.pts, pktl->pkt.dts, 2LL << (wrap_bits - 1))) {
+                              // not B-frame
+                              next_pkt->pts = pktl->pkt.dts;
+                          }
+                          if (last_dts != AV_NOPTS_VALUE) {
+                              // Once last dts was set to AV_NOPTS_VALUE, we don't change it.
+                              last_dts = pktl->pkt.dts;
+                          }
+                      }
+                      pktl = pktl->next;
+                  }
+                  if (eof && next_pkt->pts == AV_NOPTS_VALUE && last_dts != AV_NOPTS_VALUE) {
+                      // Fixing the last reference frame had none pts issue (For MXF etc).
+                      // We only do this when
+                      // 1. eof.
+                      // 2. we are not able to resolve a pts value for current packet.
+                      // 3. the packets for this stream at the end of the files had valid dts.
+                      next_pkt->pts = last_dts + next_pkt->duration;
+                  }
+                  pktl = s->internal->packet_buffer;
+              }
 
 
+              st = s->streams[next_pkt->stream_index];
+              if (!(next_pkt->pts == AV_NOPTS_VALUE && st->discard < AVDISCARD_ALL &&
+                    next_pkt->dts != AV_NOPTS_VALUE && !eof)) {
+                  ret = read_from_packet_buffer(&s->internal->packet_buffer,
+                                                 &s->internal->packet_buffer_end, pkt);
+                  goto return_packet;
+              }
+          }
+
+          ret = read_frame_internal(s, pkt);
+          if (ret < 0) {
+              if (pktl && ret != AVERROR(EAGAIN)) {
+                  eof = 1;
+                  continue;
+              } else
+                  return ret;
+          }
+
+         if (av_dup_packet(add_to_pktbuf(&s->internal->packet_buffer, pkt,
+                                          &s->internal->packet_buffer_end)) < 0)
+              return AVERROR(ENOMEM);
+      }
+
+  return_packet:
+
+      st = s->streams[pkt->stream_index];
+      if ((s->iformat->flags & AVFMT_GENERIC_INDEX) && pkt->flags & AV_PKT_FLAG_KEY) {
+          ff_reduce_index(s, st->index);
+          av_add_index_entry(st, pkt->pos, pkt->dts, 0, 0, AVINDEX_KEYFRAME);
+      }
+
+      if (is_relative(pkt->dts))
+          pkt->dts -= RELATIVE_TS_BASE;
+      if (is_relative(pkt->pts))
+          pkt->pts -= RELATIVE_TS_BASE;
+
+      return ret;
+ }
+
+*/

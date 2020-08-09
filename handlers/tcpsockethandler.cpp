@@ -153,6 +153,12 @@ void TcpSocketHandler::readyRead()
         mInputStreamHandler->setPeerToAudioDisabled(streamId);
         break;
     }
+    case KICK_PARTICIPANT:
+    {
+        qDebug() << "You have been kicked by the host!";
+        mInputStreamHandler->kickYourself();
+        break;
+    }
     default:
         qDebug() << "Dont understand the code sent in beginning of tcp mesasge";
     };
@@ -263,6 +269,32 @@ void TcpSocketHandler::sendDisabledAudioSignal()
     mSocket->write(header);
     header.clear();
 }
+
+void TcpSocketHandler::sendKickParticipantSignal(const QString& streamId)
+{
+    QByteArray header;
+
+    header.append(KICK_PARTICIPANT);
+    header.append(streamId.size());
+    header.append(streamId.toLocal8Bit().data());
+
+    header.prepend(mStreamId.toLocal8Bit().data());
+    header.prepend(mStreamId.size());
+
+    //Don't really need this, but removing it would make the server parser struggle.
+    header.prepend(mDisplayName.toLocal8Bit().data());
+    header.prepend(mDisplayName.size());
+
+    //Puts the roomId and its size at the front of the array
+    header.prepend(mRoomId.toLocal8Bit().data());
+    header.prepend(mRoomId.size());
+
+    qDebug() << "My Header: " << header.length() << "\n" << header;
+
+    mSocket->write(header);
+    header.clear();
+}
+
 
 void TcpSocketHandler::appendToHeader(const QByteArray &data)
 {

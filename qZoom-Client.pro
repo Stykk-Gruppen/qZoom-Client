@@ -73,5 +73,4 @@ HEADERS += \
     handlers/videohandler.h \
     handlers/videoplaybackhandler.h
 
-DISTFILES += \
-    img/qZoom-logo.png
+DISTFILES +=

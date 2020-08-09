@@ -132,6 +132,11 @@ QString UserHandler::getStreamId() const
     return mStreamId;
 }
 
+QString UserHandler::getUsername() const
+{
+    return mUsername;
+}
+
 QString UserHandler::getPersonalRoomId() const
 {
     return mPersonalRoomId;

@@ -364,9 +364,24 @@ bool InputStreamHandler::videoPlaybackStarted(int index) const
     return mVideoPlaybackStartedVector[index];
 }
 
+QString InputStreamHandler::getStreamIdFromIndex(int index) const
+{
+    QString ret;
+    if (mStreamIdVector.size() > static_cast<std::make_unsigned<decltype(index)>::type>(index))
+    {
+        return mStreamIdVector.at(index);
+    }
+    return ret;
+}
+
 void InputStreamHandler::setVideoPlaybackStarted(int index, bool val)
 {
     mVideoPlaybackStartedVector[index] = val;
+}
+
+void InputStreamHandler::kickYourself()
+{
+    mImageHandler->kickYourself();
 }
 
 int InputStreamHandler::getVideoBufferSize(int index) const
@@ -428,5 +443,7 @@ void InputStreamHandler::setPeerToAudioDisabled(const QString& streamId)
 
     mImageHandler->setPeerAudioIsDisabled(index, true);
 }
+
+
 
 

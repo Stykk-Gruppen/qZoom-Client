@@ -218,16 +218,27 @@ Rectangle {
                 repeaterId.model = imageHandler.getNumberOfScreens();
             }
         }
-
-
     }
 
     Row {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 32
         anchors.right: parent.right
-        layoutDirection: Qt.RightToLeft
         anchors.rightMargin: 32
+
+        C.PushButton {
+            id: kickUserButton
+            text: "Kick User"
+            visible: sessionHandler.isHost()
+            font.pixelSize: 32
+            property var toggled: true
+            onClicked: {
+                //streamHandler.stopRecording();
+                //TODO handle return value?
+                //sessionHandler.leaveSession();
+                kickUser.open()
+            }
+        }
 
         C.PushButton {
             id: leaveSessionButton

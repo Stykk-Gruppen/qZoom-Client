@@ -22,6 +22,7 @@ public:
     int getUserId() const;
     int getGuestId() const;
     QString getStreamId() const;
+    QString getUsername() const;
     QString getGuestName() const;
     QString getGuestStreamId() const;
 

@@ -13,8 +13,12 @@ Rectangle {
     property var focusScreen: false;
     property var selectedScreenIndex: 0
 
-    RoomInfo {
+    C.RoomInfo {
         id: roomInfo
+    }
+
+    C.KickUser {
+        id: kickUser
     }
 
     Rectangle {
@@ -66,17 +70,10 @@ Rectangle {
                     height: focusScreen ? screenGridArea.height : screenGridArea.height/parent.rows
                     color: "#161637"
 
-                    Rectangle {
-                        id: borderRectangle
-                        width: parent.width
-                        height: parent.height
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
                         Image {
                             id: liveImage
-                            width: parent.width - 2
-                            height: parent.height - 2
+                            width: parent.width - 4
+                            height: parent.height - 4
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.horizontalCenter: parent.horizontalCenter
                             property bool counter: false
@@ -85,39 +82,37 @@ Rectangle {
                             source: "image://live/10"
                             fillMode: Image.PreserveAspectFit
                             cache: false
-                            onWidthChanged: {
-                                borderRectangle.width = paintedWidth + 6
-                                borderRectangle.height = paintedHeight + 6
+
+                            Rectangle {
+                                id: borderRectangle
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: parent.paintedWidth + 4
+                                height: parent.paintedHeight + 4
+
+                                anchors.margins: -border.width
+                                z: -1
+                                border.width: 4
+                                border.color: "red"
+                                color: "#161637"
                             }
-                            onHeightChanged: {
-                                borderRectangle.width = paintedWidth + 6
-                                borderRectangle.height = paintedHeight + 6
-                            }
-                            //onHeightChanged: borderRectangle.height = paintedHeight + 2
-                            //onWindowChanged: console.log("AAAA");
 
                             function reload() {
                                 counter = !counter
                                 var screenIndex = focusScreen ? selectedScreenIndex : index
                                 //console.log(screenIndex)
                                 source = "image://live/image?id=" + counter + "&" + screenIndex
-                                //borderRectangle.width = liveImage.paintedWidth + 2
-                                //borderRectangle.height = liveImage.paintedHeight + 2
                                 if (imageHandler.getAudioIsDisabled(index)) {
-                                    borderRectangle.color = "#DB504A";
+                                    borderRectangle.border.color = "#DB504A";
                                 }
                                 else {
                                     if (imageHandler.getIsTalking(index)) {
-                                        borderRectangle.color = "#FFB800"
+                                        borderRectangle.border.color = "#FFB800"
                                     }
                                     else {
-                                        //borderRectangle.color = "#161637"
-                                        borderRectangle.color = Qt.rgba(27/255, 29/255, 54/255, 1)
-                                        //QColor(27, 29, 54, 255)
+                                        borderRectangle.border.color = Qt.rgba(27/255, 29/255, 54/255, 1)
                                     }
                                 }
-                                //console.log(paintedHeight)
-                                //console.log(paintedWidth)
                             }
 
                             MouseArea {
@@ -125,7 +120,6 @@ Rectangle {
                                 onDoubleClicked: {
                                     selectedScreenIndex = index
                                     focusScreen = !focusScreen
-                                    //repeaterId.model = 0
                                     repeaterId.model = focusScreen ? 1 : imageHandler.getNumberOfScreens()
                                 }
                             }
@@ -140,6 +134,15 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+        target: imageHandler
+        function onForceLeaveSession() {
+            console.log("inside qml");
+            sessionHandler.leaveSession();
+            changePage("home");
         }
     }
 

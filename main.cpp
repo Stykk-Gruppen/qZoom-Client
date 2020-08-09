@@ -64,6 +64,22 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
+    QCoreApplication::setApplicationName("qZoom-Client");
+    QCoreApplication::setApplicationVersion("1.0");
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Hello! This is the current description");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption localHost(QStringList() << "l" << "localhost",
+                                 QCoreApplication::translate("main", "Connects to localhost"));
+    parser.addOption(localHost);
+    parser.process(app);
+
+    if (parser.isSet(localHost))
+    {
+        address = QHostAddress::LocalHost;
+    }
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/view/main.qml"));
