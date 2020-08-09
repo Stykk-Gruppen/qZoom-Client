@@ -37,7 +37,7 @@ public slots:
     void readPendingDatagrams();
 
 private:
-
+    int sendArray(QByteArray data);
     struct sockaddr_in si_other;
     int s, i, slen=sizeof(si_other);
     void addStreamToVector(QString, int);

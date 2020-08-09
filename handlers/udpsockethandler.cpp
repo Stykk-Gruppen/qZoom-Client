@@ -210,32 +210,50 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
             arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
-            //ret += mUdpSocket->writeDatagram(temp, temp.size(), mAddress, mPort);
-            if (sendto(s, temp, temp.size(), 0 , (struct sockaddr *) &si_other, slen)==-1)
-            {
-                return 0;
-            }
+            ret += sendArray(temp);
         }
         else
         {
+            /* We do not remove anything from arr if it is
+             * smaller than (datagramMaxSize - arrToPrepend.size()),
+             * so we need the break to leave the while loop
+            */
             arr.prepend(arrToPrepend);
-            //ret += mUdpSocket->writeDatagram(arr, arr.size(), mAddress, mPort);
-            if (sendto(s, arr, arr.size(), 0 , (struct sockaddr *) &si_other, slen)==-1)
-            {
-                return 0;
-            }
+            ret += sendArray(arr);
             break;
         }
 
         if(ret < 0)
         {
+            //TODO this should also print c++ socket error, could end up here with
+            //mUdpSocket->error(); not printing anything usefull
             qDebug() << mUdpSocket->error();
             qDebug() << ret;
             break;
         }
-        //if(ret >= arr.size()) break;
+
     }
 
     return ret;
+}
+/**
+ * On most routers, if we do not "open" the port by sending a datagram with QAbstractSocket
+ * it will block incoming datagrams, and the program will recieve nothing
+ * @param data QByteArray containing data to be sent
+ * @return int with how many bytes sent, or the error code
+ */
+int UdpSocketHandler::sendArray(QByteArray data)
+{
+    static bool openPortWithQUDP = false;
+    if(openPortWithQUDP)
+    {
+        //Returns number of bytes sent, or -1 or error
+        return sendto(s, data, data.size(), 0 , (struct sockaddr *) &si_other, slen);
+    }
+    else
+    {
+        openPortWithQUDP = true;
+        return mUdpSocket->writeDatagram(data, data.size(), mAddress, mPort);
+    }
 }
 
