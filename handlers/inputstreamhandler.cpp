@@ -1,6 +1,6 @@
 #include "inputstreamhandler.h"
 
-InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent) : QObject(parent)
+InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address)
 {
     mImageHandler = imageHandler;
     mBufferSize = bufferSize;

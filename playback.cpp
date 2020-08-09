@@ -1,7 +1,7 @@
 #include "playback.h"
 
 Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
-                   size_t bufferSize,ImageHandler* _imageHandler, int index, QObject *parent) : QObject(parent)
+                   size_t bufferSize,ImageHandler* _imageHandler, int index)
 {
 
     mBufferSize = bufferSize;

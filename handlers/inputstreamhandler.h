@@ -12,11 +12,10 @@
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
 
-class InputStreamHandler : public QObject
+class InputStreamHandler
 {
-    Q_OBJECT
 public:
-    explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address, QObject *parent = nullptr);
+    explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address);
     void addStreamToVector(int index, const QString& streamId, const QString& displayName);
     void init();
     void close();
@@ -62,7 +61,6 @@ private:
     ImageHandler* mImageHandler;
     int mBufferSize;
     QHostAddress mAddress;
-signals:
 
 };
 

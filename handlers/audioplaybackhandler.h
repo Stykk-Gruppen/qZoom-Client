@@ -9,11 +9,7 @@
 extern "C" {
 #include <ao/ao.h>
 #include "libswresample/swresample.h"
-
-
 #include "libavutil/opt.h"
-
-
 #include "libavfilter/avfilter.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
@@ -23,10 +19,9 @@ extern "C" {
 
 class AudioPlaybackHandler : public Playback
 {
-    Q_OBJECT
 public:
     AudioPlaybackHandler(std::mutex* writeLock, QByteArray* buffer,
-                         size_t bufferSize, ImageHandler* _imageHandler, int index, QObject *parent = nullptr);
+                         size_t bufferSize, ImageHandler* _imageHandler, int index);
     ~AudioPlaybackHandler();
     void start();
 private:

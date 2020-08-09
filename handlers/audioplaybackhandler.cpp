@@ -1,10 +1,9 @@
 #include "audioplaybackhandler.h"
 
-AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize,
-                                           ImageHandler* _imageHandler,int index,
-                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index, parent)
+AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer,
+                                           size_t bufferSize, ImageHandler* _imageHandler,
+                                           int index) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index)
 {
-    initAudio(parent);
     mBufferSize = mBufferSize/16;
 }
 
@@ -12,26 +11,6 @@ AudioPlaybackHandler::~AudioPlaybackHandler()
 {
 
 }
-
-void AudioPlaybackHandler::initAudio(QObject *parent)
-{
-    mAudioFormat.setSampleRate(44100);
-    mAudioFormat.setChannelCount(2);
-    mAudioFormat.setCodec("audio/pcm");
-    mAudioFormat.setSampleType(QAudioFormat::SignedInt);
-    mAudioFormat.setSampleSize(16);
-    mAudioFormat.setByteOrder(QAudioFormat::LittleEndian);
-
-    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
-    if (!info.isFormatSupported(mAudioFormat))
-    {
-        qDebug() << "Raw audio format not supported by backend, cannot play audio.";
-    }
-
-    mpAudio = new QAudioOutput(mAudioFormat, parent);
-    mpOut = mpAudio->start();
-}
-
 
 /**
  * Initialize input contexts and starts reading packets from the

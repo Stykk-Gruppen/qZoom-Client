@@ -3,8 +3,8 @@
 #define     CODEC_FLAG_TRUNCATED 0x00010000
 
 VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer,
-                                           size_t bufferSize, ImageHandler* _imageHandler,int index,
-                                           QObject *parent) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index, parent)
+                                           size_t bufferSize, ImageHandler* _imageHandler,
+                                           int index) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index)
 {
 
 }
@@ -14,13 +14,6 @@ VideoPlaybackHandler::~VideoPlaybackHandler()
 
 }
 
-static int interruptCallBack(void* ctx)
-{
-    qDebug() << "inside interrupt";
-    return 0;
-}
-
-static const AVIOInterruptCB icb = {interruptCallBack, NULL};
 
 void VideoPlaybackHandler::start()
 {
@@ -28,11 +21,6 @@ void VideoPlaybackHandler::start()
     int error = 0;
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
-
-
-    inputFormatContext->interrupt_callback = icb;
-    //inputFormatContext->interrupt_callback.callback = interruptCallBack;
-    //inputFormatContext->interrupt_callback.opaque = NULL;
 
     uint8_t *avioContextBuffer = reinterpret_cast<uint8_t*>(av_malloc(mBufferSize));
     Q_ASSERT(avioContextBuffer);

@@ -7,11 +7,10 @@ extern "C" {
 #include "libavformat/avformat.h"
 }
 #include "handlers/imagehandler.h"
-class Playback : public QObject
+class Playback
 {
-    Q_OBJECT
 public:
-    explicit Playback(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize, ImageHandler* _imageHandler, int index, QObject *parent = nullptr);
+    explicit Playback(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize, ImageHandler* _imageHandler, int index);
     virtual void start(){};
     void stop();
     ~Playback();
