@@ -21,4 +21,4 @@ The online documentation is available at this [website](https://tarves.no/docs/q
 The client does not support peer-to-peer interactions. All data goes through the server which can be found [here](https://github.com/Feqzz/qZoom-Server).
 
 ## Credits
-Much appreciations to Kornelius Hauge for creating the logo, icons and for giving feedback on the GUI.
+Much appreciations to [Kornelius Hauge](https://www.behance.net/korneliushauge) for creating the logo, icons and for giving feedback on the GUI.
