@@ -65,13 +65,16 @@ void TcpSocketHandler::readyRead()
 
     qDebug() << "Data received: " << data;
 
+    //To prepare our router to recieve datagrams, we need to send a empty one to the server.
+    emit sendDummyDatagram();
+
     int code = data[0];
     data.remove(0, 1);
     switch(code)
     {
     case VIDEO_HEADER:
     {
-        //HEADER
+
         int numOfHeaders = data[0];
         qDebug() << "number of headers recieved from server: " << numOfHeaders;
         data.remove(0, 1);

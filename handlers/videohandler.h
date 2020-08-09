@@ -32,7 +32,7 @@ public:
                  int64_t mTime, ImageHandler* mImageHandler,
                  UdpSocketHandler* _socketHandler,
                  int bufferSize, TcpSocketHandler* tcpSocketHandler, bool screenShare,
-                 QObject* parent = 0);
+                 QObject* parent = nullptr);
     ~VideoHandler();
     void grabFrames();
     void close();

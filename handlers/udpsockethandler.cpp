@@ -183,7 +183,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
             arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
-            ret += sendArray(temp);
+            ret += sendto(mCppUdpSocket, temp, temp.size(), 0 , (struct sockaddr *) &si_other, slen);
         }
         else
         {
@@ -192,7 +192,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
              * so we need the break to leave the while loop
             */
             arr.prepend(arrToPrepend);
-            ret += sendArray(arr);
+            ret += sendto(mCppUdpSocket, arr, arr.size(), 0 , (struct sockaddr *) &si_other, slen);
             break;
         }
 
@@ -215,18 +215,15 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
  * @param data QByteArray containing data to be sent
  * @return int with how many bytes sent, or the error code
  */
-int UdpSocketHandler::sendArray(const QByteArray& data)
+void UdpSocketHandler::openPortHack()
 {
-    static bool openPortWithQUDP = false;
-    if(openPortWithQUDP)
+    QByteArray data;
+    data.append(int(0));
+    int error = mUdpSocket->writeDatagram(data, data.size(), mAddress, mPort);
+    if(error < 0)
     {
-        //Returns number of bytes sent, or -1 or error
-        return sendto(mCppUdpSocket, data, data.size(), 0 , (struct sockaddr *) &si_other, slen);
-    }
-    else
-    {
-        openPortWithQUDP = true;
-        return mUdpSocket->writeDatagram(data, data.size(), mAddress, mPort);
+        qDebug() << mUdpSocket->error();
+        qDebug() << error;
     }
 }
 

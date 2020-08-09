@@ -24,16 +24,17 @@ class UdpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit UdpSocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
+    explicit UdpSocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler,
+                              QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
     void initSocket();
     void closeSocket();
     int sendDatagram(QByteArray arr);
 
 public slots:
     void readPendingDatagrams();
+    void openPortHack();
 
 private:
-    int sendArray(const QByteArray& data);
     int mCppUdpSocket;
     int slen = sizeof(si_other);
     int mBufferSize;

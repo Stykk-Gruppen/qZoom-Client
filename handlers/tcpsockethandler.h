@@ -17,7 +17,8 @@ class TcpSocketHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId, QString displayName, QHostAddress address, int port, QObject* parent = nullptr);
+    explicit TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId, QString roomId,
+                              QString displayName, QHostAddress address, int port, QObject* parent = nullptr);
     ~TcpSocketHandler();
     void updateDisplayName(const QString& displayName);
     void sendChangedDisplayNameSignal();
@@ -33,7 +34,8 @@ public:
     bool isReady() const;
     QByteArray getReply() const;
     QTcpSocket *getSocket();
-
+signals:
+    void sendDummyDatagram();
 public slots:
     void writeHeader();
     void connected();
