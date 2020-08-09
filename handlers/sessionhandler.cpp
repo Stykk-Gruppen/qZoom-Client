@@ -40,7 +40,7 @@ void SessionHandler::kickParticipant(const int &index) const
 
 bool SessionHandler::isHost() const
 {
-    return (mRoomHostUsername == mUser->getUsername());
+    return (mRoomHostUsername == mUser->getUsername() && !mUser->isGuest());
 }
 
 bool SessionHandler::enableVideo()
