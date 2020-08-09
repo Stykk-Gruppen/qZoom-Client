@@ -16,7 +16,10 @@ LIBS += -L/usr/lib -lavdevice -lavformat -lavutil -lswscale -lswresample -lavcod
 TARGET.CAPABILITY += SwEvent
 
 SOURCES += \
+        core/participant.cpp \
+        core/playback.cpp \
         core/servertcpqueries.cpp \
+        core/settings.cpp \
         core/systemcall.cpp \
         handlers/audiohandler.cpp \
         handlers/audioplaybackhandler.cpp \
@@ -27,9 +30,6 @@ SOURCES += \
         handlers/imagehandler.cpp \
         handlers/inputstreamhandler.cpp \
         main.cpp \
-        participant.cpp \
-        playback.cpp \
-        settings.cpp \
         handlers/udpsockethandler.cpp \
         handlers/tcpsockethandler.cpp \
         handlers/videohandler.cpp \
@@ -55,7 +55,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    core/participant.h \
+    core/playback.h \
     core/servertcpqueries.h \
+    core/settings.h \
     core/systemcall.h \
     handlers/audiohandler.h \
     handlers/audioplaybackhandler.h \
@@ -65,9 +68,6 @@ HEADERS += \
     handlers/userhandler.h \
     handlers/imagehandler.h \
     handlers/inputstreamhandler.h \
-    participant.h \
-    playback.h \
-    settings.h \
     handlers/udpsockethandler.h \
     handlers/tcpsockethandler.h \
     handlers/videohandler.h \

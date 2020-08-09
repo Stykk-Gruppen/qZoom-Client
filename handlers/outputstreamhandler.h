@@ -5,7 +5,7 @@
 #include "handlers/udpsockethandler.h"
 #include <QObject>
 #include "handlers/imagehandler.h"
-#include "settings.h"
+#include "core/settings.h"
 #include "handlers/errorhandler.h"
 
 class OutputStreamHandler : public QObject

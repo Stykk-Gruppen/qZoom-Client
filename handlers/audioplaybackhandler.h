@@ -15,7 +15,7 @@ extern "C" {
 #include "libavfilter/buffersrc.h"
 }
 #include "handlers/imagehandler.h"
-#include "playback.h"
+#include "core/playback.h"
 
 class AudioPlaybackHandler : public Playback
 {

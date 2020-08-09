@@ -15,6 +15,10 @@ UserHandler::~UserHandler()
 
 }
 
+/**
+ * @brief UserHandler::isGuest
+ * @return
+ */
 bool UserHandler::isGuest() const
 {
     return mIsGuest;
@@ -117,47 +121,84 @@ bool UserHandler::updatePersonalRoom(const QString& roomId, const QString& roomP
     return true;
 }
 
+/**
+ * @brief UserHandler::getErrorMessage
+ * @return
+ */
 QString UserHandler::getErrorMessage() const
 {
     return mErrorMessage;
 }
 
+/**
+ * @brief UserHandler::getUserId
+ * @return
+ */
 int UserHandler::getUserId() const
 {
     return mUserId;
 }
 
+/**
+ * @brief UserHandler::getStreamId
+ * @return
+ */
 QString UserHandler::getStreamId() const
 {
     return mStreamId;
 }
 
+/**
+ * @brief UserHandler::getUsername
+ * @return
+ */
 QString UserHandler::getUsername() const
 {
     return mUsername;
 }
 
+/**
+ * @brief UserHandler::getPersonalRoomId
+ * @return
+ */
 QString UserHandler::getPersonalRoomId() const
 {
     return mPersonalRoomId;
     qDebug() << "personal room id" << mPersonalRoomId;
 }
 
+/**
+ * @brief UserHandler::getPersonalRoomPassword
+ * @return
+ */
 QString UserHandler::getPersonalRoomPassword() const
 {
     return mPersonalRoomPassword;
 }
 
+/**
+ * @brief UserHandler::hasRoom
+ * @return
+ */
 bool UserHandler::hasRoom()
 {
     return mHasRoom;
 }
 
+/**
+ * @brief UserHandler::getGuestName
+ * @return
+ */
 QString UserHandler::getGuestName() const
 {
     return mGuestName;
 }
 
+/**
+ * @brief UserHandler::getGuestStreamId
+ * Gets ID from Database
+ * @return
+ */
 QString UserHandler::getGuestStreamId() const
 {
     QVariantList vars;
@@ -172,6 +213,11 @@ QString UserHandler::getGuestStreamId() const
     return "getGuestStreamIdFailed";
 }
 
+/**
+ * @brief UserHandler::getGuestId
+ * Gets ID from Database
+ * @return
+ */
 int UserHandler::getGuestId() const
 {
     QVariantList vars;
@@ -180,6 +226,10 @@ int UserHandler::getGuestId() const
     return returnList[0].toInt();
 }
 
+/**
+ * @brief UserHandler::logout
+ * @return
+ */
 bool UserHandler::logout()
 {
     mIsGuest = true;

@@ -5,8 +5,8 @@
 #include <QByteArray>
 #include <QtConcurrent/QtConcurrent>
 #include "handlers/imagehandler.h"
-#include <handlers/tcpsockethandler.h>
-#include <playback.h>
+#include "handlers/tcpsockethandler.h"
+#include "core/playback.h"
 
 class VideoPlaybackHandler : public Playback
 {

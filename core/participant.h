@@ -3,7 +3,6 @@
 
 #include <QImage>
 
-
 class Participant
 {
 public:

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QString>
-#include "settings.h"
+#include "core/settings.h"
 #include "core/servertcpqueries.h"
 class UserHandler : public QObject
 {

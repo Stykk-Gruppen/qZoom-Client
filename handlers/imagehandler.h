@@ -7,8 +7,8 @@
 #include <QPainter>
 #include <QQuickImageProvider>
 #include <QtConcurrent/QtConcurrent>
-#include "settings.h"
-#include "participant.h"
+#include "core/settings.h"
+#include "core/participant.h"
 extern "C" {
 #include "libavutil/frame.h"
 #include "libavformat/avformat.h"

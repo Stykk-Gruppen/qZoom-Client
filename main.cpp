@@ -13,7 +13,7 @@
 #include <QTimer>
 #include "handlers/outputstreamhandler.h"
 #include "handlers/videoplaybackhandler.h"
-#include "settings.h"
+#include "core/settings.h"
 #include "handlers/imagehandler.h"
 #include <QQuickView>
 #include <stdio.h>
