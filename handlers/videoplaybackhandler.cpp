@@ -81,10 +81,9 @@ void VideoPlaybackHandler::start()
         videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
         videoDecoderCodecContext->thread_count = 2;
 
-
-
         videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
         videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+
         err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
         Q_ASSERT(err>=0);
         qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;

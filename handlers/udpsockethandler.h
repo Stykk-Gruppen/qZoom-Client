@@ -10,7 +10,7 @@
 #include "handlers/imagehandler.h"
 #include "handlers/videoplaybackhandler.h"
 #include "handlers/audioplaybackhandler.h"
-
+#include <QDateTime>
 #include<stdio.h>	//printf
 #include<string.h> //memset
 #include<stdlib.h> //exit(0);
@@ -35,6 +35,7 @@ public slots:
     void openPortHack();
 
 private:
+    void printBytesPerSecond(int bytes);
     int mCppUdpSocket;
     int slen = sizeof(si_other);
     int mBufferSize;
