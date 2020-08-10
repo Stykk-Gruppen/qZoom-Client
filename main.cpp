@@ -22,6 +22,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/log.h>
 #include <libavdevice/avdevice.h>
 #include <ao/ao.h>
 }
@@ -54,7 +55,9 @@ int main(int argc, char *argv[])
 
     errorHandler = new ErrorHandler;
 
-    int bufferSize = 8*1024;
+    //av_log_set_level(AV_LOG_QUIET);
+
+    int bufferSize = 16*1024;
     int portNumberTCP = 1338;
     int portNumberUDP = 1337;
     int portNumberTCPQueries = 1339;
