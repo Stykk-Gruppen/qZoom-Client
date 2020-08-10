@@ -12,7 +12,7 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
     connect(this, &VideoHandler::callWriteHeader, mTcpSocketHandler, &TcpSocketHandler::writeHeader);
 
-    mBufferSize = bufferSize;
+    mBufferSize = 10e5;
     mWriteToFile = false;
     mSocketHandler = _socketHandler;
     mTime = _time;

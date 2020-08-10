@@ -13,7 +13,7 @@ public:
     explicit Playback(std::mutex* _writeLock, QByteArray* buffer, size_t bufferSize, ImageHandler* _imageHandler, int index);
     virtual void start(){};
     void stop();
-    ~Playback();
+    virtual ~Playback();
 protected:
     static int customReadPacket(void *opaque, uint8_t *buf, int buf_size);
     struct mBufferAndLockStruct {
