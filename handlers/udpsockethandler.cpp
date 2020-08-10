@@ -134,6 +134,37 @@ void UdpSocketHandler::readPendingDatagrams()
 
     signalCount++;
 }
+/**
+ * Prints how many bytes were sent during the last x seconds
+ * @param bytes
+ */
+void UdpSocketHandler::printBytesPerSecond(int bytes)
+{
+    const int secondsBetweenPrints = 1;
+    static int totalSent = 0;
+    static qint64 lastTime = 0;
+    qint64 seconds = QDateTime::currentSecsSinceEpoch();
+    //First time sending a datagram
+    if(lastTime == 0)
+    {
+        lastTime = seconds;
+        totalSent += bytes;
+        return;
+    }
+    //If enough time has passed, print and reset
+    if(seconds - lastTime >= secondsBetweenPrints)
+    {
+
+        qDebug() << "\nCurrently sending datagrams with a "<< totalSent/(1000*secondsBetweenPrints) << "kB/s\n";
+        totalSent = 0;
+        lastTime = seconds;
+    }
+    //Append to total
+    else
+    {
+        totalSent += bytes;
+    }
+}
 
 /**
  * Send the QByteArray through the current udpSocket,
@@ -145,6 +176,7 @@ void UdpSocketHandler::readPendingDatagrams()
  */
 int UdpSocketHandler::sendDatagram(QByteArray arr)
 {
+
     int datagramMaxSize = 2*512;
     if(mUdpSocket == nullptr)
     {
@@ -183,6 +215,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             QByteArray temp = QByteArray(arr, (datagramMaxSize - arrToPrepend.size()));
             temp.prepend(arrToPrepend);
             arr.remove(0, (datagramMaxSize - arrToPrepend.size()));
+            printBytesPerSecond(temp.size());
             ret += sendto(mCppUdpSocket, temp, temp.size(), 0 , (struct sockaddr *) &si_other, slen);
         }
         else
@@ -192,6 +225,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
              * so we need the break to leave the while loop
             */
             arr.prepend(arrToPrepend);
+            printBytesPerSecond(arr.size());
             ret += sendto(mCppUdpSocket, arr, arr.size(), 0 , (struct sockaddr *) &si_other, slen);
             break;
         }
