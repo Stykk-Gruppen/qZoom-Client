@@ -38,7 +38,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     while(s->buffer->size() <= 0);
 
 
-
+    qDebug() << *s->buffer;
     int stringLength = s->buffer->at(0);
     s->writeLock->lock();
 
