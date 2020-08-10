@@ -175,6 +175,7 @@ QTcpSocket *TcpSocketHandler::getSocket()
 //Send header to server, and receive headers from other participants back
 void TcpSocketHandler::writeHeader()
 {
+    mHeader.prepend(int(0));
     prependDefaultHeader(mHeader);
 
     qDebug() << "My Header: " << mHeader.length() << "\n" << mHeader;
