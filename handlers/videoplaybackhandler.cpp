@@ -133,6 +133,11 @@ void VideoPlaybackHandler::start()
 
 
         int stringLength = mStruct->buffer->at(0);
+        if(mStopPlayback)
+        {
+            //return AVERROR_EOF;
+            break;
+        }
         mStruct->writeLock->lock();
 
         mStruct->buffer->remove(0, 1);
