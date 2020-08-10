@@ -35,7 +35,33 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
     static int counter = 0;
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
-    while (s->buffer->size() <= buf_size)
+    while(s->buffer->size() <= 0);
+
+
+
+    int stringLength = s->buffer->at(0);
+    s->writeLock->lock();
+
+    s->buffer->remove(0, 1);
+
+    s->writeLock->unlock();
+
+
+    qDebug() << "Stringlength: " << stringLength;
+    while(s->buffer->size() <= stringLength);
+
+
+    QByteArray sizeArray = QByteArray(s->buffer->data(), stringLength);
+    qDebug() << "sizearray: " << sizeArray;
+    QString sizeString = QString(sizeArray);
+    qDebug() << "sizestring: " << sizeString;
+    buf_size = sizeString.toInt();
+
+
+    qDebug() << "Buf_size: " << buf_size;
+
+
+    while (s->buffer->size() <= buf_size+stringLength)
     {
         if((*s->stopPlayback))
         {
@@ -48,6 +74,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     }
 
     s->writeLock->lock();
+    s->buffer->remove(0, stringLength);
     QByteArray tempBuffer = QByteArray(s->buffer->data(), buf_size);
     s->buffer->remove(0, buf_size);
     s->writeLock->unlock();
@@ -58,6 +85,6 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     //Since return value is fixed it will never stop reading, should not be a problem for us?
     //qDebug() << tempBuffer.size();
     counter++;
-    qDebug() << counter;
+    //qDebug() << counter;
     return buf_size;
 }

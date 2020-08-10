@@ -630,12 +630,23 @@ int VideoHandler::custom_io_write(void* opaque, uint8_t *buffer, int buffer_size
     if(!s->headerSent)
     {
         qDebug() << "INNE I HEADERSEND";
+
+        QString stringLength = QString::number(send.size());
+        send.prepend(stringLength.toUtf8().data());
+        send.prepend(stringLength.size());
         s->tcpSocket->appendToHeader(send);
         return 0;
     }
     else
     {
         //Prepends the video header byte needed by socketHandler
+
+        QString stringLength = QString::number(send.size());
+        send.prepend(stringLength.toUtf8().data());
+        send.prepend(stringLength.size());
+
+
+
         send.prepend(int(1));
         return s->udpSocket->sendDatagram(send);
 

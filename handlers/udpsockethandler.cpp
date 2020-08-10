@@ -203,6 +203,8 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
     arrToPrepend.prepend(mRoomId.toLocal8Bit().data());
     arrToPrepend.prepend(mRoomId.size());
 
+
+
     while(arr.size() > 0)
     {
         if(arr.size() > (datagramMaxSize - arrToPrepend.size()))
