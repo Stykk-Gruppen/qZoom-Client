@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     errorHandler = new ErrorHandler;
 
-    int bufferSize = 64*1024;
+    int bufferSize = 8*1024;
     int portNumberTCP = 1338;
     int portNumberUDP = 1337;
     int portNumberTCPQueries = 1339;

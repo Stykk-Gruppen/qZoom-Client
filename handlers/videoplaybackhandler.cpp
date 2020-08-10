@@ -113,10 +113,10 @@ void VideoPlaybackHandler::start()
         //AVFrame *frm;
         uint8_t recvbuf[(int)mBufferSize];
         memset(recvbuf, 0, mBufferSize);
-        int pos = 0;
+        static int pos = 0;
 
         AVCodecParserContext * parser = av_parser_init(AV_CODEC_ID_H264);
-        parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
+        //parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
         parser->flags |= PARSER_FLAG_USE_CODEC_TS;
 
         while (mStruct->buffer->size() <= mBufferSize)
@@ -157,65 +157,100 @@ void VideoPlaybackHandler::start()
 
             //Parsing temporary packet into pkt
             av_init_packet(packet);
-            av_parser_parse2(parser, videoDecoderCodecContext,
-                &(packet->data), &(packet->size),
-                tempPacket->data, tempPacket->size,
-                tempPacket->pts, tempPacket->dts, tempPacket->pos
-                );
 
-            packet->pts = parser->pts;
-            packet->dts = parser->dts;
-            packet->pos = parser->pos;
-
-            //Set keyframe flag
-            if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
+            int in_len = tempPacket->size;
+            int len = 0;
+            while(tempPacket->size)
             {
-                packet->flags |= AV_PKT_FLAG_KEY;
+                qDebug() << "Before parse";
+                len = av_parser_parse2(parser, videoDecoderCodecContext,
+                    &(packet->data), &(packet->size),
+                    tempPacket->data, tempPacket->size,
+                    tempPacket->pts, tempPacket->dts, tempPacket->pos
+                    );
+
+                qDebug() << "Return from parser: " << len;
+                qDebug() << "Packet size: " << packet->size;
+                qDebug() <<"TempPacket size: " << tempPacket->size;
+
+                tempPacket->data+=len;
+                tempPacket->size -= len;
+                qDebug() <<"TempPacket size: " << tempPacket->size;
+
+                if(packet->size)
+                {
+
+                    packet->pts = parser->pts;
+                    packet->dts = parser->dts;
+                    packet->pos = parser->pos;
+
+                    //Set keyframe flag
+                    if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
+                    {
+                        packet->flags |= AV_PKT_FLAG_KEY;
+                    }
+
+                    if (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_NONE && (packet->flags & AV_PKT_FLAG_KEY))
+                    {
+                        packet->flags |= AV_PKT_FLAG_KEY;
+                    }
+                    packet->duration = 96000; //Same result as in av_read_frame()
+
+                    error = avcodec_send_packet(videoDecoderCodecContext, packet);
+
+
+                    //Decode:
+                    //error = avcodec_send_packet(videoDecoderCodecContext, packet);
+                    if (error == AVERROR_EOF || error == AVERROR(EOF))
+                    {
+                        qDebug() << "send packet sleep";
+                        /*int ms = 1000;
+                        struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+                        nanosleep(&ts, NULL);*/
+                        continue;
+                    }
+                    else if(error == AVERROR(EAGAIN))
+                    {
+                        qDebug() << "Eagain on send packet!";
+
+                    }
+                    else if(error < 0)
+                    {
+                        char* errbuff = (char *)malloc((1000)*sizeof(char));
+                        av_strerror(error,errbuff,1000);
+                        qDebug() << "Failed udp input avcodec_send_packet: code "<<error<< " meaning: " << errbuff;
+                        //exit(1);
+                        continue;
+                    }
+
+
+                    error = avcodec_receive_frame(videoDecoderCodecContext, frame);
+                    if (error == AVERROR(EAGAIN) || error == AVERROR_EOF){
+                        //skipped_frames++;
+                        qDebug() << "Skipped a Frame VideoPlaybackHandler";
+                        continue;
+                    }
+                    else if (error < 0) {
+                        char* errbuff = (char *)malloc((1000)*sizeof(char));
+                        av_strerror(error,errbuff,1000);
+                        qDebug() << "Failed avcodec_receive_frame: code "<<error<< " meaning: " << errbuff;
+                        exit(1);
+                    }
+
+                    mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
+
+                    av_frame_unref(frame);
+                    av_packet_unref(packet);
+                    //Display frame
+                    //…
+
+                }
             }
 
-            if (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_NONE && (packet->flags & AV_PKT_FLAG_KEY))
-            {
-                packet->flags |= AV_PKT_FLAG_KEY;
-            }
-            packet->duration = 96000; //Same result as in av_read_frame()
 
-            //Decode:
-            error = avcodec_send_packet(videoDecoderCodecContext, packet);
-            if (error == AVERROR_EOF || error == AVERROR(EOF))
-            {
-                qDebug() << "send packet sleep";
-                int ms = 1000;
-                struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-                nanosleep(&ts, NULL);
-                continue;
-            }
-            else if(error < 0)
-            {
-                char* errbuff = (char *)malloc((1000)*sizeof(char));
-                av_strerror(error,errbuff,1000);
-                qDebug() << "Failed udp input avcodec_send_packet: code "<<error<< " meaning: " << errbuff;
-                exit(1);
 
-            }
-            error = avcodec_receive_frame(videoDecoderCodecContext, frame);
-            if (error == AVERROR(EAGAIN) || error == AVERROR_EOF){
-                //skipped_frames++;
-                qDebug() << "Skipped a Frame VideoPlaybackHandler";
-                continue;
-            }
-            else if (error < 0) {
-                char* errbuff = (char *)malloc((1000)*sizeof(char));
-                av_strerror(error,errbuff,1000);
-                qDebug() << "Failed avcodec_receive_frame: code "<<error<< " meaning: " << errbuff;
-                exit(1);
-            }
 
-            mImageHandler->readImage(videoDecoderCodecContext, frame, mIndex);
 
-            av_frame_unref(frame);
-            av_packet_unref(packet);
-            //Display frame
-            //…
         }
 
         //qDebug() << inputFormatContext->interrupt_callback.callback;

@@ -219,10 +219,10 @@ int VideoHandler::init()
         mOutputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
         mOutputVideoCodecContext->time_base = mInputVideoCodecContext->time_base;
         //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
-        mOutputVideoCodecContext->max_b_frames = 0;
+        mOutputVideoCodecContext->max_b_frames = 2;
         //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-        mOutputVideoCodecContext->gop_size = 1;
-        mOutputVideoCodecContext->flags |= 0x00080000;
+        mOutputVideoCodecContext->gop_size = 0;
+        //mOutputVideoCodecContext->flags |= 0x00080000;
 
         av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryfast", 0);
         //av_opt_set(mOutputVideoCodecContext->priv_data, "crf", "36", 0);//0 is lossless, 53 is worst possible quality
