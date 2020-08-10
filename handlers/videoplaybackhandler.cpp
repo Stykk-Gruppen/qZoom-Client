@@ -76,7 +76,7 @@ void VideoPlaybackHandler::start()
 
         if (videoDecoderCodec->capabilities & CODEC_CAP_TRUNCATED)
         {
-          videoDecoderCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+            videoDecoderCodecContext->flags |= CODEC_FLAG_TRUNCATED;
         }
         videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
         videoDecoderCodecContext->thread_count = 2;
@@ -108,7 +108,7 @@ void VideoPlaybackHandler::start()
 
     while (!mStopPlayback)
     {
-        //qDebug() << "About to call av read frame";
+
         //av_read_frame(fmt_ctx, NULL);
 
         //AVCodecContext *cctx;
@@ -126,7 +126,9 @@ void VideoPlaybackHandler::start()
 
 
 
-        while(mStruct->buffer->size() <= 0);
+        while(!mStopPlayback && mStruct->buffer->size() <= 0)
+        {
+        }
 
 
 
@@ -139,7 +141,9 @@ void VideoPlaybackHandler::start()
 
 
         qDebug() << "Stringlength: " << stringLength;
-        while(mStruct->buffer->size() <= stringLength);
+        while(!mStopPlayback && mStruct->buffer->size() <= stringLength)
+        {
+        }
 
 
         QByteArray sizeArray = QByteArray(mStruct->buffer->data(), stringLength);
@@ -150,7 +154,7 @@ void VideoPlaybackHandler::start()
 
 
 
-        while (mStruct->buffer->size() <= buffer_size+stringLength)
+        while (!mStopPlayback && mStruct->buffer->size() <= buffer_size+stringLength)
         {
             if((*mStruct->stopPlayback))
             {
@@ -164,12 +168,20 @@ void VideoPlaybackHandler::start()
         }
 
 
+        qDebug() << "Before lock";
+        if(mStopPlayback)
+        {
+            //return AVERROR_EOF;
+            break;
+        }
         mStruct->writeLock->lock();
+        qDebug() << "After lock";
         mStruct->buffer->remove(0, stringLength);
 
         QByteArray tempBuffer = QByteArray(mStruct->buffer->data(), buffer_size);
         mStruct->buffer->remove(0, buffer_size);
         mStruct->writeLock->unlock();
+
 
         memcpy(recvbuf, tempBuffer.constData(), buffer_size);
 
@@ -181,7 +193,7 @@ void VideoPlaybackHandler::start()
         int length = buffer_size;
 
 
-
+        qDebug() << "Before length check" << length;
         if (length >= 0)
         {
 
@@ -201,18 +213,19 @@ void VideoPlaybackHandler::start()
 
 
 
-
+            qDebug() << "Before Parse";
             av_parser_parse2(parser, videoDecoderCodecContext,
-                                &(packet->data), &(packet->size),
-                                tempPacket->data, tempPacket->size,
-                                //AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
-                                tempPacket->pts, tempPacket->dts, tempPacket->pos
-                                );
+                             &(packet->data), &(packet->size),
+                             tempPacket->data, tempPacket->size,
+                             //AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
+                             tempPacket->pts, tempPacket->dts, tempPacket->pos
+                             );
 
 
             packet->pts = parser->pts;
             packet->dts = parser->dts;
             packet->pos = parser->pos;
+            qDebug() << "After Parse";
 
             //Set keyframe flag
             if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
@@ -276,8 +289,8 @@ void VideoPlaybackHandler::start()
 
 
 
-    }
-
+        }
+        qDebug() << "Closing videoplaybackhandler after if";
 
         //qDebug() << inputFormatContext->interrupt_callback.callback;
         /*
@@ -305,7 +318,7 @@ void VideoPlaybackHandler::start()
         //qDebug() << "packet pts VideoPlaybackHandler: " << packet.pts;
 
     }
-
+    qDebug() << "Closing videoplaybackhandler";
     avformat_close_input(&inputFormatContext);
     avcodec_free_context(&videoDecoderCodecContext);
 
