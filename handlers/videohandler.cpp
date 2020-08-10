@@ -115,8 +115,8 @@ int VideoHandler::init()
     if(mScreenCapture)
     {
         QString videoSize = QString::number(mScreenWidth) + "x" + QString::number(mScreenHeight);
-        //std::string framerate = QString{}.setNum(10).toStdString();
-        //av_dict_set(&screenOpt, "framerate", framerate.c_str(), 0);
+        std::string framerate = QString{}.setNum(30).toStdString();
+        av_dict_set(&screenOpt, "framerate", framerate.c_str(), 0);
         av_dict_set(&screenOpt, "video_size", videoSize.toUtf8().data(), 0);
         av_dict_set(&screenOpt, "probesize", "800000000", 0);
     }
@@ -200,12 +200,15 @@ int VideoHandler::init()
         //qDebug() << in_stream->codecpar->height;
         //outputVideoCodecContext->width = 960;
         //outputVideoCodecContext->height = 540;
-        mOutputVideoCodecContext->width = 800;
-        mOutputVideoCodecContext->height = 450;
+        //mOutputVideoCodecContext->width = 800;
+        //mOutputVideoCodecContext->height = 450;
         //outputVideoCodecContext->width = 640;
         //outputVideoCodecContext->height = 360;
         if(mScreenCapture)
         {
+            mOutputVideoCodecContext->width = 1920;
+            mOutputVideoCodecContext->height = 1080;
+
             //double ratio = in_stream->codecpar->width / in_stream->codecpar->height;
 
             //outputVideoCodecContext->height = outputVideoCodecContext->width / ratio;
@@ -219,12 +222,12 @@ int VideoHandler::init()
         mOutputVideoCodecContext->pix_fmt = STREAM_PIX_FMT;
         mOutputVideoCodecContext->time_base = mInputVideoCodecContext->time_base;
         //outputVideoCodecContext->time_base = (AVRational){ 1, 10 };
-        mOutputVideoCodecContext->max_b_frames = 2;
+        mOutputVideoCodecContext->max_b_frames = 0;
         //outputVideoCodecContext->framerate = inputVideoCodecContext->framerate;
-        mOutputVideoCodecContext->gop_size = 0;
+        mOutputVideoCodecContext->gop_size = 1;
         //mOutputVideoCodecContext->flags |= 0x00080000;
 
-        av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryfast", 0);
+        av_opt_set(mOutputVideoCodecContext->priv_data, "preset", "veryslow", 0);
         //av_opt_set(mOutputVideoCodecContext->priv_data, "crf", "36", 0);//0 is lossless, 53 is worst possible quality
         av_opt_set(mOutputVideoCodecContext->priv_data, "tune", "zerolatency", 0);//0 is lossless, 53 is worst possible quality
         //av_opt_set(outputVideoCodecContext->priv_data, "qmin", "15", 0);
@@ -325,6 +328,7 @@ int VideoHandler::init()
 void VideoHandler::grabFrames()
 {
     init();
+
     emit callWriteHeader();
 
     mActive = true;

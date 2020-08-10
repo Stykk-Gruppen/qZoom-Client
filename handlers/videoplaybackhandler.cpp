@@ -100,7 +100,9 @@ void VideoPlaybackHandler::start()
     AVFrame* frame = av_frame_alloc();
     AVPacket* packet = av_packet_alloc();
     //AVFrame* resampled = 0;
-
+    mBufferSize = (video_stream->codecpar->bit_rate *2.3) / 1000;
+    //mBufferSize = (video_stream->codecpar->width * video_stream->codecpar->height * video_stream->codec->framerate.num * 2) / 1000;
+    qDebug() << "Setting buffersize to: " << mBufferSize;
     while (!mStopPlayback)
     {
         //qDebug() << "About to call av read frame";
@@ -165,7 +167,8 @@ void VideoPlaybackHandler::start()
                 len = av_parser_parse2(parser, videoDecoderCodecContext,
                     &(packet->data), &(packet->size),
                     tempPacket->data, tempPacket->size,
-                    tempPacket->pts, tempPacket->dts, tempPacket->pos
+                    AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
+                    //tempPacket->pts, tempPacket->dts, tempPacket->pos
                     );
 
                 qDebug() << "Return from parser: " << len;
@@ -182,7 +185,7 @@ void VideoPlaybackHandler::start()
                     packet->pts = parser->pts;
                     packet->dts = parser->dts;
                     packet->pos = parser->pos;
-
+/*
                     //Set keyframe flag
                     if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
                     {
@@ -194,6 +197,7 @@ void VideoPlaybackHandler::start()
                         packet->flags |= AV_PKT_FLAG_KEY;
                     }
                     packet->duration = 96000; //Same result as in av_read_frame()
+                    */
 
                     error = avcodec_send_packet(videoDecoderCodecContext, packet);
 
