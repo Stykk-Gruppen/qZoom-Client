@@ -279,7 +279,7 @@ int VideoHandler::init()
             ret = AVERROR(ENOMEM);
         }
 
-        //ret = avcodec_parameters_to_context(avctx, out_stream->codecpar);
+        ret = avcodec_parameters_to_context(avctx, out_stream->codecpar);
 
 
 
