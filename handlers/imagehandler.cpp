@@ -169,6 +169,8 @@ void ImageHandler::removePeer(uint8_t index)
     mImageLock.lock();
     mImageMap.erase(index);
 
+
+    qDebug() << "After Erase";
     //Might need to move the other participants down a place.
     //If we remove index 3, the map may get a gap and look like: 0, 1, 2, 4, 255
     //After the algorithm it will look like: 0, 1, 2, 3, 255
@@ -188,6 +190,7 @@ void ImageHandler::removePeer(uint8_t index)
         }
         counter++;
     }
+    qDebug() << "After very fun Stian loop";
     mImageLock.unlock();
     emit refreshScreens();
 }
