@@ -68,7 +68,14 @@ void VideoPlaybackHandler::start()
 
     int err;
     //Q_ASSERT(video_stream);
-    AVCodecContext *videoDecoderCodecContext = video_stream->codec;
+    //AVCodecContext *videoDecoderCodecContext = video_stream->codec;
+
+    AVCodecContext *videoDecoderCodecContext; // = video_stream->codec;
+    videoDecoderCodecContext = avcodec_alloc_context3(NULL);
+    avcodec_parameters_to_context(videoDecoderCodecContext, video_stream->codecpar);
+
+
+
     if(video_stream)
     {
         // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
@@ -104,7 +111,6 @@ void VideoPlaybackHandler::start()
 
     //uint8_t recvbuf[(int)10e5];
     memset(mRecvbuf, 0, 10e5);
-    int pos = 0;
 
     AVCodecParserContext * parser = av_parser_init(AV_CODEC_ID_H264);
     parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
