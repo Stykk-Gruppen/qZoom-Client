@@ -35,9 +35,12 @@ Dialog {
                 Text {
                     text: qsTr("Room ID:")
                 }
-                Text {
+                TextEdit {
                     id: roomIdText
                     text: sessionHandler.getRoomId()
+                    selectByMouse: true
+                    readOnly: true
+                    wrapMode: Text.WordWrap
                 }
             }
 
@@ -47,8 +50,11 @@ Dialog {
                     id: roomPasswordText
                     text: qsTr("Room Password:");
                 }
-                Text {
+                TextEdit {
                     text: sessionHandler.getRoomPassword()
+                    selectByMouse: true
+                    readOnly: true
+                    wrapMode: Text.WordWrap
                 }
             }
 
@@ -58,8 +64,25 @@ Dialog {
                     id: roomHostText
                     text: qsTr("Room Host:");
                 }
-                Text {
+                TextEdit {
                     text: sessionHandler.getRoomHostUsername()
+                    selectByMouse: true
+                    readOnly: true
+                    wrapMode: Text.WordWrap
+                }
+            }
+
+            RowLayout {
+                spacing: 10
+                Text {
+                    id: streamIdText
+                    text: qsTr("Your stream ID:");
+                }
+                TextEdit {
+                    text: userHandler.isGuest() ? userHandler.getGuestStreamId() : userHandler.getStreamId()
+                    selectByMouse: true
+                    readOnly: true
+                    wrapMode: Text.WordWrap
                 }
             }
         }
