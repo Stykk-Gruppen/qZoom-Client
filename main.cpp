@@ -103,11 +103,6 @@ int main(int argc, char *argv[])
 
     QScopedPointer<Settings> settings(new Settings());
 
-    if (settings->getServerIpAddress() == "Localhost")
-    {
-        qDebug() << "it is localhost";
-    }
-
     ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(settings.data());
     UserHandler* userHandlerObject = new UserHandler(serverTcpQueries, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());

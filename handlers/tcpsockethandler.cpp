@@ -37,6 +37,7 @@ int TcpSocketHandler::init()
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
         errorHandler->giveErrorDialog("Could not connect to server");
+        qDebug() << mAddress << mPort;
         return -1;
     }
     return 0;

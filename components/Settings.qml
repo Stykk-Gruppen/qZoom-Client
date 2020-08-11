@@ -12,29 +12,22 @@ Dialog {
 
     function loadSettings() {
         defaultAudioInput.model = sessionHandler.getAudioInputDevices();
-        console.log(backendSettings.getDefaultAudioInput());
         var index = defaultAudioInput.find(backendSettings.getDefaultAudioInput())
-        console.log(index);
+        var sessionIsActive = sessionHandler.getSessionIsActive();
         defaultAudioInput.currentIndex = index;
         audioOn.checked = backendSettings.getAudioOn();
         videoOn.checked = backendSettings.getVideoOn();
         saveLastRoom.checked = backendSettings.getSaveLastRoom();
         displayName.text = backendSettings.getDisplayName();
         hostAddressTextField.text = backendSettings.getServerIpAddress();
+        hostAddressTextField.readOnly = sessionIsActive;
         tcpPortTextField.text = backendSettings.getTcpPort();
+        tcpPortTextField.readOnly = sessionHandler;
         udpPortTextField.text = backendSettings.getUdpPort();
+        udpPortTextField.readOnly = sessionIsActive;
         sqlTcpPortTextField.text = backendSettings.getSqlTcpPort();
-
+        sqlTcpPortTextField.readOnly = sessionIsActive;
     }
-
-    /*function getAudioInputDevices(){
-        var inputList = streamHandler.getAudioInputDevices();
-        for(var title in inputList) {
-            inputAudioDevices.append({text: inputList[title]});
-        }
-        defaultAudioInput.displayText = streamHandler.getDefaultAudioInputDevice();
-
-    }*/
 
     id: settings
     visible: false
@@ -69,7 +62,18 @@ Dialog {
                     placeholderText: "Host Address"
                     cursorVisible: false
                     maximumLength: 20
-                    readOnly: sessionHandler.getSessionIsActive()
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("UDP Port:");
+                }
+                TextField {
+                    id: udpPortTextField
+                    placeholderText: "1337"
+                    cursorVisible: false
+                    maximumLength: 20
                 }
             }
 
@@ -79,30 +83,14 @@ Dialog {
                 }
                 TextField {
                     id: tcpPortTextField
-                    placeholderText: "1337"
-                    cursorVisible: false
-                    maximumLength: 20
-                    readOnly: sessionHandler.getSessionIsActive()
-                }
-            }
-
-            RowLayout {
-                Text {
-                    //id: udpPortTextField
-                    text: qsTr("UDP Port:");
-                }
-                TextField {
-                    id: udpPortTextField
                     placeholderText: "1338"
                     cursorVisible: false
                     maximumLength: 20
-                    readOnly: sessionHandler.getSessionIsActive()
                 }
             }
 
             RowLayout {
                 Text {
-                    //id: hostAddressText
                     text: qsTr("SQL TCP Port:");
                 }
                 TextField {
@@ -110,7 +98,6 @@ Dialog {
                     placeholderText: "1339"
                     cursorVisible: false
                     maximumLength: 20
-                    readOnly: sessionHandler.getSessionIsActive()
                 }
             }
 
