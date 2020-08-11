@@ -572,7 +572,8 @@ void VideoHandler::grabFrames()
         //count++;
     }
     close();
-    mImageHandler->readImage(nullptr, nullptr, 0);
+    //mImageHandler->readImage(nullptr, nullptr, 0);
+    mImageHandler->setPeerVideoAsDisabled(std::numeric_limits<uint8_t>::max());
 
 
     /*
