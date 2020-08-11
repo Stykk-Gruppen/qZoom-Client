@@ -21,10 +21,10 @@ public:
     Q_INVOKABLE QString getPersonalRoomPassword() const;
     int getUserId() const;
     int getGuestId() const;
-    QString getStreamId() const;
+    Q_INVOKABLE QString getStreamId() const;
     QString getUsername() const;
     QString getGuestName() const;
-    QString getGuestStreamId() const;
+    Q_INVOKABLE QString getGuestStreamId() const;
 
 private:
     ServerTcpQueries* mServerTcpQueries;
