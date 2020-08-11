@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     errorHandler = new ErrorHandler;
 
-    //av_log_set_level(AV_LOG_QUIET);
+    av_log_set_level(AV_LOG_QUIET);
 
     int bufferSize = 10e5;
     int portNumberTCP = 1338;

@@ -38,6 +38,7 @@ public:
     int getVideoBufferSize(int index) const;
     bool audioPlaybackStarted(int index) const;
     bool videoPlaybackStarted(int index) const;
+    bool videoHeaderVectorIsEmpty(int index) const;
     QString getStreamIdFromIndex(int index) const;
     QFuture<void>* getAudioFutures(int index);
     QFuture<void>* getVideoFutures(int index);

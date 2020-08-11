@@ -232,7 +232,6 @@ void VideoPlaybackHandler::start()
         av_frame_unref(frame);
         av_packet_unref(packet);
 
-        qDebug() << "Closing videoplaybackhandler after if";
     }
     qDebug() << "Closing videoplaybackhandler";
     avformat_close_input(&inputFormatContext);

@@ -113,9 +113,13 @@ void UdpSocketHandler::readPendingDatagrams()
         }
         else if (audioOrVideoInt == 1)
         {
-            mInputStreamHandler->lockVideoMutex(index);
-            mInputStreamHandler->appendToVideoBuffer(index, data);
-            mInputStreamHandler->unlockVideoMutex(index);
+            if(!mInputStreamHandler->videoHeaderVectorIsEmpty(index))
+            {
+                mInputStreamHandler->lockVideoMutex(index);
+                mInputStreamHandler->appendToVideoBuffer(index, data);
+                mInputStreamHandler->unlockVideoMutex(index);
+            }
+
             if(!mInputStreamHandler->videoPlaybackStarted(index))
             {
                 //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
@@ -155,7 +159,7 @@ void UdpSocketHandler::printBytesPerSecond(int bytes)
     if(seconds - lastTime >= secondsBetweenPrints)
     {
 
-        qDebug() << "\nCurrently sending datagrams with a "<< totalSent/(1000*secondsBetweenPrints) << "kB/s\n";
+        //qDebug() << "\nCurrently sending datagrams with a "<< totalSent/(1000*secondsBetweenPrints) << "kB/s\n";
         totalSent = 0;
         lastTime = seconds;
     }

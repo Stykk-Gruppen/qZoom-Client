@@ -171,6 +171,7 @@ void InputStreamHandler::handleHeader(QByteArray data)
     {
         //Failed to find streamId in vector. Will add them instead.
         addStreamToVector(mStreamIdVector.size(), streamId, displayName);
+        //StreamId is not added yet to vector, so -1 is not required.
         index = (mStreamIdVector.size());// - 1);
     }
 
@@ -180,7 +181,8 @@ void InputStreamHandler::handleHeader(QByteArray data)
         qDebug() << " header is empty adding it to the buffers " << data;
         mVideoHeaderVector[index]->append(data);
         mVideoBufferVector[index]->append(data);
-        //
+
+        //We have to wait until this point to add streamId to vector, to avoid udp writing packages in front of the header:
         mStreamIdVector.push_back(streamId);
     }
     mVideoMutexVector[index]->unlock();
@@ -219,7 +221,7 @@ void InputStreamHandler::addStreamToVector(int index, const QString& streamId, c
                                                                    mImageHandler, index));
     mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, tempVideoBuffer, mBufferSize,
                                                                    mImageHandler, index));
-    //mStreamIdVector.push_back(streamId);
+
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
 
@@ -364,6 +366,11 @@ void InputStreamHandler::unlockVideoMutex(int index)
 bool InputStreamHandler::videoPlaybackStarted(int index) const
 {
     return mVideoPlaybackStartedVector[index];
+}
+
+bool InputStreamHandler::videoHeaderVectorIsEmpty(int index) const
+{
+    return mVideoHeaderVector.at(index)->isEmpty();
 }
 
 QString InputStreamHandler::getStreamIdFromIndex(int index) const
