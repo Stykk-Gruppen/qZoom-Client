@@ -19,12 +19,13 @@ public:
     Q_INVOKABLE QString getErrorMessage() const;
     Q_INVOKABLE QString getPersonalRoomId() const;
     Q_INVOKABLE QString getPersonalRoomPassword() const;
+    Q_INVOKABLE QString getStreamId() const;
+    Q_INVOKABLE QString getGuestStreamId() const;
+    Q_INVOKABLE QString getDisplayName() const;
     int getUserId() const;
     int getGuestId() const;
-    Q_INVOKABLE QString getStreamId() const;
     QString getUsername() const;
     QString getGuestName() const;
-    Q_INVOKABLE QString getGuestStreamId() const;
 
 private:
     ServerTcpQueries* mServerTcpQueries;

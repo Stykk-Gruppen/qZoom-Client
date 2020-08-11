@@ -213,6 +213,11 @@ QString UserHandler::getGuestStreamId() const
     return "getGuestStreamIdFailed";
 }
 
+QString UserHandler::getDisplayName() const
+{
+    return isGuest() ? mGuestName : mUsername;
+}
+
 /**
  * @brief UserHandler::getGuestId
  * Gets ID from Database

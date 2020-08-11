@@ -34,15 +34,17 @@ void Settings::loadSettings()
     else
     {
         qDebug() << "Settings file not found. Creating default";
-        loadAndSaveDefaultSettings();
+        const QString displayName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
+        loadAndSaveDefaultSettings(displayName);
     }
 }
 
-void Settings::loadAndSaveDefaultSettings()
+void Settings::loadAndSaveDefaultSettings(const QString& displayName)
 {
     mAudioOn = false;
     mVideoOn = true;
-    mDisplayName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    //mDisplayName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    mDisplayName = displayName;
     mDefaultAudioInput = "default";
     mSaveLastRoom = true;
     mLastRoomId = "";

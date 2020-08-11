@@ -109,7 +109,8 @@ Dialog {
     onRejected: console.log("Close clicked")
     onReset: {
         console.log("Restore Defaults clicked")
-        backendSettings.loadAndSaveDefaultSettings();
+        var displayName = userHandler.getDisplayName();
+        backendSettings.loadAndSaveDefaultSettings(displayName);
         loadSettings();
     }
 }

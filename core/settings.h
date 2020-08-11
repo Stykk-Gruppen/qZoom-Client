@@ -13,7 +13,7 @@ class Settings : public QObject
 public:
     Settings();
     Q_INVOKABLE void loadSettings();
-    Q_INVOKABLE void loadAndSaveDefaultSettings();
+    Q_INVOKABLE void loadAndSaveDefaultSettings(const QString& displayName);
     Q_INVOKABLE void saveSettings();
     Q_INVOKABLE void setAudioOn(bool val);
     Q_INVOKABLE void setVideoOn(bool val);
