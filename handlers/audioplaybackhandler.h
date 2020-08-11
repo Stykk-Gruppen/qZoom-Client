@@ -29,7 +29,7 @@ private:
     QAudioFormat mAudioFormat;
     QAudioOutput* mpAudio;
     QIODevice* mpOut;
-
+    static int customReadPacket(void *opaque, uint8_t *buf, int buf_size);
     int initFilterGraph(AVFilterGraph **graph, AVFilterContext **src,
                                         AVCodecContext *ctx,AVFilterContext **sink);
 

@@ -130,15 +130,15 @@ void VideoPlaybackHandler::start()
         mStruct->writeLock->unlock();
 
 
-        qDebug() << "Stringlength: " << stringLength;
+        //qDebug() << "Stringlength: " << stringLength;
         while(!mStopPlayback && mStruct->buffer->size() <= stringLength)
         {
         }
 
         QByteArray sizeArray = QByteArray(mStruct->buffer->data(), stringLength);
-        qDebug() << "sizearray: " << sizeArray;
+        //qDebug() << "sizearray: " << sizeArray;
         QString sizeString = QString(sizeArray);
-        qDebug() << "sizestring: " << sizeString;
+       // qDebug() << "sizestring: " << sizeString;
         int buffer_size = sizeString.toInt();
 
         while (!mStopPlayback && mStruct->buffer->size() <= (buffer_size + stringLength))
@@ -155,14 +155,14 @@ void VideoPlaybackHandler::start()
         }
 
 
-        qDebug() << "Before lock";
+        //qDebug() << "Before lock";
         if(mStopPlayback)
         {
             //return AVERROR_EOF;
             break;
         }
         mStruct->writeLock->lock();
-        qDebug() << "After lock";
+       // qDebug() << "After lock";
         mStruct->buffer->remove(0, stringLength);
 
         QByteArray tempBuffer = QByteArray(mStruct->buffer->data(), buffer_size);
@@ -180,7 +180,7 @@ void VideoPlaybackHandler::start()
         int length = buffer_size;
 
 
-        qDebug() << "Before length check" << length;
+        //qDebug() << "Before length check" << length;
         int ret = parsePacket(parser, packet, length, videoDecoderCodecContext);
         if (ret < 0)
         {
@@ -233,7 +233,7 @@ void VideoPlaybackHandler::start()
         av_packet_unref(packet);
 
     }
-    qDebug() << "Closing videoplaybackhandler";
+    //qDebug() << "Closing videoplaybackhandler";
     avformat_close_input(&inputFormatContext);
     avcodec_free_context(&videoDecoderCodecContext);
 
@@ -262,7 +262,7 @@ int VideoPlaybackHandler::parsePacket(AVCodecParserContext* parser, AVPacket* pa
     //Parsing temporary packet into pkt
     av_init_packet(packet);
 
-    qDebug() << "Before Parse";
+    //qDebug() << "Before Parse";
     av_parser_parse2(parser, videoDecoderCodecContext,
                      &(packet->data), &(packet->size),
                      tempPacket->data, tempPacket->size,
@@ -273,7 +273,7 @@ int VideoPlaybackHandler::parsePacket(AVCodecParserContext* parser, AVPacket* pa
     packet->pts = parser->pts; //Might not need these
     packet->dts = parser->dts;
     packet->pos = parser->pos;
-    qDebug() << "After Parse";
+    //qDebug() << "After Parse";
 
     //Set keyframe flag
     if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
