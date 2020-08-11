@@ -3,8 +3,6 @@
 SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                                ImageHandler* imageHandler,
                                Settings* settings, int bufferSize,
-                               QHostAddress address, int _portNumberTCP,
-                               int _portNumerUDP,
                                QObject *parent) : QObject(parent)
 {
     mServerTcpQueries = _mServerTcpQueries;
@@ -13,11 +11,14 @@ SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler
     mIpAddress = "Ipaddress";
     mSettings = settings;
     mBufferSize = bufferSize;
-    mPortNumberTCP = _portNumberTCP;
-    mPortNumberUDP = _portNumerUDP;
-    mAddress = address;
+    mPortNumberTCP = settings->getTcpPort();
+    mPortNumberUDP = settings->getUdpPort();
     mImageHandler = imageHandler;
     mSessionIsActive = false;
+
+    mAddress = (mSettings->getServerIpAddress() == "Localhost") ?
+                QHostAddress::LocalHost : QHostAddress(mSettings->getServerIpAddress());
+
 }
 
 bool SessionHandler::enableScreenShare()
@@ -251,6 +252,11 @@ bool SessionHandler::addGuestUserToDatabase()
     }
     qDebug() << "Added guest :" << mUser->getGuestName() << "to the database";
     return true;
+}
+
+bool SessionHandler::getSessionIsActive() const
+{
+    return mSessionIsActive;
 }
 
 void SessionHandler::setDefaultRoomID()
