@@ -22,7 +22,7 @@ void VideoPlaybackHandler::start()
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
 
-   // mBufferSize = 10e5;
+    // mBufferSize = 10e5;
     uint8_t *avioContextBuffer = reinterpret_cast<uint8_t*>(av_malloc(mBufferSize));
     Q_ASSERT(avioContextBuffer);
 
@@ -138,7 +138,7 @@ void VideoPlaybackHandler::start()
         QByteArray sizeArray = QByteArray(mStruct->buffer->data(), stringLength);
         //qDebug() << "sizearray: " << sizeArray;
         QString sizeString = QString(sizeArray);
-       // qDebug() << "sizestring: " << sizeString;
+        // qDebug() << "sizestring: " << sizeString;
         int buffer_size = sizeString.toInt();
 
         while (!mStopPlayback && mStruct->buffer->size() <= (buffer_size + stringLength))
@@ -162,7 +162,7 @@ void VideoPlaybackHandler::start()
             break;
         }
         mStruct->writeLock->lock();
-       // qDebug() << "After lock";
+        // qDebug() << "After lock";
         mStruct->buffer->remove(0, stringLength);
 
         QByteArray tempBuffer = QByteArray(mStruct->buffer->data(), buffer_size);

@@ -117,6 +117,8 @@ void AudioPlaybackHandler::start()
     ao_initialize();
 
     int driver = ao_default_driver_id();
+    ao_info *driver_info = ao_driver_info(driver);
+        printf("Player audio driver: %s\n", driver_info->name);
 
     // The format of the decoded PCM samples
     ao_sample_format sample_format;

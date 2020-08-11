@@ -996,7 +996,6 @@ void AudioHandler::cleanup()
     {
         avformat_close_input(&mInputFormatContext);
     }
-    exit(0);
 }
 /**
  * Initialize input, filtergraph, output, fifo and resampler contexts
@@ -1078,7 +1077,8 @@ int AudioHandler::grabFrames()
              * output sample format and put it into the FIFO buffer. */
             if (readDecodeConvertAndStore(&finished))
             {
-                cleanup();
+                //cleanup();
+                break;
             }
 
 
@@ -1104,7 +1104,8 @@ int AudioHandler::grabFrames()
              * encode it and write it to the output file. */
             if (loadEncodeAndWrite())
             {
-                cleanup();
+                //cleanup();
+                break;
             }
         }
 
@@ -1119,16 +1120,17 @@ int AudioHandler::grabFrames()
                 data_written = 0;
                 if (encodeAudioFrame(NULL, &data_written))
                 {
-                    cleanup();
+                    //cleanup();
+                    break;
                 }
             } while (data_written);
             break;
         }
     }
-    avformat_close_input(&mInputFormatContext);
+    //avformat_close_input(&mInputFormatContext);
     mActive = false;
 
-    //cleanup();
+    cleanup();
     return 0;
 
 }
