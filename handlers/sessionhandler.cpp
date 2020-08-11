@@ -78,13 +78,10 @@ int SessionHandler::initOtherStuff()
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
     mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
-    //mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
     mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPortNumberTCP);
     connect(mTcpSocketHandler, &TcpSocketHandler::sendDummyDatagram, mUdpSocketHandler, &UdpSocketHandler::openPortHack);
     mOutputStreamHandler = new OutputStreamHandler(mImageHandler, mUdpSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
-    //Init tcpServerHandler
-    //mTcpServerHandler->init();
-    //Init sending of our header, empty or not
+
     if(mTcpSocketHandler->init() < 0)
     {
         return -1;

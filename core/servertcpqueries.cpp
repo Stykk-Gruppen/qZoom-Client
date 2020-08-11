@@ -18,7 +18,7 @@ bool ServerTcpQueries::connect()
     this->connectToHost(mServerAddress, mPortNumber);
     if(!this->waitForConnected(mMillisWait))
     {
-        qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
+        qDebug() << "SQLTcpSocketError: " << this->errorString() << Q_FUNC_INFO;
         qDebug() << mServerAddress << mPortNumber;
         return false;
     }
@@ -35,7 +35,7 @@ bool ServerTcpQueries::disconnect()
     if (this->state() == QAbstractSocket::UnconnectedState || this->waitForDisconnected(mMillisWait)) {
         return true;
     }
-    qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
+    qDebug() << "SQLTcpSocketError: " << this->errorString() << Q_FUNC_INFO;
     return false;
 }
 /**

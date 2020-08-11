@@ -54,8 +54,8 @@ void Settings::loadAndSaveDefaultSettings(const QString& displayName)
     mLastRoomId = "";
     mLastRoomPassword = "";
     mServerIpAddress = "";
-    mTcpPort = 1337;
-    mUdpPort = 1338;
+    mUdpPort = 1337;
+    mTcpPort = 1338;
     mSqlTcpPort = 1339;
     saveSettings();
 }

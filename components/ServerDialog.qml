@@ -8,8 +8,8 @@ import "../components" as C
 
 Dialog {
     id: dialogId
-    width: 600
-    height: 600
+    width: 400
+    height: 400
     //modal: true
     title: "Server Information"
     //anchors.centerIn: parent
@@ -41,10 +41,11 @@ Dialog {
 
             RowLayout {
                 Text {
-                    text: qsTr("TCP Port:");
+                    //id: udpPortTextField
+                    text: qsTr("UDP Port:");
                 }
                 TextField {
-                    id: tcpPortTextField
+                    id: udpPortTextField
                     placeholderText: "1337"
                     cursorVisible: false
                     maximumLength: 20
@@ -53,11 +54,10 @@ Dialog {
 
             RowLayout {
                 Text {
-                    //id: udpPortTextField
-                    text: qsTr("UDP Port:");
+                    text: qsTr("TCP Port:");
                 }
                 TextField {
-                    id: udpPortTextField
+                    id: tcpPortTextField
                     placeholderText: "1338"
                     cursorVisible: false
                     maximumLength: 20
