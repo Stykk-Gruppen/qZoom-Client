@@ -171,8 +171,8 @@ void InputStreamHandler::handleHeader(QByteArray data)
     {
         //Failed to find streamId in vector. Will add them instead.
         addStreamToVector(mStreamIdVector.size(), streamId, displayName);
-        //StreamId is not added yet to vector, so -1 is not required.
-        index = (mStreamIdVector.size());// - 1);
+
+        index = (mStreamIdVector.size() - 1);
     }
 
     mVideoMutexVector[index]->lock();
@@ -182,8 +182,6 @@ void InputStreamHandler::handleHeader(QByteArray data)
         mVideoHeaderVector[index]->append(data);
         mVideoBufferVector[index]->append(data);
 
-        //We have to wait until this point to add streamId to vector, to avoid udp writing packages in front of the header:
-        mStreamIdVector.push_back(streamId);
     }
     mVideoMutexVector[index]->unlock();
 }
@@ -221,9 +219,11 @@ void InputStreamHandler::addStreamToVector(int index, const QString& streamId, c
                                                                    mImageHandler, index));
     mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, tempVideoBuffer, mBufferSize,
                                                                    mImageHandler, index));
+    mStreamIdVector.push_back(streamId);
 
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
+
 
     //Your own image is at numeric limit for uint8, so we have a problem if a room gets that many participants
     mImageHandler->addPeer(index, displayName);
