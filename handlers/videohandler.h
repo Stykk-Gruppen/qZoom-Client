@@ -86,5 +86,8 @@ private:
     QString mCameraDeviceName;
     std::mutex* mWriteLock;
     TcpSocketHandler* mTcpSocketHandler;
+
+
+
 };
 #endif // VideoHandler_H

@@ -91,12 +91,12 @@ void VideoPlaybackHandler::start()
         qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
         qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
 
-        AVFrame	*frameRGB = av_frame_alloc();
+        /*AVFrame	*frameRGB = av_frame_alloc();
         frameRGB->format = AV_PIX_FMT_RGB24;
         frameRGB->width = videoStreamCodecParameters->width;
         frameRGB->height = videoStreamCodecParameters->height;
         err = av_frame_get_buffer(frameRGB, 0);
-        Q_ASSERT(err == 0);
+        Q_ASSERT(err == 0);*/
     }
 
     AVFrame* frame = av_frame_alloc();

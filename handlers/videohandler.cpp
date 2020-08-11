@@ -22,16 +22,16 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 
     /*ScreenSharing stuff*/
-    if(mScreenCapture)
+    /*if(mScreenCapture)
     {
         mSource = "x11grab";
         this->mCameraDeviceName = buildScreenDeviceName();
     }
     else
-    {
+    {*/
         this->mCameraDeviceName = cDeviceName;
         mSource = "v4l2";
-    }
+    //}
 
     //this->aDeviceName = aDeviceName;
     this->mImageHandler = imageHandler;
@@ -129,6 +129,7 @@ int VideoHandler::init()
         return -1;
     }
 
+    av_dict_free(&screenOpt);
 
     //Get stream information
     if ((ret = avformat_find_stream_info(ifmt_ctx, 0)) < 0)
@@ -297,7 +298,7 @@ int VideoHandler::init()
     }
 
     int avio_buffer_size = mBufferSize;
-    void* avio_buffer = av_malloc(avio_buffer_size);
+    void *avio_buffer = av_malloc(avio_buffer_size);
     AVIOContext* custom_io = avio_alloc_context (
                 (unsigned char*)avio_buffer, avio_buffer_size,
                 1, (void*) mStruct,
@@ -435,7 +436,7 @@ void VideoHandler::grabFrames()
                 mScaledFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
+            //mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mScaledFrame);
             if(ret < 0)
             {
@@ -459,7 +460,7 @@ void VideoHandler::grabFrames()
                 mVideoFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
+           // mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mVideoFrame);
             //av_frame_free(&videoFrame);
             if(ret < 0)
@@ -571,6 +572,15 @@ void VideoHandler::grabFrames()
         //if(count > numberOfFrames) break;
         //count++;
     }
+    /*av_free(pkt);
+    av_free(outPacket);
+    av_free(mScaledFrame);
+    av_free(mVideoFrame);*/
+    av_packet_free(&pkt);
+    av_packet_free(&outPacket);
+
+    av_frame_free(&mScaledFrame);
+    av_frame_free(&mVideoFrame);
     close();
     mImageHandler->readImage(nullptr, nullptr, 0);
 
@@ -599,9 +609,16 @@ void VideoHandler::grabFrames()
 
 void VideoHandler::close()
 {
+    avcodec_free_context(&mOutputVideoCodecContext);
+    avcodec_free_context(&mInputVideoCodecContext);
     avformat_close_input(&ifmt_ctx);
+    if (ofmt_ctx->pb){
+           av_freep(&ofmt_ctx->pb->buffer);
+    }
+    avio_context_free(&ofmt_ctx->pb);
     avformat_free_context(ofmt_ctx);
-
+    sws_freeContext(img_convert_ctx);
+    //av_free(avio_buffer);
     mActive = false;
 }
 

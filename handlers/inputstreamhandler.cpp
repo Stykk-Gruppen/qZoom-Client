@@ -15,7 +15,7 @@ void InputStreamHandler::init()
 
 void InputStreamHandler::close()
 {
-    qDebug() << "Closing inputStreamHandler";
+    qDebug() << "m, Closing inputStreamHandler";
     qDebug() << "Stopping playbackhandlers";
 
     for(size_t i = 0; i < mVideoPlaybackHandlerVector.size(); i++)
@@ -106,6 +106,9 @@ void InputStreamHandler::removeStream(const QString& streamId)
         mVideoPlaybackHandlerVector[index]->stop();
         mVideoFutures.at(index)->waitForFinished();
 
+        mStreamIdVector.erase(mStreamIdVector.begin() + index);
+        qDebug() << "Successfully removed stream with streamId: " << streamId;
+
         delete mVideoHeaderVector.at(index);
         delete mAudioBufferVector.at(index);
         delete mVideoBufferVector.at(index);
@@ -122,8 +125,7 @@ void InputStreamHandler::removeStream(const QString& streamId)
         mVideoPlaybackHandlerVector.erase(mVideoPlaybackHandlerVector.begin() + index);
         mAudioPlaybackStartedVector.erase(mAudioPlaybackStartedVector.begin() + index);
         mVideoPlaybackStartedVector.erase(mVideoPlaybackStartedVector.begin() + index);
-        mStreamIdVector.erase(mStreamIdVector.begin() + index);
-        qDebug() << "Successfully removed stream with streamId: " << streamId;
+
         mImageHandler->removePeer(index);
         mVideoFutures.erase(mVideoFutures.begin() + index);
         mAudioFutures.erase(mAudioFutures.begin() + index);
