@@ -204,6 +204,11 @@ QString UserHandler::getGuestStreamId() const
     QVariantList vars;
     vars.append(QString::number(getGuestId()));
     const QVariantList returnList = mServerTcpQueries->RQuery(8, vars);
+    if (returnList.isEmpty())
+    {
+        qDebug() << "Failed Query " << Q_FUNC_INFO;
+        return "getGuestStreamIdFailed";
+    }
     const QString queryData = returnList[0].toString();
     if(!queryData.isEmpty())
     {
@@ -228,6 +233,11 @@ int UserHandler::getGuestId() const
     QVariantList vars;
     vars.append(mGuestName);
     QVariantList returnList = mServerTcpQueries->RQuery(9, vars);
+    if (returnList.isEmpty())
+    {
+        qDebug() << "GuestID is empty";
+        return -1;
+    }
     return returnList[0].toInt();
 }
 

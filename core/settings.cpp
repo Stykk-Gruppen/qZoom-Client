@@ -20,6 +20,10 @@ void Settings::loadSettings()
         mDisplayName = settings.value("displayName").toString();
         mDefaultAudioInput = settings.value("defaultAudioInput").toString();
         mSaveLastRoom = settings.value("saveLastRoom").toBool();
+        mServerIpAddress = settings.value("serverIpAddress").toString();
+        mTcpPort = settings.value("tcpPort").toInt();
+        mUdpPort = settings.value("udpPort").toInt();
+        mSqlTcpPort = settings.value("sqlTcpPort").toInt();
         if (mSaveLastRoom)
         {
             mLastRoomId = settings.value("lastRoomId").toString();
@@ -49,6 +53,10 @@ void Settings::loadAndSaveDefaultSettings(const QString& displayName)
     mSaveLastRoom = true;
     mLastRoomId = "";
     mLastRoomPassword = "";
+    mServerIpAddress = "";
+    mTcpPort = 1337;
+    mUdpPort = 1338;
+    mSqlTcpPort = 1339;
     saveSettings();
 }
 
@@ -63,6 +71,10 @@ void Settings::saveSettings()
     object.insert("displayName", QJsonValue::fromVariant(mDisplayName));
     object.insert("defaultAudioInput", QJsonValue::fromVariant(mDefaultAudioInput));
     object.insert("saveLastRoom", QJsonValue::fromVariant(mSaveLastRoom));
+    object.insert("serverIpAddress", QJsonValue::fromVariant(mServerIpAddress));
+    object.insert("tcpPort", QJsonValue::fromVariant(mTcpPort));
+    object.insert("udpPort", QJsonValue::fromVariant(mUdpPort));
+    object.insert("sqlTcpPort", QJsonValue::fromVariant(mSqlTcpPort));
     if (mSaveLastRoom)
     {
         object.insert("lastRoomId", QJsonValue::fromVariant(mLastRoomId));
@@ -106,6 +118,46 @@ QString Settings::getLastRoomId() const
 QString Settings::getLastRoomPassword() const
 {
     return mLastRoomPassword;
+}
+
+int Settings::getTcpPort() const
+{
+    return mTcpPort;
+}
+
+int Settings::getUdpPort() const
+{
+    return mUdpPort;
+}
+
+int Settings::getSqlTcpPort() const
+{
+    return mSqlTcpPort;
+}
+
+QString Settings::getServerIpAddress() const
+{
+    return mServerIpAddress;
+}
+
+void Settings::setServerIpAddress(const QString &serverIpAddress)
+{
+    mServerIpAddress = serverIpAddress;
+}
+
+void Settings::setSqlTcpPort(int sqlTcpPort)
+{
+    mSqlTcpPort = sqlTcpPort;
+}
+
+void Settings::setUdpPort(int udpPort)
+{
+    mUdpPort = udpPort;
+}
+
+void Settings::setTcpPort(int tcpPort)
+{
+    mTcpPort = tcpPort;
 }
 
 void Settings::setAudioOn(bool val)

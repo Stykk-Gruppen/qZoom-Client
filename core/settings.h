@@ -22,6 +22,13 @@ public:
     Q_INVOKABLE void setSaveLastRoom(bool val);
     Q_INVOKABLE void setLastRoomId(const QString& val);
     Q_INVOKABLE void setLastRoomPassword(const QString& val);
+    Q_INVOKABLE void setServerIpAddress(const QString &serverIpAddress);
+    Q_INVOKABLE void setSqlTcpPort(int sqlTcpPort);
+    Q_INVOKABLE void setUdpPort(int udpPort);
+    Q_INVOKABLE void setTcpPort(int tcpPort);
+    Q_INVOKABLE int getTcpPort() const;
+    Q_INVOKABLE int getUdpPort() const;
+    Q_INVOKABLE int getSqlTcpPort() const;
     Q_INVOKABLE bool getAudioOn() const;
     Q_INVOKABLE bool getVideoOn() const;
     Q_INVOKABLE bool getSaveLastRoom() const;
@@ -29,8 +36,12 @@ public:
     Q_INVOKABLE QString getDefaultAudioInput() const;
     Q_INVOKABLE QString getLastRoomId() const;
     Q_INVOKABLE QString getLastRoomPassword() const;
+    Q_INVOKABLE QString getServerIpAddress() const;
 
 private:
+    int mTcpPort;
+    int mUdpPort;
+    int mSqlTcpPort;
     bool mAudioOn;
     bool mVideoOn;
     bool mSaveLastRoom;
@@ -39,6 +50,7 @@ private:
     QString mSettingsFile = "./settings.json";
     QString mLastRoomId;
     QString mLastRoomPassword;
+    QString mServerIpAddress;
 };
 
 #endif // SETTINGS_H

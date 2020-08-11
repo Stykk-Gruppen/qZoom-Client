@@ -105,12 +105,17 @@ int main(int argc, char *argv[])
 
     QScopedPointer<Settings> settings(new Settings());
 
-    ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(portNumberTCPQueries, address);
+    if (settings->getServerIpAddress() == "Localhost")
+    {
+        qDebug() << "it is localhost";
+    }
+
+    ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(settings.data());
     UserHandler* userHandlerObject = new UserHandler(serverTcpQueries, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(serverTcpQueries, userHandlerObject,
                                                               imageHandlerObject, settings.data(),
-                                                              bufferSize, address, portNumberTCP,portNumberUDP);
+                                                              bufferSize);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<UserHandler> userHandler(userHandlerObject);

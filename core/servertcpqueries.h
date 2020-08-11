@@ -2,11 +2,12 @@
 #define SERVERTCPQUERIES_H
 #include <QTcpSocket>
 #include <QHostAddress>
+#include "settings.h"
 
 class ServerTcpQueries : public QTcpSocket
 {
 public:
-    ServerTcpQueries(int port, QHostAddress address, QObject* parent = nullptr);
+    ServerTcpQueries(Settings* settings, QObject* parent = nullptr);
     /*QVariantList query0SelectFromRoom(QString _roomId, QString _roomPassword);
     int query1InsertIntoRoomSession(QString _roomId, QString _userId);
     int query2InsertIntoRoom(QString _roomId, QString _host, QString _roomPassword);
@@ -27,6 +28,7 @@ private:
     int mPortNumber;
     int mMillisWait;
     QHostAddress mServerAddress;
+    Settings* mSettings;
 };
 
 #endif // SERVERTCPQUERIES_H

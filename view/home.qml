@@ -7,6 +7,10 @@ Rectangle {
     id: root
     color: Qt.rgba(27/255, 29/255, 54/255, 1)
 
+    C.ServerDialog {
+        id: serverDialog
+    }
+
     /*
     C.Header {
         id: header
@@ -511,5 +515,9 @@ Rectangle {
 
     Component.onCompleted: {
         setTitle("qZoom :: Home");
+
+        if(!backendSettings.getServerIpAddress()) {
+            serverDialog.open();
+        }
     }
 }

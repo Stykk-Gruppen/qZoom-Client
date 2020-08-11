@@ -20,6 +20,10 @@ Dialog {
         videoOn.checked = backendSettings.getVideoOn();
         saveLastRoom.checked = backendSettings.getSaveLastRoom();
         displayName.text = backendSettings.getDisplayName();
+        hostAddressTextField.text = backendSettings.getServerIpAddress();
+        tcpPortTextField.text = backendSettings.getTcpPort();
+        udpPortTextField.text = backendSettings.getUdpPort();
+        sqlTcpPortTextField.text = backendSettings.getSqlTcpPort();
 
     }
 
@@ -35,7 +39,7 @@ Dialog {
     id: settings
     visible: false
     width: 400
-    height: 300
+    height: 500
     //modal: true
     title: "Settings"
     //anchors.centerIn: parent
@@ -50,9 +54,63 @@ Dialog {
                 }
                 TextField {
                     id: displayName
-                    placeholderText: "UserName"
+                    placeholderText: "Visible name"
                     cursorVisible: false
                     maximumLength: 20
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("Host Address:");
+                }
+                TextField {
+                    id: hostAddressTextField
+                    placeholderText: "Host Address"
+                    cursorVisible: false
+                    maximumLength: 20
+                    readOnly: sessionHandler.getSessionIsActive()
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("TCP Port:");
+                }
+                TextField {
+                    id: tcpPortTextField
+                    placeholderText: "1337"
+                    cursorVisible: false
+                    maximumLength: 20
+                    readOnly: sessionHandler.getSessionIsActive()
+                }
+            }
+
+            RowLayout {
+                Text {
+                    //id: udpPortTextField
+                    text: qsTr("UDP Port:");
+                }
+                TextField {
+                    id: udpPortTextField
+                    placeholderText: "1338"
+                    cursorVisible: false
+                    maximumLength: 20
+                    readOnly: sessionHandler.getSessionIsActive()
+                }
+            }
+
+            RowLayout {
+                Text {
+                    //id: hostAddressText
+                    text: qsTr("SQL TCP Port:");
+                }
+                TextField {
+                    id: sqlTcpPortTextField
+                    placeholderText: "1339"
+                    cursorVisible: false
+                    maximumLength: 20
+                    readOnly: sessionHandler.getSessionIsActive()
                 }
             }
 
@@ -61,6 +119,7 @@ Dialog {
                 checked: true
                 text: qsTr("Audio on when joining meeting")
             }
+
             CheckBox {
                 id: videoOn
                 checked: true
@@ -92,6 +151,10 @@ Dialog {
         backendSettings.setVideoOn(videoOn.checked);
         backendSettings.setSaveLastRoom(saveLastRoom.checked);
         backendSettings.setDefaultAudioInput(defaultAudioInput.currentText);
+        backendSettings.setServerIpAddress(hostAddressTextField.text);
+        backendSettings.setTcpPort(tcpPortTextField.text);
+        backendSettings.setUdpPort(udpPortTextField.text);
+        backendSettings.setSqlTcpPort(sqlTcpPortTextField.text);
 
         if (displayName.text !== backendSettings.getDisplayName()) {
             backendSettings.setDisplayName(displayName.text === "" ? "UserName" : displayName.text);

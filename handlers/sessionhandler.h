@@ -23,8 +23,6 @@ public:
     explicit SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                             ImageHandler* imageHandler,
                             Settings* settings, int bufferSize,
-                            QHostAddress address, int _portNumberTCP,
-                            int _portNumerUDP,
                             QObject *parent = nullptr);
     Q_INVOKABLE void updateDisplayName();
     Q_INVOKABLE void disableVideo();
@@ -44,6 +42,7 @@ public:
     Q_INVOKABLE QString getRoomPassword() const;
     Q_INVOKABLE QString getRoomHostUsername() const;
     Q_INVOKABLE QVariantList getAudioInputDevices() const;
+    Q_INVOKABLE bool getSessionIsActive() const;
 
 private:
     ServerTcpQueries* mServerTcpQueries;
