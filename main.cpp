@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     //av_log_set_level(AV_LOG_QUIET);
 
-    int bufferSize = 16*1024;
+    int bufferSize = 10e5;
     int portNumberTCP = 1338;
     int portNumberUDP = 1337;
     int portNumberTCPQueries = 1339;

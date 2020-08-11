@@ -22,6 +22,7 @@ void VideoPlaybackHandler::start()
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
 
+   // mBufferSize = 10e5;
     uint8_t *avioContextBuffer = reinterpret_cast<uint8_t*>(av_malloc(mBufferSize));
     Q_ASSERT(avioContextBuffer);
 

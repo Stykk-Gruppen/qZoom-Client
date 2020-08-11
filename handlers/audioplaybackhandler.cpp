@@ -4,7 +4,7 @@ AudioPlaybackHandler::AudioPlaybackHandler(std::mutex* _writeLock, QByteArray* b
                                            size_t bufferSize, ImageHandler* _imageHandler,
                                            int index) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index)
 {
-    mBufferSize = mBufferSize/16;
+    mBufferSize = 1024*1;
 }
 
 AudioPlaybackHandler::~AudioPlaybackHandler()

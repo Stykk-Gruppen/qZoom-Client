@@ -38,7 +38,7 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     while(s->buffer->size() <= 0);
 
 
-    qDebug() << *s->buffer;
+    //qDebug() << *s->buffer;
     int stringLength = s->buffer->at(0);
     s->writeLock->lock();
 
@@ -60,13 +60,19 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
     qDebug() << "Buf_size: " << buf_size;
 
+   /* if(buf_size>1000){
+        s->writeLock->lock();
+        s->buffer->append(stringLength);
+        s->writeLock->unlock();
+        return AVERROR_EOF;
+    }*/
 
     while (s->buffer->size() <= buf_size+stringLength)
     {
-        if((*s->stopPlayback))
+        /*if((*s->stopPlayback))
         {
             return AVERROR_EOF;
-        }
+        }*/
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         //qDebug() << "sleeping";

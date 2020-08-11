@@ -103,7 +103,7 @@ void UdpSocketHandler::readPendingDatagrams()
             mInputStreamHandler->lockAudioMutex(index);
             mInputStreamHandler->appendToAudioBuffer(index, data);
             mInputStreamHandler->unlockAudioMutex(index);
-            if(!mInputStreamHandler->audioPlaybackStarted(index) && mInputStreamHandler->getAudioBufferSize(index) >= (mBufferSize / 8))
+            if(!mInputStreamHandler->audioPlaybackStarted(index) && mInputStreamHandler->getAudioBufferSize(index) >= 1024*1)
             {
                 *mInputStreamHandler->getAudioFutures(index) = QtConcurrent::run(mInputStreamHandler->getAudioPlaybackHandler(index), &AudioPlaybackHandler::start);
                 qDebug() << "Starting AudioPlaybackHandler for streamId: " << streamId;
@@ -116,7 +116,7 @@ void UdpSocketHandler::readPendingDatagrams()
             mInputStreamHandler->lockVideoMutex(index);
             mInputStreamHandler->appendToVideoBuffer(index, data);
             mInputStreamHandler->unlockVideoMutex(index);
-            if(!mInputStreamHandler->videoPlaybackStarted(index) && mInputStreamHandler->getVideoBufferSize(index) >= mBufferSize)
+            if(!mInputStreamHandler->videoPlaybackStarted(index))
             {
                 //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
                 *mInputStreamHandler->getVideoFutures(index) = QtConcurrent::run(mInputStreamHandler->getVideoPlaybackHandler(index), &VideoPlaybackHandler::start);
