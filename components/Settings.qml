@@ -80,7 +80,7 @@ Dialog {
 
                 ComboBox {
                     id: defaultAudioInput
-                    editable: true
+                    editable: false
                 }
             }
         }
@@ -104,6 +104,7 @@ Dialog {
         }
 
         backendSettings.saveSettings();
+        settings.close();
     }
     onRejected: console.log("Close clicked")
     onReset: {

@@ -566,6 +566,8 @@ void VideoHandler::grabFrames()
             //av_packet_free(&pkt);
             //av_packet_free(&outPacket);
         }
+        av_packet_unref(pkt);
+        av_packet_unref(outPacket);
 
         //static int count = 0;
         //qDebug() << count << "/" << numberOfFrames;
