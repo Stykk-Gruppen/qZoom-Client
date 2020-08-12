@@ -33,7 +33,7 @@ Dialog {
                 }
                 TextField {
                     id: hostAddressTextField
-                    placeholderText: "Host Address"
+                    placeholderText: "Localhost"
                     cursorVisible: false
                     maximumLength: 20
                 }
