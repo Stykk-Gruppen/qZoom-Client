@@ -53,7 +53,7 @@ void Settings::loadAndSaveDefaultSettings(const QString& displayName)
     mSaveLastRoom = true;
     mLastRoomId = "";
     mLastRoomPassword = "";
-    mServerIpAddress = "";
+    mServerIpAddress = "Localhost";
     mUdpPort = 1337;
     mTcpPort = 1338;
     mSqlTcpPort = 1339;

@@ -55,11 +55,11 @@ Dialog {
 
             RowLayout {
                 Text {
-                    text: qsTr("Host Address:");
+                    text: qsTr("Host Address");
                 }
                 TextField {
                     id: hostAddressTextField
-                    placeholderText: "Host Address"
+                    placeholderText: "Localhost"
                     cursorVisible: false
                     maximumLength: 20
                 }
@@ -67,7 +67,7 @@ Dialog {
 
             RowLayout {
                 Text {
-                    text: qsTr("UDP Port:");
+                    text: qsTr("UDP Port");
                 }
                 TextField {
                     id: udpPortTextField
@@ -79,7 +79,7 @@ Dialog {
 
             RowLayout {
                 Text {
-                    text: qsTr("TCP Port:");
+                    text: qsTr("TCP Port");
                 }
                 TextField {
                     id: tcpPortTextField
@@ -91,7 +91,7 @@ Dialog {
 
             RowLayout {
                 Text {
-                    text: qsTr("SQL TCP Port:");
+                    text: qsTr("SQL TCP Port");
                 }
                 TextField {
                     id: sqlTcpPortTextField
