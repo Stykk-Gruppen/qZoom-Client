@@ -55,8 +55,6 @@ int main(int argc, char *argv[])
 
     errorHandler = new ErrorHandler;
 
-    av_log_set_level(AV_LOG_QUIET);
-
     int bufferSize = 10e5;
     int portNumberTCP = 1338;
     int portNumberUDP = 1337;
@@ -82,14 +80,14 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption localHost(QStringList() << "l" << "localhost",
-                                 QCoreApplication::translate("main", "Connects to localhost"));
-    parser.addOption(localHost);
+    QCommandLineOption libavPrints("l",
+                                 QCoreApplication::translate("main", "Enables libav prints"));
+    parser.addOption(libavPrints);
     parser.process(app);
 
-    if (parser.isSet(localHost))
+    if (!parser.isSet(libavPrints))
     {
-        address = QHostAddress::LocalHost;
+        av_log_set_level(AV_LOG_QUIET);
     }
 
     QQmlApplicationEngine engine;
