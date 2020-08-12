@@ -103,6 +103,10 @@ QVariantList ServerTcpQueries::RQuery(int code, const QVariantList& vars)
             returnList = parseData(response);
         }
     }
+    else
+    {
+        returnList.append(int(-1));
+    }
     disconnect();
     return returnList;
 }
