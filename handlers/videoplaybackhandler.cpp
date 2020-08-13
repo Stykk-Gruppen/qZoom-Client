@@ -33,7 +33,10 @@ void VideoPlaybackHandler::start()
 
     error = avformat_open_input(&inputFormatContext, NULL, NULL, NULL);
     qDebug() << "HEADER RECEIVED" << Q_FUNC_INFO;
-
+    if(mStopPlayback)
+    {
+        return;
+    }
     if(error < 0)
     {
         char* errbuff = (char *)malloc((1000)*sizeof(char));

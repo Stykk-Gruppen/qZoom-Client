@@ -35,7 +35,13 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
     static int counter = 0;
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
-    while(s->buffer->size() <= 0);
+    while(s->buffer->size() <= 0)
+    {
+        if((*s->stopPlayback))
+        {
+            return AVERROR_EOF;
+        }
+    }
 
 
     //qDebug() << *s->buffer;
@@ -48,7 +54,13 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
 
     qDebug() << "Stringlength: " << stringLength;
-    while(s->buffer->size() <= stringLength);
+    while(s->buffer->size() <= stringLength)
+    {
+        if((*s->stopPlayback))
+        {
+            return AVERROR_EOF;
+        }
+    }
 
 
     QByteArray sizeArray = QByteArray(s->buffer->data(), stringLength);
@@ -69,10 +81,10 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
     while (s->buffer->size() <= buf_size+stringLength)
     {
-        /*if((*s->stopPlayback))
+        if((*s->stopPlayback))
         {
             return AVERROR_EOF;
-        }*/
+        }
         //int ms = 5;
         //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
         //qDebug() << "sleeping";

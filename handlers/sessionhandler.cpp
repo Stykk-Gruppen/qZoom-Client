@@ -49,6 +49,7 @@ bool SessionHandler::enableVideo()
     if(mOutputStreamHandler->checkVideoEnabled())
     {
         mOutputStreamHandler->disableVideo();
+
     }
     return mOutputStreamHandler->enableVideo() >= 0;
 }
