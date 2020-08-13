@@ -338,9 +338,9 @@ int VideoHandler::init()
 
 void VideoHandler::grabFrames()
 {
-    init();
+    //init();
 
-    emit callWriteHeader();
+    //emit callWriteHeader();
 
     mActive = true;
     AVPacket* pkt = av_packet_alloc();

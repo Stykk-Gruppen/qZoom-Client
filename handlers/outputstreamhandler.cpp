@@ -143,8 +143,8 @@ int OutputStreamHandler::enableVideo(bool screenShare)
                                          mBufferSize, mTcpSocketHandler, screenShare);
     }
 
-    //const int error = mVideoHandler->init();
-    //mTcpSocketHandler->writeHeader();
+    const int error = mVideoHandler->init();
+    mTcpSocketHandler->writeHeader();
     /*if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");
