@@ -341,7 +341,7 @@ void VideoHandler::grabFrames()
 {
     //init();
 
-    //emit callWriteHeader();
+    emit callWriteHeader();
 
     mActive = true;
     AVPacket* pkt = av_packet_alloc();

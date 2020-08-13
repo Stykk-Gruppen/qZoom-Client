@@ -182,6 +182,7 @@ void TcpSocketHandler::writeHeader()
     qDebug() << "My Header: " << mHeader.length() << "\n" << mHeader;
 
     mSocket->write(mHeader);
+    qDebug() << "after write";
     mHeader.clear();
 }
 
@@ -209,7 +210,7 @@ void TcpSocketHandler::sendDisabledVideoSignal()
     qDebug() << "My Header: " << header.length() << "\n" << header;
 
     mSocket->write(header);
-    header.clear();
+    mSocket->waitForBytesWritten();
 }
 
 void TcpSocketHandler::sendDisabledAudioSignal()

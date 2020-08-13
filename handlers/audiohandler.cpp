@@ -818,7 +818,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     if(error<0){
         char* errbuff = (char *)malloc((1000)*sizeof(char));
         av_strerror(error,errbuff,1000);
-        qDebug() << "Failed playbackhandler av_buffersrc_add_frame_flags: code "<<error<< " meaning: " << errbuff;
+        qDebug() << "Failed playbackhandler av_buffersrc_add_frame_flags: code " <<error<< " meaning: " << errbuff;
         exit(1);
     }
 
@@ -827,7 +827,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     if(error<0){
         char* errbuff = (char *)malloc((1000)*sizeof(char));
         av_strerror(error,errbuff,1000);
-        qDebug() << "Failed playbackhandler av_buffersink_get_frame: code "<<error<< " meaning: " << errbuff;
+        qDebug() << "Failed playbackhandler av_buffersink_get_frame: code " <<error<< " meaning: " << errbuff;
         exit(1);
     }
 
@@ -853,9 +853,8 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
 
 
     /* Packet used for temporary storage. */
-    AVPacket output_packet;
+    AVPacket* output_packet = av_packet_alloc();
 
-    initPacket(&output_packet);
 
     /* Set a timestamp based on the sample rate for the container. */
     if(first)
@@ -887,7 +886,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     }
 
     /* Receive one encoded frame from the encoder. */
-    error = avcodec_receive_packet(mOutputCodecContext, &output_packet);
+    error = avcodec_receive_packet(mOutputCodecContext, output_packet);
     /* If the encoder asks for more data to be able to provide an
      * encoded frame, return indicating that no data is present. */
     if (error == AVERROR(EAGAIN))
@@ -915,7 +914,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     /* Write one audio frame from the temporary packet to the output file. */
     mWriteLock->lock();
     if (*data_present &&
-            (error = av_interleaved_write_frame(mOutputFormatContext, &output_packet)) < 0)
+            (error = av_interleaved_write_frame(mOutputFormatContext, output_packet)) < 0)
     {
         fprintf(stderr, "Could not write audio frame");
         mWriteLock->unlock();
@@ -923,9 +922,11 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     }
     //qDebug() << error;
     mWriteLock->unlock();
+    av_packet_free(&output_packet);
 
 cleanup:
-    av_packet_unref(&output_packet);
+    av_packet_unref(output_packet);
+    av_packet_free(&output_packet);
     return error;
 }
 
