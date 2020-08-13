@@ -22,16 +22,16 @@ VideoHandler::VideoHandler(QString cDeviceName, std::mutex* _writeLock,int64_t _
 
 
     /*ScreenSharing stuff*/
-    /*if(mScreenCapture)
+    if(mScreenCapture)
     {
         mSource = "x11grab";
         this->mCameraDeviceName = buildScreenDeviceName();
     }
     else
-    {*/
+    {
         this->mCameraDeviceName = cDeviceName;
         mSource = "v4l2";
-    //}
+    }
 
     //this->aDeviceName = aDeviceName;
     this->mImageHandler = imageHandler;
@@ -436,7 +436,7 @@ void VideoHandler::grabFrames()
                 mScaledFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            //mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
+            mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mScaledFrame);
             if(ret < 0)
             {
@@ -460,7 +460,7 @@ void VideoHandler::grabFrames()
                 mVideoFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-           // mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
+            mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mVideoFrame);
             //av_frame_free(&videoFrame);
             if(ret < 0)
@@ -584,7 +584,7 @@ void VideoHandler::grabFrames()
     av_frame_free(&mScaledFrame);
     av_frame_free(&mVideoFrame);
     close();
-    //mImageHandler->readImage(nullptr, nullptr, 0);
+
     mImageHandler->setPeerVideoAsDisabled(std::numeric_limits<uint8_t>::max());
 
 
@@ -615,7 +615,8 @@ void VideoHandler::close()
     avcodec_free_context(&mOutputVideoCodecContext);
     avcodec_free_context(&mInputVideoCodecContext);
     avformat_close_input(&ifmt_ctx);
-    if (ofmt_ctx->pb){
+    if (ofmt_ctx->pb)
+    {
            av_freep(&ofmt_ctx->pb->buffer);
     }
     avio_context_free(&ofmt_ctx->pb);
