@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
     errorHandler = new ErrorHandler;
 
     int bufferSize = 10e5;
-    int portNumberTCP = 1338;
-    int portNumberUDP = 1337;
-    int portNumberTCPQueries = 1339;
+    //int portNumberTCP = 1338;
+    //int portNumberUDP = 1337;
+    //int portNumberTCPQueries = 1339;
     QHostAddress address;
     //address = QHostAddress::LocalHost;
     //address = QHostAddress("46.250.220.57"); //tarves.no

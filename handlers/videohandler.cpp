@@ -271,9 +271,19 @@ int VideoHandler::init()
             return -1;
         }
         out_stream->codecpar->codec_tag = 0;
+
+
+
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
         {
-            out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            //out_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+            mOutputVideoCodecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+        }
+        //usikker på om denne må være før eller etter.
+        ret = avcodec_parameters_to_context(mOutputVideoCodecContext, out_stream->codecpar);
+        if (ret < 0)
+        {
+            exit(1);
         }
 
         /*
@@ -334,7 +344,7 @@ void VideoHandler::grabFrames()
 
     mActive = true;
     AVPacket* pkt = av_packet_alloc();
-    AVStream *in_stream, *out_stream;
+    AVStream* out_stream;
     AVPacket* outPacket = av_packet_alloc();
 
     pkt->size = 0;
@@ -436,7 +446,7 @@ void VideoHandler::grabFrames()
                 mScaledFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-            //mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
+            mImageHandler->readImage(mOutputVideoCodecContext, mScaledFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mScaledFrame);
             if(ret < 0)
             {
@@ -460,7 +470,7 @@ void VideoHandler::grabFrames()
                 mVideoFrame->pts = mPts;
                 mPts += ifmt_ctx->streams[0]->time_base.den/ifmt_ctx->streams[0]->r_frame_rate.num;
             }
-           // mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
+            mImageHandler->readImage(mOutputVideoCodecContext, mVideoFrame, std::numeric_limits<uint8_t>::max());
             ret = avcodec_send_frame(mOutputVideoCodecContext, mVideoFrame);
             //av_frame_free(&videoFrame);
             if(ret < 0)
@@ -512,7 +522,7 @@ void VideoHandler::grabFrames()
             mNumberOfSkippedFrames = 0;
 
 
-            in_stream  = ifmt_ctx->streams[pkt->stream_index];
+            //in_stream  = ifmt_ctx->streams[pkt->stream_index];
             out_stream = ofmt_ctx->streams[pkt->stream_index];
             //out_stream->avg_frame_rate = (AVRational){60, 1};
             //out_stream->time_base = (AVRational){1, 60};
