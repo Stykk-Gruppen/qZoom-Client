@@ -68,43 +68,42 @@ void VideoPlaybackHandler::start()
 
     int err;
     //Q_ASSERT(video_stream);
-    AVCodecContext *videoDecoderCodecContext = video_stream->codec;
-    if(video_stream)
+
+    //AVCodecContext *videoDecoderCodecContext; // = video_stream->codec;
+    //videoDecoderCodecContext = avcodec_alloc_context3(NULL);
+
+    if(!video_stream)
     {
-        // video_stream->codec->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-
-        AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
-        AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
-
-        if (videoDecoderCodec->capabilities & CODEC_CAP_TRUNCATED)
-        {
-            videoDecoderCodecContext->flags |= CODEC_FLAG_TRUNCATED;
-        }
-        videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
-        videoDecoderCodecContext->thread_count = 2;
-
-        videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
-        videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
-
-        err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
-        Q_ASSERT(err>=0);
-        qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
-        qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
-
-        /*AVFrame	*frameRGB = av_frame_alloc();
-        frameRGB->format = AV_PIX_FMT_RGB24;
-        frameRGB->width = videoStreamCodecParameters->width;
-        frameRGB->height = videoStreamCodecParameters->height;
-        err = av_frame_get_buffer(frameRGB, 0);
-        Q_ASSERT(err == 0);*/
+        qDebug() << "Not a videostream!";
+        return;
     }
+
+    AVCodecParameters	*videoStreamCodecParameters = video_stream->codecpar;
+    AVCodec* videoDecoderCodec = avcodec_find_decoder(videoStreamCodecParameters->codec_id);
+    AVCodecContext *videoDecoderCodecContext;
+
+    videoDecoderCodecContext = avcodec_alloc_context3(videoDecoderCodec);
+    videoDecoderCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
+
+    if (videoDecoderCodec->capabilities & CODEC_CAP_TRUNCATED)
+    {
+        videoDecoderCodecContext->flags |= CODEC_FLAG_TRUNCATED;
+    }
+    videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
+    videoDecoderCodecContext->thread_count = 2;
+
+    err = avcodec_parameters_to_context(videoDecoderCodecContext, video_stream->codecpar);
+
+    err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
+    Q_ASSERT(err>=0);
+    qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
+    qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
 
     AVFrame* frame = av_frame_alloc();
     AVPacket* packet = av_packet_alloc();
 
     //uint8_t recvbuf[(int)10e5];
     memset(mRecvbuf, 0, 10e5);
-    int pos = 0;
 
     AVCodecParserContext * parser = av_parser_init(AV_CODEC_ID_H264);
     parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
