@@ -115,12 +115,14 @@ void UdpSocketHandler::readPendingDatagrams()
         }
         else if (audioOrVideoInt == 1)
         {
+            mInputStreamHandler->lockVideoMutex(index);
+
             if(!mInputStreamHandler->videoHeaderVectorIsEmpty(index))
             {
-                mInputStreamHandler->lockVideoMutex(index);
                 mInputStreamHandler->appendToVideoBuffer(index, data);
-                mInputStreamHandler->unlockVideoMutex(index);
             }
+            mInputStreamHandler->unlockVideoMutex(index);
+
 
             if(!mInputStreamHandler->videoPlaybackStarted(index))
             {
