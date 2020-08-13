@@ -57,6 +57,7 @@ int AudioPlaybackHandler::customReadPacket(void *opaque, uint8_t *buf, int buf_s
 void AudioPlaybackHandler::start()
 {
     mStopPlayback = false;
+    mImageHandler->setPeerAudioIsDisabled(mIndex, false);
 
     int error = 0;
     AVFormatContext *inputFormatContext = avformat_alloc_context();
@@ -178,7 +179,8 @@ void AudioPlaybackHandler::start()
         exit(-1);
     }
 
-    while (!mStopPlayback) {
+    while (!mStopPlayback)
+    {
         error = av_read_frame(inputFormatContext,&packet);
         if(error < 0)
         {
@@ -255,11 +257,11 @@ void AudioPlaybackHandler::start()
                 QString silenceEnd = "lavfi.silence_end";
                 if(silenceEnd.compare(silenceData->key)==0)
                 {
-                    mImageHandler->toggleBorder(true,mIndex);
+                    mImageHandler->toggleBorder(true, mIndex);
                 }
                 if(silenceStart.compare(silenceData->key)==0)
                 {
-                    mImageHandler->toggleBorder(false,mIndex);
+                    mImageHandler->toggleBorder(false, mIndex);
                 }
             }
         }
