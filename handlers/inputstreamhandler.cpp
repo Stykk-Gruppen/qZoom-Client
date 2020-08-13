@@ -429,9 +429,11 @@ void InputStreamHandler::setPeerToVideoDisabled(const QString& streamId)
     uint8_t index = findStreamIdIndex(streamId);
 
     //Stopping videoplaybackhandler
-    mVideoMutexVector[index]->lock();
+
     mVideoPlaybackHandlerVector[index]->stop();
     mVideoFutures.at(index)->waitForFinished();
+
+    mVideoMutexVector[index]->lock();
     mVideoPlaybackStartedVector[index] = false;
     mVideoBufferVector[index]->clear();
     mVideoHeaderVector[index]->clear();
@@ -445,9 +447,10 @@ void InputStreamHandler::setPeerToAudioDisabled(const QString& streamId)
     uint8_t index = findStreamIdIndex(streamId);
 
     //Stopping audioPlaybackhandler:
-    mAudioMutexVector[index]->lock();
+
     mAudioPlaybackHandlerVector[index]->stop();
     mAudioFutures.at(index)->waitForFinished();
+    mAudioMutexVector[index]->lock();
     mAudioPlaybackStartedVector[index] = false;
     mAudioBufferVector[index]->clear();
     mAudioMutexVector[index]->unlock();

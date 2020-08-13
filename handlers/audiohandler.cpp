@@ -925,7 +925,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     av_packet_free(&output_packet);
 
 cleanup:
-    av_packet_unref(output_packet);
+    //av_packet_unref(output_packet);
     av_packet_free(&output_packet);
     return error;
 }

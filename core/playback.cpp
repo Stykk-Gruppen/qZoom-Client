@@ -72,12 +72,12 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
     qDebug() << "Buf_size: " << buf_size;
 
-   /* if(buf_size>1000){
+    if(buf_size>2000 && buf_size > 0){
         s->writeLock->lock();
         s->buffer->append(stringLength);
         s->writeLock->unlock();
         return AVERROR_EOF;
-    }*/
+    }
 
     while (s->buffer->size() <= buf_size+stringLength)
     {
