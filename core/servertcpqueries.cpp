@@ -1,9 +1,8 @@
 #include "servertcpqueries.h"
 
-ServerTcpQueries::ServerTcpQueries(int _port, QHostAddress serverAddress, QObject* parent): QTcpSocket(parent)
+ServerTcpQueries::ServerTcpQueries(Settings* settings, QObject* parent): QTcpSocket(parent)
 {
-    mServerAddress = serverAddress;
-    mPortNumber = _port;
+    mSettings = settings;
     mMillisWait = 2000;
 }
 /**
@@ -13,10 +12,14 @@ ServerTcpQueries::ServerTcpQueries(int _port, QHostAddress serverAddress, QObjec
  */
 bool ServerTcpQueries::connect()
 {
+    mServerAddress = (mSettings->getServerIpAddress() == "Localhost") ?
+                QHostAddress::LocalHost : QHostAddress(mSettings->getServerIpAddress());
+    mPortNumber = mSettings->getSqlTcpPort();
     this->connectToHost(mServerAddress, mPortNumber);
     if(!this->waitForConnected(mMillisWait))
     {
-        qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
+        qDebug() << "SQLTcpSocketError: " << this->errorString() << Q_FUNC_INFO;
+        qDebug() << mServerAddress << mPortNumber;
         return false;
     }
     return true;
@@ -32,7 +35,7 @@ bool ServerTcpQueries::disconnect()
     if (this->state() == QAbstractSocket::UnconnectedState || this->waitForDisconnected(mMillisWait)) {
         return true;
     }
-    qDebug() << "TcpSocketError: " << this->errorString() << Q_FUNC_INFO;
+    qDebug() << "SQLTcpSocketError: " << this->errorString() << Q_FUNC_INFO;
     return false;
 }
 /**
@@ -77,6 +80,10 @@ int ServerTcpQueries::CUDQuery(int code, const QVariantList& vars)
             QByteArray response = this->readAll();
             numberOfRowsAffected = response[0];
         }
+    }
+    else
+    {
+        return numberOfRowsAffected;
     }
     disconnect();
     return numberOfRowsAffected;

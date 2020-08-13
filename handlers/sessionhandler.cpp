@@ -3,8 +3,6 @@
 SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler* _user,
                                ImageHandler* imageHandler,
                                Settings* settings, int bufferSize,
-                               QHostAddress address, int _portNumberTCP,
-                               int _portNumerUDP,
                                QObject *parent) : QObject(parent)
 {
     mServerTcpQueries = _mServerTcpQueries;
@@ -13,11 +11,14 @@ SessionHandler::SessionHandler(ServerTcpQueries* _mServerTcpQueries, UserHandler
     mIpAddress = "Ipaddress";
     mSettings = settings;
     mBufferSize = bufferSize;
-    mPortNumberTCP = _portNumberTCP;
-    mPortNumberUDP = _portNumerUDP;
-    mAddress = address;
+    mPortNumberTCP = settings->getTcpPort();
+    mPortNumberUDP = settings->getUdpPort();
     mImageHandler = imageHandler;
     mSessionIsActive = false;
+
+    mAddress = (mSettings->getServerIpAddress() == "Localhost") ?
+                QHostAddress::LocalHost : QHostAddress(mSettings->getServerIpAddress());
+
 }
 
 bool SessionHandler::enableScreenShare()
@@ -74,16 +75,16 @@ int SessionHandler::initOtherStuff()
     const QString streamId = isGuest() ? mUser->getGuestStreamId() : mUser->getStreamId();
     const QString roomId = getRoomId();
     const QString displayName = mSettings->getDisplayName();
+    mPortNumberUDP = mSettings->getUdpPort();
+    mPortNumberTCP = mSettings->getTcpPort();
+    mAddress = QHostAddress(mSettings->getServerIpAddress());
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
     mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
-    //mTcpServerHandler = new TcpServerHandler(mInputStreamHandler, mPort);
     mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPortNumberTCP);
     connect(mTcpSocketHandler, &TcpSocketHandler::sendDummyDatagram, mUdpSocketHandler, &UdpSocketHandler::openPortHack);
     mOutputStreamHandler = new OutputStreamHandler(mImageHandler, mUdpSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
-    //Init tcpServerHandler
-    //mTcpServerHandler->init();
-    //Init sending of our header, empty or not
+
     if(mTcpSocketHandler->init() < 0)
     {
         return -1;
@@ -251,6 +252,11 @@ bool SessionHandler::addGuestUserToDatabase()
     }
     qDebug() << "Added guest :" << mUser->getGuestName() << "to the database";
     return true;
+}
+
+bool SessionHandler::getSessionIsActive() const
+{
+    return mSessionIsActive;
 }
 
 void SessionHandler::setDefaultRoomID()

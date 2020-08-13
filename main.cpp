@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     int portNumberTCPQueries = 1339;
     QHostAddress address;
     //address = QHostAddress::LocalHost;
-    address = QHostAddress("46.250.220.57"); //tarves.no
+    //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("46.250.220.237"); //feqzz.no
     //address = QHostAddress::LocalHost;
     //address = QHostAddress("2001:4da8:a:1:6000:100:000f:d37b:46.250.220.57"); //tarves.no ipv6 og ipv4
@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
 
     QScopedPointer<Settings> settings(new Settings());
 
-    ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(portNumberTCPQueries, address);
+    ServerTcpQueries* serverTcpQueries = new ServerTcpQueries(settings.data());
     UserHandler* userHandlerObject = new UserHandler(serverTcpQueries, settings.data());
     ImageHandler* imageHandlerObject = new ImageHandler(settings.data());
     SessionHandler* sessionHandlerObject = new SessionHandler(serverTcpQueries, userHandlerObject,
                                                               imageHandlerObject, settings.data(),
-                                                              bufferSize, address, portNumberTCP,portNumberUDP);
+                                                              bufferSize);
 
     QScopedPointer<ImageHandler> imageHandler(imageHandlerObject);
     QScopedPointer<UserHandler> userHandler(userHandlerObject);

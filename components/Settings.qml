@@ -12,30 +12,27 @@ Dialog {
 
     function loadSettings() {
         defaultAudioInput.model = sessionHandler.getAudioInputDevices();
-        console.log(backendSettings.getDefaultAudioInput());
         var index = defaultAudioInput.find(backendSettings.getDefaultAudioInput())
-        console.log(index);
+        var sessionIsActive = sessionHandler.getSessionIsActive();
         defaultAudioInput.currentIndex = index;
         audioOn.checked = backendSettings.getAudioOn();
         videoOn.checked = backendSettings.getVideoOn();
         saveLastRoom.checked = backendSettings.getSaveLastRoom();
         displayName.text = backendSettings.getDisplayName();
-
+        hostAddressTextField.text = backendSettings.getServerIpAddress();
+        hostAddressTextField.readOnly = sessionIsActive;
+        tcpPortTextField.text = backendSettings.getTcpPort();
+        tcpPortTextField.readOnly = sessionHandler;
+        udpPortTextField.text = backendSettings.getUdpPort();
+        udpPortTextField.readOnly = sessionIsActive;
+        sqlTcpPortTextField.text = backendSettings.getSqlTcpPort();
+        sqlTcpPortTextField.readOnly = sessionIsActive;
     }
-
-    /*function getAudioInputDevices(){
-        var inputList = streamHandler.getAudioInputDevices();
-        for(var title in inputList) {
-            inputAudioDevices.append({text: inputList[title]});
-        }
-        defaultAudioInput.displayText = streamHandler.getDefaultAudioInputDevice();
-
-    }*/
 
     id: settings
     visible: false
     width: 400
-    height: 300
+    height: 500
     //modal: true
     title: "Settings"
     //anchors.centerIn: parent
@@ -50,7 +47,55 @@ Dialog {
                 }
                 TextField {
                     id: displayName
-                    placeholderText: "UserName"
+                    placeholderText: "Visible name"
+                    cursorVisible: false
+                    maximumLength: 20
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("Host Address");
+                }
+                TextField {
+                    id: hostAddressTextField
+                    placeholderText: "Localhost"
+                    cursorVisible: false
+                    maximumLength: 20
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("UDP Port");
+                }
+                TextField {
+                    id: udpPortTextField
+                    placeholderText: "1337"
+                    cursorVisible: false
+                    maximumLength: 20
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("TCP Port");
+                }
+                TextField {
+                    id: tcpPortTextField
+                    placeholderText: "1338"
+                    cursorVisible: false
+                    maximumLength: 20
+                }
+            }
+
+            RowLayout {
+                Text {
+                    text: qsTr("SQL TCP Port");
+                }
+                TextField {
+                    id: sqlTcpPortTextField
+                    placeholderText: "1339"
                     cursorVisible: false
                     maximumLength: 20
                 }
@@ -61,6 +106,7 @@ Dialog {
                 checked: true
                 text: qsTr("Audio on when joining meeting")
             }
+
             CheckBox {
                 id: videoOn
                 checked: true
@@ -92,6 +138,10 @@ Dialog {
         backendSettings.setVideoOn(videoOn.checked);
         backendSettings.setSaveLastRoom(saveLastRoom.checked);
         backendSettings.setDefaultAudioInput(defaultAudioInput.currentText);
+        backendSettings.setServerIpAddress(hostAddressTextField.text);
+        backendSettings.setTcpPort(tcpPortTextField.text);
+        backendSettings.setUdpPort(udpPortTextField.text);
+        backendSettings.setSqlTcpPort(sqlTcpPortTextField.text);
 
         if (displayName.text !== backendSettings.getDisplayName()) {
             backendSettings.setDisplayName(displayName.text === "" ? "UserName" : displayName.text);

@@ -17,5 +17,6 @@
         <file>components/KickUser.qml</file>
         <file>components/RoomInfo.qml</file>
         <file>components/Settings.qml</file>
+        <file>components/ServerDialog.qml</file>
     </qresource>
 </RCC>
