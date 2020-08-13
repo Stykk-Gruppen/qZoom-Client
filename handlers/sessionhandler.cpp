@@ -75,6 +75,9 @@ int SessionHandler::initOtherStuff()
     const QString streamId = isGuest() ? mUser->getGuestStreamId() : mUser->getStreamId();
     const QString roomId = getRoomId();
     const QString displayName = mSettings->getDisplayName();
+    mPortNumberUDP = mSettings->getUdpPort();
+    mPortNumberTCP = mSettings->getTcpPort();
+    mAddress = QHostAddress(mSettings->getServerIpAddress());
     mSessionIsActive = true;
     mInputStreamHandler = new InputStreamHandler(mImageHandler, mBufferSize, mAddress);
     mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);

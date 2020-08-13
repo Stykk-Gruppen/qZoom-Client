@@ -23,6 +23,8 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(mPort);
 
+    qDebug() << "UDPSOCKET" << mAddress.toString().toUtf8();
+
     if (inet_aton(mAddress.toString().toUtf8() , &si_other.sin_addr) == 0)
     {
         fprintf(stderr, "inet_aton() failed\n");
