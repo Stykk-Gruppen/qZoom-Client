@@ -849,7 +849,7 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
             }
         }
     }
-
+    av_dict_free(&meta);
 
 
     /* Packet used for temporary storage. */
