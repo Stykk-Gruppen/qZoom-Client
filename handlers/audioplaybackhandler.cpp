@@ -263,6 +263,7 @@ void AudioPlaybackHandler::start()
                 }
             }
         }
+        av_dict_free(&meta);
 
         if (!resampled)
         {

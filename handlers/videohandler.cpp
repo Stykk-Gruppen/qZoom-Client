@@ -283,7 +283,8 @@ int VideoHandler::init()
         ret = avcodec_parameters_to_context(mOutputVideoCodecContext, out_stream->codecpar);
         if (ret < 0)
         {
-            exit(1);
+            qDebug() << "avcodec_parameters_to_context failed" << Q_FUNC_INFO;
+            exit(-1);
         }
 
         /*
