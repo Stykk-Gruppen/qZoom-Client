@@ -48,18 +48,12 @@ ErrorHandler* errorHandler;
 
 int main(int argc, char *argv[])
 {
-    //Registrer div ting, deprecated, men uten disse så blir det ffmpeg codec errors
-    av_register_all();
-    avcodec_register_all();
     avdevice_register_all();
 
     errorHandler = new ErrorHandler;
 
     int bufferSize = 10e5;
-    //int portNumberTCP = 1338;
-    //int portNumberUDP = 1337;
-    //int portNumberTCPQueries = 1339;
-    QHostAddress address;
+    //QHostAddress address;
     //address = QHostAddress::LocalHost;
     //address = QHostAddress("46.250.220.57"); //tarves.no
     //address = QHostAddress("46.250.220.237"); //feqzz.no
