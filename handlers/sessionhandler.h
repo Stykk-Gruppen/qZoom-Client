@@ -43,14 +43,18 @@ public:
     Q_INVOKABLE QString getRoomHostUsername() const;
     Q_INVOKABLE QVariantList getAudioInputDevices() const;
     Q_INVOKABLE bool getSessionIsActive() const;
-
+    Q_INVOKABLE void kickYourself();
+    Q_INVOKABLE void deleteStreamsAndSockets();
 private:
     ServerTcpQueries* mServerTcpQueries;
     void addUser();
     int initOtherStuff();
-    void closeOtherStuff();
     void getUserRoom();
     void setDefaultRoomID();
+    void deleteSocketHandlers();
+    void deleteStreams();
+    void closeSocketHandlers();
+    void closeStreams();
     bool addGuestUserToDatabase();
     bool mUserHasRoom;
     bool mSessionIsActive;
@@ -69,6 +73,7 @@ private:
     InputStreamHandler* mInputStreamHandler;
     UdpSocketHandler* mUdpSocketHandler;
     TcpSocketHandler* mTcpSocketHandler;
+
 
 signals:
 

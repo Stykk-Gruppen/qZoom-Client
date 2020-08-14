@@ -26,6 +26,7 @@ class UdpSocketHandler : public QObject
 public:
     explicit UdpSocketHandler(int bufferSize, int port, InputStreamHandler* inputStreamHandler,
                               QString streamId, QString roomId, QHostAddress address, QObject *parent = nullptr);
+    ~UdpSocketHandler();
     void initSocket();
     void closeSocket();
     int sendDatagram(QByteArray arr);

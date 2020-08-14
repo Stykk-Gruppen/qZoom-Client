@@ -31,6 +31,12 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
         exit(1);
     }
 }
+
+UdpSocketHandler::~UdpSocketHandler()
+{
+    delete mUdpSocket;
+    mUdpSocket = nullptr;
+}
 /**
  * Creates a new QUdepSocket and makes it listen to port and QHostAddress::Any.
  * When we used mAddress(ip address to the server) it did not recieve any datagrams.
@@ -48,8 +54,6 @@ void UdpSocketHandler::closeSocket()
     qDebug() << "Closing SocketHandler";
     mUdpSocket->abort();
     mUdpSocket->close();
-    delete mUdpSocket;
-    mUdpSocket = nullptr;
 }
 
 /**

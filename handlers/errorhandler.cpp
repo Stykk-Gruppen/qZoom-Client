@@ -10,4 +10,8 @@ void ErrorHandler::giveErrorDialog(const QString& error)
     emit showError(error);
 }
 
+void ErrorHandler::giveKickedErrorDialog()
+{
+    emit showKickError();
+}
 

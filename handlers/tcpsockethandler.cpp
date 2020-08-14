@@ -18,9 +18,14 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QStri
 
 TcpSocketHandler::~TcpSocketHandler()
 {
-
+    delete mSocket;
+    mSocket = nullptr;
 }
-
+void TcpSocketHandler::close()
+{
+    qDebug() << "Closing TcpSocketHandler";
+    mSocket->close();
+}
 int TcpSocketHandler::init()
 {
     mSocket = new QTcpSocket(this);
@@ -49,13 +54,7 @@ bool TcpSocketHandler::isOpen() const
     return mSocket != nullptr;
 }
 
-void TcpSocketHandler::close()
-{
-    qDebug() << "Closing TcpSocketHandler";
-    mSocket->close();
-    delete mSocket;
-    mSocket = nullptr;
-}
+
 
 void TcpSocketHandler::readyRead()
 {

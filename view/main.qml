@@ -29,6 +29,8 @@ ApplicationWindow {
         standardButtons: Dialog.Close | Dialog.Help
 
         property alias text : errorText.text
+        property bool kicked: false
+        property bool xButton: true
 
         Rectangle{
             anchors.centerIn: parent
@@ -38,18 +40,47 @@ ApplicationWindow {
             }
 
         }
-
-
-        onRejected: console.log("Close clicked")
+        //In order to capture the X button we use onVisibilityChanged
+        onVisibilityChanged: {
+                if (!this.visible && xButton){
+                    console.log("X clicked")
+                    if(kicked){
+                        sessionHandler.deleteStreamsAndSockets();
+                        kicked = false;
+                    }
+                }
+                if (this.visible){
+                    xButton = true
+                }
+            }
+        onRejected: {
+            console.log("Close clicked")
+            if(kicked){
+                sessionHandler.deleteStreamsAndSockets();
+                kicked = false;
+            }
+        }
         onHelp: {
             console.log("Help clicked, opening browser..");
             Qt.openUrlExternally("https://github.com/Feqzz/qZoom-Client/wiki");
+            if(kicked){
+                sessionHandler.deleteStreamsAndSockets();
+                kicked = false;
+            }
 
         }
         Connections {
             target: errorHandler
             function onShowError(error) {
                 showErrorMessage(error);
+            }
+        }
+        Connections {
+            target: errorHandler
+            function onShowKickError() {
+                errorMessage.text = "You have been kicked from the room"
+                errorMessage.kicked = true;
+                errorMessage.visible = true;
             }
         }
     }

@@ -9,9 +9,10 @@ class ErrorHandler : public QObject
 public:
     explicit ErrorHandler(QObject *parent = nullptr);
     void giveErrorDialog(const QString& error);
-
+    void giveKickedErrorDialog();
 signals:
     void showError(QString error);
+    void showKickError();
 };
 
 //extern QScopedPointer<ErrorHandler> ERRORHANDLER(new ErrorHandler());

@@ -96,25 +96,32 @@ int SessionHandler::initOtherStuff()
     return 0;
 }
 
-void SessionHandler::closeOtherStuff()
+
+void SessionHandler::deleteSocketHandlers()
 {
-    mSessionIsActive = false;
-    qDebug() << "Before close";
-    //Sockets should close first, they use buffers and locks inside inputStreamHandler
+    qDebug() << Q_FUNC_INFO;
+    delete mUdpSocketHandler;
+    delete mTcpSocketHandler;
+}
+
+void SessionHandler::deleteStreams()
+{
+    delete mInputStreamHandler;
+    delete mOutputStreamHandler;
+}
+
+void SessionHandler::closeSocketHandlers()
+{
     mUdpSocketHandler->closeSocket();
     mTcpSocketHandler->close();
+}
+
+void SessionHandler::closeStreams()
+{
     //This will clear all the vectors containing objects connected to each person in the room
     mInputStreamHandler->close();
     //This will close the output streams
     mOutputStreamHandler->close();
-
-    qDebug() << "After close, about to delete";
-    delete mUdpSocketHandler;
-    delete mTcpSocketHandler;
-    delete mInputStreamHandler;
-    delete mOutputStreamHandler;
-    qDebug() << "Deleted everything";
-    mImageHandler->removeAllPeers();
 }
 
 QVariantList SessionHandler::getAudioInputDevices() const
@@ -150,7 +157,7 @@ bool SessionHandler::joinSession(const QString& roomId, const QString& roomPassw
 
         if(initOtherStuff() < 0)
         {
-            closeOtherStuff();
+            leaveSession();
             errorHandler->giveErrorDialog("An unknown error occured when initializing stream");
             return false;
         }
@@ -198,10 +205,29 @@ void SessionHandler::addUser()
     }
 }
 
+void SessionHandler::kickYourself()
+{
+    mSessionIsActive = false;
+    closeSocketHandlers();
+    closeStreams();
+    errorHandler->giveKickedErrorDialog();
+}
+
+void SessionHandler::deleteStreamsAndSockets()
+{
+    deleteSocketHandlers();
+    deleteStreams();
+    mImageHandler->removeAllPeers();
+}
+
 bool SessionHandler::leaveSession()
 {
-    //CLose all that is opened;
-    closeOtherStuff();
+    mSessionIsActive = false;
+    closeSocketHandlers();
+    closeStreams();
+    deleteSocketHandlers();
+    deleteStreams();
+    mImageHandler->removeAllPeers();
     return true;
 }
 

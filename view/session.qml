@@ -140,8 +140,8 @@ Rectangle {
     Connections {
         target: imageHandler
         function onForceLeaveSession() {
-            console.log("inside qml");
-            sessionHandler.leaveSession();
+            sessionHandler.kickYourself();
+            //sessionHandler.leaveSession();
             changePage("home");
         }
     }
