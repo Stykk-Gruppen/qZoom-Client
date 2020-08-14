@@ -84,6 +84,7 @@ int SessionHandler::initOtherStuff()
     mUdpSocketHandler = new UdpSocketHandler(mBufferSize, mPortNumberUDP, mInputStreamHandler, streamId, roomId, mAddress);
     mTcpSocketHandler = new TcpSocketHandler(mInputStreamHandler, streamId, roomId, displayName, mAddress, mPortNumberTCP);
     connect(mTcpSocketHandler, &TcpSocketHandler::sendDummyDatagram, mUdpSocketHandler, &UdpSocketHandler::openPortHack);
+
     mOutputStreamHandler = new OutputStreamHandler(mImageHandler, mUdpSocketHandler, mBufferSize, mSettings, mTcpSocketHandler);
 
     if(mTcpSocketHandler->init() < 0)
@@ -125,9 +126,9 @@ bool SessionHandler::joinSession(const QString& roomId, const QString& roomPassw
 {
     qDebug() << "RoomId: " << roomId;
     QVariantList vars;
-    vars.append(roomPassword);
     vars.append(roomId);
-    const QVariantList response = mServerTcpQueries->RQuery(0, vars);
+    vars.append(roomPassword);
+    const QVariantList response = mServerTcpQueries->serverQuery(0, vars);
     if(response.size() > 0)
     {
         if(response[0].toInt() == -1)
@@ -176,8 +177,8 @@ void SessionHandler::addUser()
     qDebug() << "User is guest: " << mUser->isGuest();
     if (!mUser->isGuest())
     {
-        vars.prepend(QString::number(mUser->getUserId()));
-        const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
+        vars.append(QString::number(mUser->getUserId()));
+        const int numberOfRowsAffected = mServerTcpQueries->serverQuery(1, vars)[0].toInt();
         if(numberOfRowsAffected <= 0)
         {
             qDebug() << "Failed Query" << Q_FUNC_INFO;
@@ -187,8 +188,8 @@ void SessionHandler::addUser()
     {
         if (addGuestUserToDatabase())
         {
-            vars.prepend(QString::number(mUser->getGuestId()));
-            const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(1, vars);
+            vars.append(QString::number(mUser->getGuestId()));
+            const int numberOfRowsAffected = mServerTcpQueries->serverQuery(1, vars)[0].toInt();
             if(numberOfRowsAffected <= 0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
@@ -211,10 +212,10 @@ bool SessionHandler::createSession(const QString& roomId, const QString& roomPas
         if (!mUser->hasRoom())
         {
             QVariantList vars;
-            vars.append(roomId);
-            vars.append(QString::number(mUser->getUserId()));
             vars.append(roomPassword);
-            int numberOfRowsAffected = mServerTcpQueries->CUDQuery(2, vars);
+            vars.append(QString::number(mUser->getUserId()));
+            vars.append(roomId);
+            int numberOfRowsAffected = mServerTcpQueries->serverQuery(2, vars)[0].toInt();
             if(numberOfRowsAffected <= 0)
             {
                 qDebug() << "Failed Query" << Q_FUNC_INFO;
@@ -245,7 +246,7 @@ bool SessionHandler::addGuestUserToDatabase()
     qDebug() << mUser->getGuestName();
     QVariantList vars;
     vars.append(mUser->getGuestName());
-    int numberOfRowsAffected = mServerTcpQueries->CUDQuery(3, vars);
+    int numberOfRowsAffected = mServerTcpQueries->serverQuery(3, vars)[0].toInt();
     if(numberOfRowsAffected <= 0)
     {
         qDebug() << "Failed Query" << Q_FUNC_INFO;

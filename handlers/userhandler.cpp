@@ -28,7 +28,7 @@ bool UserHandler::login(const QString& username, const QString& password)
 {
     QVariantList vars;
     vars.append(username);
-    const QVariantList queryData = mServerTcpQueries->RQuery(4, vars);
+    const QVariantList queryData = mServerTcpQueries->serverQuery(4, vars);
     //Hvis lista er tom, så fant man ikke brukeren
     if(queryData.isEmpty())
     {
@@ -73,7 +73,7 @@ bool UserHandler::fillUser(int userId)
 {
     QVariantList vars;
     vars.append(QString::number(userId));
-    const QVariantList queryData = mServerTcpQueries->RQuery(5, vars);
+    const QVariantList queryData = mServerTcpQueries->serverQuery(5, vars);
     if(queryData.size() > 0)
     {
         mUserId = userId;
@@ -90,7 +90,7 @@ bool UserHandler::getPersonalRoom()
 {
     QVariantList vars;
     vars.append(QString::number(mUserId));
-    const QVariantList queryData = mServerTcpQueries->RQuery(6, vars);
+    const QVariantList queryData = mServerTcpQueries->serverQuery(6, vars);
     if(queryData.size() > 0)
     {
         mPersonalRoomId = queryData[0].toString();
@@ -110,10 +110,10 @@ bool UserHandler::updatePersonalRoom(const QString& roomId, const QString& roomP
     vars.append(roomId);
     vars.append(roomPassword);
     vars.append(QString::number(mUserId));
-    const int numberOfRowsAffected = mServerTcpQueries->CUDQuery(7, vars);
+    const int numberOfRowsAffected = mServerTcpQueries->serverQuery(7, vars)[0].toInt();
     if(numberOfRowsAffected <= 0)
     {
-        qDebug() << "Failed Query" << Q_FUNC_INFO;
+        qDebug() << "Failed Query" << Q_FUNC_INFO << " vars: " << vars;
         return false;
     }
     mPersonalRoomId = roomId;
@@ -203,7 +203,7 @@ QString UserHandler::getGuestStreamId() const
 {
     QVariantList vars;
     vars.append(QString::number(getGuestId()));
-    const QVariantList returnList = mServerTcpQueries->RQuery(8, vars);
+    const QVariantList returnList = mServerTcpQueries->serverQuery(8, vars);
     if (returnList.isEmpty())
     {
         qDebug() << "Failed Query " << Q_FUNC_INFO;
@@ -232,7 +232,7 @@ int UserHandler::getGuestId() const
 {
     QVariantList vars;
     vars.append(mGuestName);
-    QVariantList returnList = mServerTcpQueries->RQuery(9, vars);
+    QVariantList returnList = mServerTcpQueries->serverQuery(9, vars);
     if (returnList.isEmpty())
     {
         qDebug() << "GuestID is empty";

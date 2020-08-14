@@ -60,43 +60,29 @@ QVariantList ServerTcpQueries::parseData(QByteArray arr) const
     return vec;
 }
 
-int ServerTcpQueries::CUDQuery(int code, const QVariantList& vars)
-{
-    int numberOfRowsAffected = -1;
-    QByteArray data;
-    for(int i = 0; i < vars.size(); i++)
-    {
-        data.prepend(vars[i].toString().toLocal8Bit().data());
-        data.prepend(vars[i].toString().size());
-    }
-    data.prepend(vars.size());
-    data.prepend(code);
-    if(connect())
-    {
-        qDebug() <<"SQL TCP Query(" << code << ")" << " Sending data: " << data;
-        this->write(data);
-        if(this->waitForReadyRead(mMillisWait))
-        {
-            QByteArray response = this->readAll();
-            numberOfRowsAffected = response[0];
-        }
-    }
-    else
-    {
-        return numberOfRowsAffected;
-    }
-    disconnect();
-    return numberOfRowsAffected;
-}
-
-QVariantList ServerTcpQueries::RQuery(int code, const QVariantList& vars)
+/**
+ * Sends x amount of variables together with y code over TCP to the server.
+ * To be used in a SQL Query, where the int will tell the server which query to run.
+ * On the server the variables will be bound from left to right. So the first variable the
+ * server recieves will be bound to the first variable in the query. Example
+ * q.prepare("UPDATE room SET id = :roomId, password = :roomPassword WHERE host = :host");
+        q.bindValue(":roomId", vec[0]);
+        q.bindValue(":roomPassword", vec[1]);
+        q.bindValue(":host", vec[2].toInt());
+ * @param code int describing which query to run
+ * @param vars QVariantList input vars to be used in the query.
+ * @return QVariantList which contains all the return variables of a select or the
+ * number of rows affected in case of update, delete or insert. On failure
+ * it will return a list with -1.
+ */
+QVariantList ServerTcpQueries::serverQuery(int code, const QVariantList& vars)
 {
     QVariantList returnList;
     QByteArray data;
     for(int i = 0; i < vars.size(); i++)
     {
-        data.prepend(vars[i].toString().toLocal8Bit().data());
-        data.prepend(vars[i].toString().size());
+        data.append(vars[i].toString().size());
+        data.append(vars[i].toString().toLocal8Bit().data());
     }
     data.prepend(vars.size());
     data.prepend(code);
