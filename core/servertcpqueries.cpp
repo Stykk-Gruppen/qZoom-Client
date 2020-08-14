@@ -95,6 +95,10 @@ QVariantList ServerTcpQueries::serverQuery(int code, const QVariantList& vars)
             QByteArray response = this->readAll();
             returnList = parseData(response);
         }
+        else
+        {
+            returnList.append(int(-1));
+        }
     }
     else
     {
