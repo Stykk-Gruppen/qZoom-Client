@@ -99,7 +99,12 @@ bool UserHandler::getPersonalRoom()
     }
     return false;
 }
-
+/**
+ * @brief UserHandler::updatePersonalRoom
+ * @param roomId
+ * @param roomPassword
+ * @return
+ */
 bool UserHandler::updatePersonalRoom(const QString& roomId, const QString& roomPassword)
 {
     if (roomId.length() == 0 || roomPassword.length() == 0)
@@ -110,6 +115,8 @@ bool UserHandler::updatePersonalRoom(const QString& roomId, const QString& roomP
     vars.append(roomId);
     vars.append(roomPassword);
     vars.append(QString::number(mUserId));
+    //The old roomID is used to check if the room is currently active.
+    vars.append(mPersonalRoomId);
     const int numberOfRowsAffected = mServerTcpQueries->serverQuery(7, vars)[0].toInt();
     if(numberOfRowsAffected <= 0)
     {
