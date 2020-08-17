@@ -162,6 +162,12 @@ int Settings::getSqlTcpPort() const
  */
 QString Settings::getServerIpAddress() const
 {
+    /*
+    if (mServerIpAddress == "Localhost")
+    {
+        return "127.0.0.1";
+    }
+    */
     return mServerIpAddress;
 }
 /**
