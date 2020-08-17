@@ -1,5 +1,11 @@
 #include "userhandler.h"
 
+/**
+ * @brief UserHandler::UserHandler
+ * @param _mServerTcpQueries
+ * @param settings
+ * @param parent
+ */
 UserHandler::UserHandler(ServerTcpQueries* _mServerTcpQueries, Settings* settings, QObject *parent) : QObject(parent)
 {
     mServerTcpQueries = _mServerTcpQueries;
@@ -10,6 +16,9 @@ UserHandler::UserHandler(ServerTcpQueries* _mServerTcpQueries, Settings* setting
     mGuestName = "Guest" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
+/**
+ * @brief UserHandler::~UserHandler
+ */
 UserHandler::~UserHandler()
 {
 
@@ -24,6 +33,12 @@ bool UserHandler::isGuest() const
     return mIsGuest;
 }
 
+/**
+ * @brief UserHandler::login
+ * @param username
+ * @param password
+ * @return
+ */
 bool UserHandler::login(const QString& username, const QString& password)
 {
     QVariantList vars;
@@ -41,7 +56,7 @@ bool UserHandler::login(const QString& username, const QString& password)
         return false;
     }
     const int userId = queryData[0].toInt();
-    //qDebug() << "login userId " << userId;
+
     //We have to do some hashing here someday
     if (password == queryData[1].toString())
     {
@@ -69,6 +84,11 @@ bool UserHandler::login(const QString& username, const QString& password)
     return false;
 }
 
+/**
+ * @brief UserHandler::fillUser
+ * @param userId
+ * @return
+ */
 bool UserHandler::fillUser(int userId)
 {
     QVariantList vars;
@@ -86,6 +106,10 @@ bool UserHandler::fillUser(int userId)
     return false;
 }
 
+/**
+ * @brief UserHandler::getPersonalRoom
+ * @return
+ */
 bool UserHandler::getPersonalRoom()
 {
     QVariantList vars;
@@ -171,7 +195,6 @@ QString UserHandler::getUsername() const
 QString UserHandler::getPersonalRoomId() const
 {
     return mPersonalRoomId;
-    qDebug() << "personal room id" << mPersonalRoomId;
 }
 
 /**
@@ -216,8 +239,9 @@ QString UserHandler::getGuestStreamId() const
         qDebug() << "Failed Query " << Q_FUNC_INFO;
         return "getGuestStreamIdFailed";
     }
+
     const QString queryData = returnList[0].toString();
-    if(!queryData.isEmpty())
+    if (!queryData.isEmpty())
     {
         return queryData;
     }
@@ -225,6 +249,10 @@ QString UserHandler::getGuestStreamId() const
     return "getGuestStreamIdFailed";
 }
 
+/**
+ * @brief UserHandler::getDisplayName
+ * @return
+ */
 QString UserHandler::getDisplayName() const
 {
     return isGuest() ? mGuestName : mUsername;
@@ -239,7 +267,7 @@ int UserHandler::getGuestId() const
 {
     QVariantList vars;
     vars.append(mGuestName);
-    QVariantList returnList = mServerTcpQueries->serverQuery(9, vars);
+    const QVariantList returnList = mServerTcpQueries->serverQuery(9, vars);
     if (returnList.isEmpty())
     {
         qDebug() << "GuestID is empty";

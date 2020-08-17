@@ -1,6 +1,15 @@
 #include "tcpsockethandler.h"
 
-
+/**
+ * @brief TcpSocketHandler::TcpSocketHandler
+ * @param inputStreamHandler
+ * @param streamId
+ * @param roomId
+ * @param displayName
+ * @param address
+ * @param port
+ * @param parent
+ */
 TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QString streamId,
                                    QString roomId, QString displayName,
                                    QHostAddress address, int port,
@@ -8,36 +17,42 @@ TcpSocketHandler::TcpSocketHandler(InputStreamHandler* inputStreamHandler, QStri
 {
     mAddress = address;
     mPort = port;
-    qDebug() << mAddress;
-    qDebug() << "Tcp port" << mPort;
     mInputStreamHandler = inputStreamHandler;
     mStreamId = streamId;
     mRoomId = roomId;
     mDisplayName = displayName;
 }
 
+/**
+ * @brief TcpSocketHandler::~TcpSocketHandler
+ */
 TcpSocketHandler::~TcpSocketHandler()
 {
     delete mSocket;
     mSocket = nullptr;
 }
+
+/**
+ * @brief TcpSocketHandler::close
+ */
 void TcpSocketHandler::close()
 {
     qDebug() << "Closing TcpSocketHandler";
     mSocket->close();
 }
+
+/**
+ * @brief TcpSocketHandler::init
+ * @return
+ */
 int TcpSocketHandler::init()
 {
     mSocket = new QTcpSocket(this);
-    /*connect(mSocket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(mSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-*/
 
     connect(mSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(mSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
 
     mSocket->connectToHost(mAddress, mPort);
-    //qDebug() << "After ConnectToHost, addr: " << mAddress << " port: " << mPort;
     if(!mSocket->waitForConnected(3000))
     {
         qDebug() << "TcpSocketError: " << mSocket->errorString();
@@ -48,19 +63,23 @@ int TcpSocketHandler::init()
     return 0;
 }
 
+/**
+ * @brief TcpSocketHandler::isOpen
+ * @return
+ */
 bool TcpSocketHandler::isOpen() const
 {
     qDebug() << "isOpen is returning: " << (mSocket != nullptr);
     return mSocket != nullptr;
 }
 
-
-
+/**
+ * @brief TcpSocketHandler::readyRead
+ */
 void TcpSocketHandler::readyRead()
 {
     qDebug() << "TcpSocket reading incoming message";
 
-    //qDebug() << mSocket->readAll();
     QByteArray data = mSocket->readAll();
 
     qDebug() << "Data received: " << data;
@@ -68,43 +87,32 @@ void TcpSocketHandler::readyRead()
     //To prepare our router to recieve datagrams, we need to send a empty one to the server.
     emit sendDummyDatagram();
 
-    int code = data[0];
+    const int code = data[0];
     data.remove(0, 1);
     switch(code)
     {
     case VIDEO_HEADER:
     {
-
-        int numOfHeaders = data[0];
+        const int numOfHeaders = data[0];
         qDebug() << "number of headers recieved from server: " << numOfHeaders;
         data.remove(0, 1);
-        //QString data(reply);
-
-
-        //qDebug() << "DataString: " << data;
-        //qDebug() << reply.indexOf(27);
-        for(int i = 0; i < numOfHeaders; i++)
+        for (int i = 0; i < numOfHeaders; i++)
         {
-            //qDebug() << "Data: " << data;
             QByteArray temp = QByteArray(data, data.indexOf(27));
-            //qDebug() << "Temp: " << temp;
             mInputStreamHandler->handleHeader(temp);
-            //qDebug() << "Data before remove endline: " << data;
             data.remove(0, (data.indexOf(27) + 1));
-            //qDebug() << "Data after remove endline: " << data;
         }
-        //mSocket->write("0");
         break;
     }
     case REMOVE_PARTICIPANT:
     {
-        //REmove the user with this streamId
+        //Remove the user with this streamId
         data.remove(0, 1);
         qDebug() << "About to remove this user: " << data;
-        int streamIdLength = data[0];
+        const int streamIdLength = data[0];
         data.remove(0, 1);
-        QByteArray streamIdArray = QByteArray(data, streamIdLength);
-        QString streamId(streamIdArray);
+        const QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        const QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->removeStream(streamId);
@@ -115,16 +123,16 @@ void TcpSocketHandler::readyRead()
         //Update Participant displayName
         data.remove(0, 1);
         qDebug() << "Updating display name for user: " << data;
-        int displayNameLength = data[0];
+        const int displayNameLength = data[0];
         data.remove(0, 1);
-        QByteArray displayNameArray = QByteArray(data, displayNameLength);
-        QString displayName(displayNameArray);
+        const QByteArray displayNameArray = QByteArray(data, displayNameLength);
+        const QString displayName(displayNameArray);
         data.remove(0, displayNameLength);
 
-        int streamIdLength = data[0];
+        const int streamIdLength = data[0];
         data.remove(0, 1);
-        QByteArray streamIdArray = QByteArray(data, streamIdLength);
-        QString streamId(streamIdArray);
+        const QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        const QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->updateParticipantDisplayName(streamId, displayName);
@@ -134,10 +142,10 @@ void TcpSocketHandler::readyRead()
     {
         data.remove(0, 1);
         qDebug() << "Setting user's video to disabled for: " << data;
-        int streamIdLength = data[0];
+        const int streamIdLength = data[0];
         data.remove(0, 1);
-        QByteArray streamIdArray = QByteArray(data, streamIdLength);
-        QString streamId(streamIdArray);
+        const QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        const QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->setPeerToVideoDisabled(streamId);
@@ -147,10 +155,10 @@ void TcpSocketHandler::readyRead()
     {
         data.remove(0, 1);
         qDebug() << "Setting user to muted for: " << data;
-        int streamIdLength = data[0];
+        const int streamIdLength = data[0];
         data.remove(0, 1);
-        QByteArray streamIdArray = QByteArray(data, streamIdLength);
-        QString streamId(streamIdArray);
+        const QByteArray streamIdArray = QByteArray(data, streamIdLength);
+        const QString streamId(streamIdArray);
         data.remove(0, streamIdLength);
 
         mInputStreamHandler->setPeerToAudioDisabled(streamId);
@@ -167,13 +175,19 @@ void TcpSocketHandler::readyRead()
     };
 }
 
+/**
+ * @brief TcpSocketHandler::getSocket
+ * @return
+ */
 QTcpSocket *TcpSocketHandler::getSocket()
 {
     return mSocket;
 }
 
-//Send header to server, and receive headers from other participants back
-void TcpSocketHandler::writeHeader()
+/**
+ * @brief TcpSocketHandler::sendVideoHeader
+ */
+void TcpSocketHandler::sendVideoHeader()
 {
     mHeader.prepend(VIDEO_HEADER);
     prependDefaultHeader(mHeader);
@@ -185,6 +199,9 @@ void TcpSocketHandler::writeHeader()
     mHeader.clear();
 }
 
+/**
+ * @brief TcpSocketHandler::sendChangedDisplayNameSignal
+ */
 void TcpSocketHandler::sendChangedDisplayNameSignal()
 {
     QByteArray header;
@@ -198,9 +215,11 @@ void TcpSocketHandler::sendChangedDisplayNameSignal()
     header.clear();
 }
 
+/**
+ * @brief TcpSocketHandler::sendDisabledVideoSignal
+ */
 void TcpSocketHandler::sendDisabledVideoSignal()
 {
-    //QByteArray header = QString("VIDEO_DISABLED").toUtf8();
     QByteArray header;
     header.append(VIDEO_DISABLED);
 
@@ -212,9 +231,11 @@ void TcpSocketHandler::sendDisabledVideoSignal()
     mSocket->waitForBytesWritten();
 }
 
+/**
+ * @brief TcpSocketHandler::sendDisabledAudioSignal
+ */
 void TcpSocketHandler::sendDisabledAudioSignal()
 {
-    //QByteArray header = QString("AUDIO_DISABLED").toUtf8();
     QByteArray header;
     header.append(AUDIO_DISABLED);
 
@@ -226,6 +247,10 @@ void TcpSocketHandler::sendDisabledAudioSignal()
     header.clear();
 }
 
+/**
+ * @brief TcpSocketHandler::sendKickParticipantSignal
+ * @param streamId
+ */
 void TcpSocketHandler::sendKickParticipantSignal(const QString& streamId)
 {
     QByteArray header;
@@ -242,6 +267,10 @@ void TcpSocketHandler::sendKickParticipantSignal(const QString& streamId)
     header.clear();
 }
 
+/**
+ * @brief TcpSocketHandler::prependDefaultHeader
+ * @param data
+ */
 void TcpSocketHandler::prependDefaultHeader(QByteArray& data) const
 {
     data.prepend(mStreamId.toLocal8Bit().data());
@@ -256,49 +285,29 @@ void TcpSocketHandler::prependDefaultHeader(QByteArray& data) const
     data.prepend(mRoomId.size());
 }
 
+/**
+ * @brief TcpSocketHandler::appendToHeader
+ * @param data
+ */
 void TcpSocketHandler::appendToHeader(const QByteArray &data)
 {
     mHeader.append(data);
 }
 
-void TcpSocketHandler::connected()
-{
-    qDebug() << "Tcp socket connected to " << mAddress << "on port " << mPort;
-    qDebug() << "TCP Request: " << mRequest;
-    //mSocket->write(mRequest);
-}
-
-void TcpSocketHandler::disconnected()
-{
-    qDebug() << "TCPSocket disconnected";
-}
-
+/**
+ * @brief TcpSocketHandler::bytesWritten
+ * @param bytes
+ */
 void TcpSocketHandler::bytesWritten(qint64 bytes)
 {
     qDebug() << "Tcpsocket wrote " << bytes << " bytes";
     mBytesWritten = bytes;
 }
 
-void TcpSocketHandler::wait()
-{
-    while (mSocket->waitForReadyRead(1000));
-}
-
-int TcpSocketHandler::getBytesWritten() const
-{
-    return mBytesWritten;
-}
-
-QByteArray TcpSocketHandler::getReply() const
-{
-    return mReply;
-}
-
-bool TcpSocketHandler::isReady() const
-{
-    return mReady;
-}
-
+/**
+ * @brief TcpSocketHandler::updateDisplayName
+ * @param displayName
+ */
 void TcpSocketHandler::updateDisplayName(const QString& displayName)
 {
     mDisplayName = displayName;

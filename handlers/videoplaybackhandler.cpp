@@ -2,6 +2,14 @@
 #define 	CODEC_CAP_TRUNCATED   0x0008
 #define     CODEC_FLAG_TRUNCATED 0x00010000
 
+/**
+ * @brief VideoPlaybackHandler::VideoPlaybackHandler
+ * @param _writeLock
+ * @param buffer
+ * @param bufferSize
+ * @param _imageHandler
+ * @param index
+ */
 VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock, QByteArray* buffer,
                                            size_t bufferSize, ImageHandler* _imageHandler,
                                            int index) : Playback(_writeLock, buffer, bufferSize, _imageHandler, index)
@@ -9,12 +17,17 @@ VideoPlaybackHandler::VideoPlaybackHandler(std::mutex* _writeLock, QByteArray* b
 
 }
 
+/**
+ * @brief VideoPlaybackHandler::~VideoPlaybackHandler
+ */
 VideoPlaybackHandler::~VideoPlaybackHandler()
 {
 
 }
 
-
+/**
+ * @brief VideoPlaybackHandler::start
+ */
 void VideoPlaybackHandler::start()
 {
     mStopPlayback = false;
@@ -22,7 +35,6 @@ void VideoPlaybackHandler::start()
     AVFormatContext *inputFormatContext = avformat_alloc_context();
     Q_ASSERT(inputFormatContext);
 
-    // mBufferSize = 10e5;
     uint8_t *avioContextBuffer = reinterpret_cast<uint8_t*>(av_malloc(mBufferSize));
     Q_ASSERT(avioContextBuffer);
 
@@ -45,16 +57,6 @@ void VideoPlaybackHandler::start()
         exit(1);
     }
 
-    //Funker ikke med denne linja, men litt rart det funker uten?
-    //error = avformat_find_stream_info(fmt_ctx, nullptr);
-    /*if(error < 0)
-        {
-            char* errbuff = (char *)malloc((1000)*sizeof(char));
-            av_strerror(error,errbuff,1000);
-            qDebug() << "AVFormat find udp stream failed" << errbuff;
-            exit(1);
-        }*/
-
     qDebug() << "Dumping videoplayback format";
     av_dump_format(inputFormatContext, 0, NULL, 0);
 
@@ -62,20 +64,13 @@ void VideoPlaybackHandler::start()
     for (uint i = 0; i < inputFormatContext->nb_streams; ++i)
     {
         AVStream* st = inputFormatContext->streams[i];
-        //Debug() << st->id << st->index << st->start_time << st->duration << st->codecpar->codec_type;
         if (st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
             video_stream = st;
         }
     }
 
-    int err;
-    //Q_ASSERT(video_stream);
-
-    //AVCodecContext *videoDecoderCodecContext; // = video_stream->codec;
-    //videoDecoderCodecContext = avcodec_alloc_context3(NULL);
-
-    if(!video_stream)
+    if (!video_stream)
     {
         qDebug() << "Not a videostream!";
         return;
@@ -95,17 +90,16 @@ void VideoPlaybackHandler::start()
     videoDecoderCodecContext->thread_type  = FF_THREAD_SLICE;
     videoDecoderCodecContext->thread_count = 2;
 
-    err = avcodec_parameters_to_context(videoDecoderCodecContext, video_stream->codecpar);
+    error = avcodec_parameters_to_context(videoDecoderCodecContext, video_stream->codecpar);
 
-    err = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
-    Q_ASSERT(err>=0);
+    error = avcodec_open2(videoDecoderCodecContext, videoDecoderCodec, nullptr);
+    Q_ASSERT(error >= 0);
     qDebug() << "codec name: " << videoDecoderCodec->name<< " codec id " << videoDecoderCodec->id;
     qDebug() << "codecpar width" << videoStreamCodecParameters->width <<" h: "<< videoStreamCodecParameters->height << " format: "<< videoStreamCodecParameters->format<< " pix fmt: " << videoDecoderCodecContext->pix_fmt;
 
     AVFrame* frame = av_frame_alloc();
     AVPacket* packet = av_packet_alloc();
 
-    //uint8_t recvbuf[(int)10e5];
     memset(mRecvbuf, 0, 10e5);
 
     AVCodecParserContext * parser = av_parser_init(AV_CODEC_ID_H264);
@@ -114,15 +108,13 @@ void VideoPlaybackHandler::start()
 
     while (!mStopPlayback)
     {
-
         while(!mStopPlayback && mStruct->buffer->size() <= 0)
         {
         }
 
         int stringLength = mStruct->buffer->at(0);
-        if(mStopPlayback)
+        if (mStopPlayback)
         {
-            //return AVERROR_EOF;
             break;
         }
         mStruct->writeLock->lock();
@@ -131,40 +123,27 @@ void VideoPlaybackHandler::start()
 
         mStruct->writeLock->unlock();
 
-
-        //qDebug() << "Stringlength: " << stringLength;
         while(!mStopPlayback && mStruct->buffer->size() <= stringLength)
         {
         }
 
         QByteArray sizeArray = QByteArray(mStruct->buffer->data(), stringLength);
-        //qDebug() << "sizearray: " << sizeArray;
         QString sizeString = QString(sizeArray);
-        // qDebug() << "sizestring: " << sizeString;
         int buffer_size = sizeString.toInt();
 
         while (!mStopPlayback && mStruct->buffer->size() <= (buffer_size + stringLength))
         {
-            if((*mStruct->stopPlayback))
+            if (*mStruct->stopPlayback)
             {
-                //return AVERROR_EOF;
                 break;
             }
-            //int ms = 5;
-            //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-            //qDebug() << "sleeping";
-            //nanosleep(&ts, NULL);
         }
 
-
-        //qDebug() << "Before lock";
-        if(mStopPlayback)
+        if (mStopPlayback)
         {
-            //return AVERROR_EOF;
             break;
         }
         mStruct->writeLock->lock();
-        // qDebug() << "After lock";
         mStruct->buffer->remove(0, stringLength);
 
         QByteArray tempBuffer = QByteArray(mStruct->buffer->data(), buffer_size);
@@ -174,15 +153,8 @@ void VideoPlaybackHandler::start()
 
         memcpy(mRecvbuf, tempBuffer.constData(), buffer_size);
 
-
-
-        //int length = read(, recvbuf, 10e5);
-        //int length = mStruct->buffer->size();
-
         int length = buffer_size;
 
-
-        //qDebug() << "Before length check" << length;
         int ret = parsePacket(parser, packet, length, videoDecoderCodecContext);
         if (ret < 0)
         {
@@ -194,9 +166,6 @@ void VideoPlaybackHandler::start()
         if (error == AVERROR_EOF || error == AVERROR(EOF))
         {
             qDebug() << "send packet sleep";
-            /*int ms = 1000;
-            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-            nanosleep(&ts, NULL);*/
             continue;
         }
         else if(error == AVERROR(EAGAIN))
@@ -209,7 +178,6 @@ void VideoPlaybackHandler::start()
             char* errbuff = (char *)malloc((1000)*sizeof(char));
             av_strerror(error,errbuff,1000);
             qDebug() << "Failed udp input avcodec_send_packet: code "<<error<< " meaning: " << errbuff;
-            //exit(1);
             av_packet_unref(packet);
 
             continue;
@@ -217,7 +185,6 @@ void VideoPlaybackHandler::start()
 
         error = avcodec_receive_frame(videoDecoderCodecContext, frame);
         if (error == AVERROR(EAGAIN) || error == AVERROR_EOF){
-            //skipped_frames++;
             qDebug() << "Skipped a Frame VideoPlaybackHandler";
             continue;
         }
@@ -235,17 +202,26 @@ void VideoPlaybackHandler::start()
         av_packet_unref(packet);
 
     }
-    //qDebug() << "Closing videoplaybackhandler";
     avformat_close_input(&inputFormatContext);
     avcodec_free_context(&videoDecoderCodecContext);
-
 }
 
+/**
+ * @brief VideoPlaybackHandler::decreaseIndex
+ */
 void VideoPlaybackHandler::decreaseIndex()
 {
     mIndex--;
 }
 
+/**
+ * @brief VideoPlaybackHandler::parsePacket
+ * @param parser
+ * @param packet
+ * @param length
+ * @param videoDecoderCodecContext
+ * @return
+ */
 int VideoPlaybackHandler::parsePacket(AVCodecParserContext* parser, AVPacket* packet, const int& length, AVCodecContext* videoDecoderCodecContext)
 {
     if (length == 0)
@@ -257,25 +233,20 @@ int VideoPlaybackHandler::parsePacket(AVCodecParserContext* parser, AVPacket* pa
     av_init_packet(tempPacket);
     av_new_packet(tempPacket, length);
     memcpy(tempPacket->data, mRecvbuf, length);
-    //tempPacket->pos = pos; //Do we need this?
-    //pos += length; // ^^
     memset(mRecvbuf, 0, length);
 
     //Parsing temporary packet into pkt
     av_init_packet(packet);
 
-    //qDebug() << "Before Parse";
     av_parser_parse2(parser, videoDecoderCodecContext,
                      &(packet->data), &(packet->size),
                      tempPacket->data, tempPacket->size,
-                     //AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
                      tempPacket->pts, tempPacket->dts, tempPacket->pos
                      );
 
-    packet->pts = parser->pts; //Might not need these
+    packet->pts = parser->pts;
     packet->dts = parser->dts;
     packet->pos = parser->pos;
-    //qDebug() << "After Parse";
 
     //Set keyframe flag
     if (parser->key_frame == 1 || (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_I))
@@ -283,12 +254,6 @@ int VideoPlaybackHandler::parsePacket(AVCodecParserContext* parser, AVPacket* pa
         packet->flags |= AV_PKT_FLAG_KEY;
     }
 
-    /*
-    if (parser->key_frame == -1 && parser->pict_type == AV_PICTURE_TYPE_NONE && (packet->flags & AV_PKT_FLAG_KEY))
-    {
-        packet->flags |= AV_PKT_FLAG_KEY;
-    }
-    */
-    packet->duration = 96000; //Same result as in av_read_frame()
+    packet->duration = 96000;
     return 0;
 }

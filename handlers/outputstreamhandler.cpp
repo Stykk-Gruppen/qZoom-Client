@@ -1,6 +1,14 @@
 #include "outputstreamhandler.h"
 
-
+/**
+ * @brief OutputStreamHandler::OutputStreamHandler
+ * @param _imageHandler
+ * @param _socketHandler
+ * @param bufferSize
+ * @param settings
+ * @param tcpSocketHandler
+ * @param parent
+ */
 OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketHandler* _socketHandler,
                                          size_t bufferSize, Settings* settings,
                                          TcpSocketHandler* tcpSocketHandler,  QObject *parent) : QObject(parent)
@@ -20,6 +28,9 @@ OutputStreamHandler::OutputStreamHandler(ImageHandler* _imageHandler, UdpSocketH
     }
 }
 
+/**
+ * @brief OutputStreamHandler::init
+ */
 void OutputStreamHandler::init()
 {
     mVideoEnabled = mSettings->getVideoOn();
@@ -31,17 +42,15 @@ void OutputStreamHandler::init()
     {
         if(enableVideo() < 0)
         {
-
-            mTcpSocketHandler->writeHeader();
+            mTcpSocketHandler->sendVideoHeader();
             mVideoEnabled = false;
         }
     }
     else
     {
         //Skriver tom header hvis video ikke er enabled, og skriver full header hvis den er enabled;
-        mTcpSocketHandler->writeHeader();
+        mTcpSocketHandler->sendVideoHeader();
         mVideoEnabled = false;
-
     }
 
     if(mAudioEnabled)
@@ -53,6 +62,9 @@ void OutputStreamHandler::init()
     }
 }
 
+/**
+ * @brief OutputStreamHandler::close
+ */
 void OutputStreamHandler::close()
 {
     qDebug() << "Closing outputStreamHandler";
@@ -68,6 +80,9 @@ void OutputStreamHandler::close()
     }
 }
 
+/**
+ * @brief OutputStreamHandler::grabVideoHeader
+ */
 void OutputStreamHandler::grabVideoHeader()
 {
     if(mVideoHandler == nullptr)
@@ -87,6 +102,10 @@ void OutputStreamHandler::grabVideoHeader()
     mVideoHandler = nullptr;
 }
 
+/**
+ * @brief OutputStreamHandler::enableAudio
+ * @return
+ */
 int OutputStreamHandler::enableAudio()
 {
     mAudioEnabled = true;
@@ -103,7 +122,6 @@ int OutputStreamHandler::enableAudio()
     {
         fprintf(stderr, "Could not init audiohandler");
         errorHandler->giveErrorDialog("Could not stream audio");
-
         return error;
     }
 
@@ -112,6 +130,9 @@ int OutputStreamHandler::enableAudio()
     return 0;
 }
 
+/**
+ * @brief OutputStreamHandler::disableAudio
+ */
 void OutputStreamHandler::disableAudio()
 {
     if(mAudioHandler != nullptr)
@@ -119,10 +140,12 @@ void OutputStreamHandler::disableAudio()
         mAudioEnabled = false;
         mAudioHandler->toggleGrabFrames(mAudioEnabled);
         mAudioFuture.waitForFinished();
+
         qDebug() << "Audiohandler not active, deleting it";
         delete mAudioHandler;
         mAudioHandler = nullptr;
         qDebug() << "audio disabled";
+
         if(mTcpSocketHandler->isOpen())
         {
             mTcpSocketHandler->sendDisabledAudioSignal();
@@ -130,6 +153,11 @@ void OutputStreamHandler::disableAudio()
     }
 }
 
+/**
+ * @brief OutputStreamHandler::enableVideo
+ * @param screenShare
+ * @return
+ */
 int OutputStreamHandler::enableVideo(bool screenShare)
 {
     mVideoEnabled = true;
@@ -137,14 +165,12 @@ int OutputStreamHandler::enableVideo(bool screenShare)
     if (mVideoHandler == nullptr)
     {
         qDebug() << "new videohandler";
-        //int64_t time = av_gettime();
         mVideoHandler = new VideoHandler(mVideoDevice, &mUDPSendDatagramMutexLock,
                                          mTime, mImageHandler, mSocketHandler,
                                          mBufferSize, mTcpSocketHandler, screenShare);
     }
 
     const int error = mVideoHandler->init();
-    //mTcpSocketHandler->writeHeader();
     if(error < 0)
     {
         fprintf(stderr, "Could not init videohandler");
@@ -160,20 +186,17 @@ int OutputStreamHandler::enableVideo(bool screenShare)
     return 0;
 }
 
+/**
+ * @brief OutputStreamHandler::disableVideo
+ */
 void OutputStreamHandler::disableVideo()
 {
     if(mVideoHandler != nullptr)
     {
         mVideoEnabled = false;
-        //delete mVideoHandler;
         mVideoHandler->toggleGrabFrames(mVideoEnabled);
         qDebug() << "video disabled";
 
-        /*while(mVideoHandler->isActive())
-        {
-            av_usleep(500);
-            qDebug() << "VideoHandler is still active";
-        }*/
         mVideoFuture.waitForFinished();
         qDebug() << "Videohandler not active, deleting it";
 
@@ -187,11 +210,19 @@ void OutputStreamHandler::disableVideo()
     }
 }
 
+/**
+ * @brief OutputStreamHandler::getAudioInputDevices
+ * @return
+ */
 QVariantList OutputStreamHandler::getAudioInputDevices() const
 {
     return AudioHandler::getAudioInputDevices();
 }
 
+/**
+ * @brief OutputStreamHandler::changeAudioInputDevice
+ * @param deviceName
+ */
 void OutputStreamHandler::changeAudioInputDevice(const QString& deviceName)
 {
     qDebug() << "Changing Audio to: " << deviceName;
@@ -201,16 +232,28 @@ void OutputStreamHandler::changeAudioInputDevice(const QString& deviceName)
     enableAudio();
 }
 
+/**
+ * @brief OutputStreamHandler::getDefaultAudioInputDevice
+ * @return
+ */
 QString OutputStreamHandler::getDefaultAudioInputDevice() const
 {
     return "default";
 }
 
+/**
+ * @brief OutputStreamHandler::checkVideoEnabled
+ * @return
+ */
 bool OutputStreamHandler::checkVideoEnabled() const
 {
     return mVideoEnabled;
 }
 
+/**
+ * @brief OutputStreamHandler::checkAudioEnabled
+ * @return
+ */
 bool OutputStreamHandler::checkAudioEnabled() const
 {
     return mAudioEnabled;

@@ -17,7 +17,7 @@ public:
     ~VideoPlaybackHandler();
     void start();
     void decreaseIndex();
-    //static int interruptCallBack(void* ctx);
+
 private:
     int parsePacket(AVCodecParserContext* parser, AVPacket* packet, const int& length, AVCodecContext *videoDecoderCodecContext);
     uint8_t mRecvbuf[(int)10e5];

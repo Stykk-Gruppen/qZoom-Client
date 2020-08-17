@@ -8,7 +8,6 @@
 #include <handlers/videoplaybackhandler.h>
 #include <QHostAddress>
 
-
 class VideoPlaybackHandler;
 class AudioPlaybackHandler;
 
@@ -17,7 +16,6 @@ class InputStreamHandler
 public:
     explicit InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address);
     void addStreamToVector(int index, const QString& streamId, const QString& displayName);
-    void init();
     void close();
     void removeStream(const QString& streamId);
     void updateParticipantDisplayName(const QString& streamId, const QString& displayName);

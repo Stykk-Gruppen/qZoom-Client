@@ -1,5 +1,15 @@
 #include "udpsockethandler.h"
 
+/**
+ * @brief UdpSocketHandler::UdpSocketHandler
+ * @param bufferSize
+ * @param _port
+ * @param inputStreamHandler
+ * @param streamId
+ * @param roomId
+ * @param address
+ * @param parent
+ */
 UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler* inputStreamHandler,
                              QString streamId, QString roomId, QHostAddress address, QObject *parent) : QObject(parent)
 {
@@ -10,9 +20,6 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
     mStreamId = streamId;
     mRoomId = roomId;
     initSocket();
-
-    //char buf[BUFLEN];
-    //char *message = "test message very many bytes to send with this message";
 
     if ((mCppUdpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
@@ -32,6 +39,9 @@ UdpSocketHandler::UdpSocketHandler(int bufferSize, int _port, InputStreamHandler
     }
 }
 
+/**
+ * @brief UdpSocketHandler::~UdpSocketHandler
+ */
 UdpSocketHandler::~UdpSocketHandler()
 {
     delete mUdpSocket;
@@ -49,6 +59,9 @@ void UdpSocketHandler::initSocket()
     connect(mUdpSocket, &QUdpSocket::readyRead, this, &UdpSocketHandler::readPendingDatagrams);
 }
 
+/**
+ * @brief UdpSocketHandler::closeSocket
+ */
 void UdpSocketHandler::closeSocket()
 {
     qDebug() << "Closing SocketHandler";
@@ -73,19 +86,6 @@ void UdpSocketHandler::readPendingDatagrams()
         }
         QByteArray data = datagram.data();
 
-        //To allow debugging on localhost. We added the operations the server performs on incoming datagrams before sending them to a client
-       /* if(mAddress.toIPv4Address() != QHostAddress("46.250.220.57").toIPv4Address() && mAddress.toIPv4Address() != QHostAddress("213.162.241.177").toIPv4Address())
-        {
-            //roomId is the first x bytes, then streamId
-            int roomIdLength = data[0];
-            data.remove(0,1);
-
-            //Finds the roomId header, stores it and removes it from the datagram
-            QByteArray roomIdArray = QByteArray(data, roomIdLength);
-            QString roomId(roomIdArray);
-            data.remove(0, roomIdLength);
-        }*/
-
         const int streamIdLength = data[0];
         data.remove(0, 1);
 
@@ -109,13 +109,13 @@ void UdpSocketHandler::readPendingDatagrams()
             mInputStreamHandler->lockAudioMutex(index);
             mInputStreamHandler->appendToAudioBuffer(index, data);
             mInputStreamHandler->unlockAudioMutex(index);
-            if(!mInputStreamHandler->audioPlaybackStarted(index) && mInputStreamHandler->getAudioBufferSize(index) >= 1024*1)
+
+            if (!mInputStreamHandler->audioPlaybackStarted(index) && mInputStreamHandler->getAudioBufferSize(index) >= 1024*1)
             {
                 *mInputStreamHandler->getAudioFutures(index) = QtConcurrent::run(mInputStreamHandler->getAudioPlaybackHandler(index), &AudioPlaybackHandler::start);
                 qDebug() << "Starting AudioPlaybackHandler for streamId: " << streamId;
                 mInputStreamHandler->setAudioPlaybackStarted(index, true);
             }
-            //qDebug() << "audio buffer size " << mInputStreamHandler->mAudioBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else if (audioOrVideoInt == 1)
         {
@@ -125,17 +125,15 @@ void UdpSocketHandler::readPendingDatagrams()
             {
                 mInputStreamHandler->appendToVideoBuffer(index, data);
             }
-            mInputStreamHandler->unlockVideoMutex(index);
 
+            mInputStreamHandler->unlockVideoMutex(index);
 
             if(!mInputStreamHandler->videoPlaybackStarted(index))
             {
-                //qDebug() << "Buffer: " << (*mInputStreamHandler->mVideoBufferVector[index]);
                 *mInputStreamHandler->getVideoFutures(index) = QtConcurrent::run(mInputStreamHandler->getVideoPlaybackHandler(index), &VideoPlaybackHandler::start);
                 qDebug() << "STARTING VIDEOPLAYBACKHANDLER!!!";
                 mInputStreamHandler->setVideoPlaybackStarted(index, true);
             }
-            //qDebug() << "video buffer size " << mInputStreamHandler->mVideoBufferVector[index]->size() << "after signal: " << signalCount;
         }
         else
         {
@@ -143,8 +141,7 @@ void UdpSocketHandler::readPendingDatagrams()
             exit(-1);
         }
     }
-
-    signalCount++;
+    mSignalCount++;
 }
 /**
  * Prints how many bytes were sent during the last x seconds
@@ -188,8 +185,7 @@ void UdpSocketHandler::printBytesPerSecond(int bytes)
  */
 int UdpSocketHandler::sendDatagram(QByteArray arr)
 {
-
-    int datagramMaxSize = 2*512;
+    const int datagramMaxSize = 2*512;
     if(mUdpSocket == nullptr)
     {
         return AVERROR_EXIT;
@@ -215,11 +211,9 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
     arrToPrepend.prepend(mRoomId.toLocal8Bit().data());
     arrToPrepend.prepend(mRoomId.size());
 
-
-
-    while(arr.size() > 0)
+    while (arr.size() > 0)
     {
-        if(arr.size() > (datagramMaxSize - arrToPrepend.size()))
+        if (arr.size() > (datagramMaxSize - arrToPrepend.size()))
         {
             /*
              * Creates a deep copy of x bytes in arr.
@@ -252,9 +246,7 @@ int UdpSocketHandler::sendDatagram(QByteArray arr)
             qDebug() << ret;
             break;
         }
-
     }
-
     return ret;
 }
 /**
@@ -267,7 +259,7 @@ void UdpSocketHandler::openPortHack()
 {
     QByteArray data;
     data.append(int(0));
-    int error = mUdpSocket->writeDatagram(data, data.size(), mAddress, mPort);
+    const int error = mUdpSocket->writeDatagram(data, data.size(), mAddress, mPort);
     if(error < 0)
     {
         qDebug() << mUdpSocket->error();

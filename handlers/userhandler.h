@@ -5,6 +5,7 @@
 #include <QString>
 #include "core/settings.h"
 #include "core/servertcpqueries.h"
+
 class UserHandler : public QObject
 {
     Q_OBJECT

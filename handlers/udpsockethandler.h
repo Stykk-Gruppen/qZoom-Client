@@ -47,7 +47,7 @@ private:
     QString mRoomId;
     QString mStreamId;
     InputStreamHandler* mInputStreamHandler;
-    uint signalCount = 0;
+    uint mSignalCount = 0;
     struct sockaddr_in si_other;
     struct mBufferAndLockStruct
     {

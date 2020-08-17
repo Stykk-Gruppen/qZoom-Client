@@ -27,19 +27,15 @@ public:
     void sendKickParticipantSignal(const QString& streamId);
     void appendToHeader(const QByteArray& data);
     void close();
-    void wait();
     int init();
-    int getBytesWritten() const;
     bool isOpen() const;
-    bool isReady() const;
-    QByteArray getReply() const;
-    QTcpSocket *getSocket();
+    QTcpSocket* getSocket();
+
 signals:
     void sendDummyDatagram();
+
 public slots:
-    void writeHeader();
-    void connected();
-    void disconnected();
+    void sendVideoHeader();
     void bytesWritten(qint64 bytes);
     void readyRead();
 

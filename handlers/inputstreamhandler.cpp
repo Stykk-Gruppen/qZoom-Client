@@ -1,5 +1,11 @@
 #include "inputstreamhandler.h"
 
+/**
+ * @brief InputStreamHandler::InputStreamHandler
+ * @param imageHandler
+ * @param bufferSize
+ * @param address
+ */
 InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSize, QHostAddress address)
 {
     mImageHandler = imageHandler;
@@ -7,12 +13,9 @@ InputStreamHandler::InputStreamHandler(ImageHandler* imageHandler, int bufferSiz
     mAddress = address;
 }
 
-void InputStreamHandler::init()
-{
-    //new TcpServerHandler();
-    //TcpServerHandler.init();
-}
-
+/**
+ * @brief InputStreamHandler::close
+ */
 void InputStreamHandler::close()
 {
     qDebug() << "m, Closing inputStreamHandler";
@@ -89,15 +92,15 @@ void InputStreamHandler::close()
     mAudioFutures.clear();
 }
 
+/**
+ * @brief InputStreamHandler::removeStream
+ * @param streamId
+ */
 void InputStreamHandler::removeStream(const QString& streamId)
 {
     qDebug() << "Trying to remove user with streamId: " << streamId;
     int index = findStreamIdIndex(streamId);
 
-    /* Kan dette slettes uten at mutex er locked?
-    Eg fikk en segmentation fault pga customRead
-    leste av en buffer som ikke eksisterte lengre
-    */
     if(index != -1)
     {
         mAudioPlaybackHandlerVector.at(index)->stop();
@@ -203,6 +206,7 @@ void InputStreamHandler::addStreamToVector(int index, const QString& streamId, c
         qDebug() << "We currently do not allow for more than 255 participants in a room" << Q_FUNC_INFO;
         return;
     }
+
     QByteArray* tempVideoHeaderBuffer = new QByteArray();
     QFuture<void>* tempVideoFuture = new QFuture<void>();
     QFuture<void>* tempAudioFuture = new QFuture<void>();
@@ -222,46 +226,12 @@ void InputStreamHandler::addStreamToVector(int index, const QString& streamId, c
     mVideoPlaybackHandlerVector.push_back(new VideoPlaybackHandler(tempVideoLock, tempVideoBuffer, mBufferSize,
                                                                    mImageHandler, index));
     mStreamIdVector.push_back(streamId);
-
     mAudioPlaybackStartedVector.push_back(false);
     mVideoPlaybackStartedVector.push_back(false);
 
-
-    //Your own image is at numeric limit for uint8, so we have a problem if a room gets that many participants
     mImageHandler->addPeer(index, displayName);
 }
 
-/**
- * When recieving a TCP request we need to know if the streamId already exists in mStreamIdVector.
- * @param streamId QString to find in mStreamIdVector
- * @return int index where streamId was found, or 0 if not found
- */
-
-/*
-int InputStreamHandler::findStreamIdIndex(QString streamId, QString displayName)
-{
-    qDebug() << "InputStreamHandler findStreamId index: " << streamId;
-    if(mStreamIdVector.size() >= 1)
-    {
-        for(size_t i = 0; i < mStreamIdVector.size(); i++)
-        {
-            if(QString::compare(streamId, mStreamIdVector[i], Qt::CaseSensitive) == 0)
-            {
-                return i;
-            }
-        }
-        //If the streamId does not exist, push it and buffers/locks
-        addStreamToVector(mStreamIdVector.size(), streamId, displayName);
-        return mStreamIdVector.size() - 1;
-    }
-    else
-    {
-        //If this stream is the first to join, push it and buffer/locks
-        addStreamToVector(0, streamId, displayName);
-        return 0;
-    }
-}
-*/
 /**
  * Goes through the mStreamIdVector and locates the streamId
  * @param streamId
@@ -282,6 +252,10 @@ int InputStreamHandler::findStreamIdIndex(const QString& streamId) const
     return -1;
 }
 
+/**
+ * @brief InputStreamHandler::getStreamIdVector
+ * @return
+ */
 std::vector<QString> InputStreamHandler::getStreamIdVector() const
 {
     return mStreamIdVector;
@@ -335,46 +309,89 @@ void InputStreamHandler::unlockAudioMutex(int index)
     mAudioMutexVector[index]->unlock();
 }
 
+/**
+ * @brief InputStreamHandler::lockVideoMutex
+ * @param index
+ */
 void InputStreamHandler::lockVideoMutex(int index)
 {
     mVideoMutexVector[index]->lock();
 }
 
+/**
+ * @brief InputStreamHandler::appendToVideoBuffer
+ * @param index
+ * @param data
+ */
 void InputStreamHandler::appendToVideoBuffer(int index, const QByteArray& data)
 {
     mVideoBufferVector[index]->append(data);
 }
 
+/**
+ * @brief InputStreamHandler::audioPlaybackStarted
+ * @param index
+ * @return
+ */
 bool InputStreamHandler::audioPlaybackStarted(int index) const
 {
     return mAudioPlaybackStartedVector[index];
 }
 
+/**
+ * @brief InputStreamHandler::getAudioBufferSize
+ * @param index
+ * @return
+ */
 int InputStreamHandler::getAudioBufferSize(int index) const
 {
     return mAudioBufferVector[index]->size();
 }
 
+/**
+ * @brief InputStreamHandler::setAudioPlaybackStarted
+ * @param index
+ * @param val
+ */
 void InputStreamHandler::setAudioPlaybackStarted(int index, bool val)
 {
     mAudioPlaybackStartedVector[index] = val;
 }
 
+/**
+ * @brief InputStreamHandler::unlockVideoMutex
+ * @param index
+ */
 void InputStreamHandler::unlockVideoMutex(int index)
 {
     mVideoMutexVector[index]->unlock();
 }
 
+/**
+ * @brief InputStreamHandler::videoPlaybackStarted
+ * @param index
+ * @return
+ */
 bool InputStreamHandler::videoPlaybackStarted(int index) const
 {
     return mVideoPlaybackStartedVector[index];
 }
 
+/**
+ * @brief InputStreamHandler::videoHeaderVectorIsEmpty
+ * @param index
+ * @return
+ */
 bool InputStreamHandler::videoHeaderVectorIsEmpty(int index) const
 {
     return mVideoHeaderVector.at(index)->isEmpty();
 }
 
+/**
+ * @brief InputStreamHandler::getStreamIdFromIndex
+ * @param index
+ * @return
+ */
 QString InputStreamHandler::getStreamIdFromIndex(int index) const
 {
     QString ret;
@@ -385,33 +402,53 @@ QString InputStreamHandler::getStreamIdFromIndex(int index) const
     return ret;
 }
 
+/**
+ * @brief InputStreamHandler::setVideoPlaybackStarted
+ * @param index
+ * @param val
+ */
 void InputStreamHandler::setVideoPlaybackStarted(int index, bool val)
 {
     mVideoPlaybackStartedVector[index] = val;
 }
 
+/**
+ * @brief InputStreamHandler::kickYourself
+ */
 void InputStreamHandler::kickYourself()
 {
     mImageHandler->kickYourself();
 }
 
+/**
+ * @brief InputStreamHandler::getVideoBufferSize
+ * @param index
+ * @return
+ */
 int InputStreamHandler::getVideoBufferSize(int index) const
 {
     return mVideoBufferVector[index]->size();
 }
 
+/**
+ * @brief InputStreamHandler::getAudioFutures
+ * @param index
+ * @return
+ */
 QFuture<void>* InputStreamHandler::getAudioFutures(int index)
 {
     return mAudioFutures.at(index);
 }
 
+/**
+ * @brief InputStreamHandler::getVideoFutures
+ * @param index
+ * @return
+ */
 QFuture<void> *InputStreamHandler::getVideoFutures(int index)
 {
     return mVideoFutures.at(index);
 }
-
-
-
 
 /**
  * @brief InputStreamHandler::updateParticipantDisplayName
@@ -424,6 +461,10 @@ void InputStreamHandler::updateParticipantDisplayName(const QString& streamId, c
     mImageHandler->updatePeerDisplayName(index, displayName);
 }
 
+/**
+ * @brief InputStreamHandler::setPeerToVideoDisabled
+ * @param streamId
+ */
 void InputStreamHandler::setPeerToVideoDisabled(const QString& streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);
@@ -442,6 +483,10 @@ void InputStreamHandler::setPeerToVideoDisabled(const QString& streamId)
     mImageHandler->setPeerVideoAsDisabled(index);
 }
 
+/**
+ * @brief InputStreamHandler::setPeerToAudioDisabled
+ * @param streamId
+ */
 void InputStreamHandler::setPeerToAudioDisabled(const QString& streamId)
 {
     uint8_t index = findStreamIdIndex(streamId);

@@ -44,8 +44,6 @@ public:
 signals:
     void callWriteHeader();
 
-
-
 private:
     QString buildScreenDeviceName();
     //Trenger kanskje ikke denne likevel?
@@ -86,8 +84,5 @@ private:
     QString mCameraDeviceName;
     std::mutex* mWriteLock;
     TcpSocketHandler* mTcpSocketHandler;
-
-
-
 };
 #endif // VideoHandler_H
