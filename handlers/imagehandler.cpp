@@ -1,5 +1,8 @@
 #include "imagehandler.h"
-
+/**
+ * @brief ImageHandler::ImageHandler
+ * @param settings
+ */
 ImageHandler::ImageHandler(Settings* settings) : QQuickImageProvider(QQuickImageProvider::Image)
 {
     mSettings = settings;
@@ -19,7 +22,10 @@ void ImageHandler::toggleBorder(bool talking, int index)
     mImageMap[index]->setAudioIsDisabled(false);
     mImageMap[index]->setIsTalking(talking);
 }
-
+/**
+ * @brief ImageHandler::kickYourself
+ * Connected with a QML function in session.qml
+ */
 void ImageHandler::kickYourself()
 {
     emit forceLeaveSession();
@@ -46,7 +52,10 @@ bool ImageHandler::getAudioIsDisabled(int index) const
     uint8_t i = getCorrectIndex(index);
     return mImageMap.at(i)->getAudioIsDisabled();
 }
-
+/**
+ * @brief ImageHandler::getAllParticipantsDisplayNames
+ * @return QList of QStrings with all the participant displayNames
+ */
 QList<QString> ImageHandler::getAllParticipantsDisplayNames() const
 {
     QList<QString> ret;
@@ -240,45 +249,6 @@ void ImageHandler::updateImage(const QImage &image, uint8_t index)
         mImageMap[index]->setImage(image);
     }
     mImageLock.unlock();
-}
-
-/**
- * One for the history books.
- */
-void ImageHandler::veryFunStianLoop()
-{
-    QtConcurrent::run([this]()
-    {
-        int ms = 41; //1000/24
-        int i = 1;
-        QString overhead = "";
-        while (true)
-        {
-            if (i < 100)
-            {
-                overhead = "0";
-                if (i < 10)
-                {
-                    overhead = "00";
-                }
-            }
-            else
-            {
-                overhead = "";
-            }
-            QString str = "/home/stian/Downloads/testtttt/" + overhead + QString::number(i) + ".jpg";
-            QImage test = QImage(str);
-            updateImage(test, getCorrectIndex(0));
-            if (i == 382)
-            {
-                i = 1;
-            }
-            i++;
-
-            struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-            nanosleep(&ts, NULL);
-        }
-    });
 }
 
 /**

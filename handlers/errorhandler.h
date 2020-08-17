@@ -15,8 +15,7 @@ signals:
     void showKickError();
 };
 
-//extern QScopedPointer<ErrorHandler> ERRORHANDLER(new ErrorHandler());
-
+//Makes ErrorHandler global
 extern ErrorHandler* errorHandler;
 
 

@@ -23,7 +23,6 @@ class ImageHandler : public QObject, public QQuickImageProvider
 public:
     explicit ImageHandler(Settings* settings);
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
-    void veryFunStianLoop();
     void readPacket(uint8_t *buffer, int buffer_size);
     void readImage(AVCodecContext* codecContext, AVFrame* scaledFrame, uint8_t index);
     void addPeer(uint8_t index, const QString& displayName);

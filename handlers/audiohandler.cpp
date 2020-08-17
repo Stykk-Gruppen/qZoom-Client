@@ -1,4 +1,13 @@
 #include "audiohandler.h"
+/**
+ * @brief AudioHandler::AudioHandler
+ * @param _audioDeviceName
+ * @param _writeLock
+ * @param _time
+ * @param _socketHandler
+ * @param bufferSize
+ * @param _imageHandler
+ */
 AudioHandler::AudioHandler(QString _audioDeviceName, std::mutex* _writeLock,int64_t _time,
                            UdpSocketHandler *_socketHandler, int bufferSize, ImageHandler* _imageHandler)/*, QObject* parent): QObject(parent)*/
 {
@@ -112,13 +121,6 @@ int AudioHandler::openOutputStream()
     AVCodec *output_codec          = NULL;
     int error = 0;
 
-    /* Open the output file to write to it. */
-    /*if ((error = avio_open(&output_io_context, filename,
-                           AVIO_FLAG_WRITE)) < 0) {
-        fprintf(stderr, "Could not open output file");
-        return error;
-    }*/
-
     /* Create a new format context for the output container format. */
     error = avformat_alloc_output_context2(&mOutputFormatContext, NULL,"mp3", NULL);
     if (error < 0) {
@@ -135,20 +137,8 @@ int AudioHandler::openOutputStream()
     mOutputFormatContext->pb = custom_io;
     av_dict_set(&mOptions, "live", "1", 0);
 
-    /* Associate the output file (pointer) with the container format context. */
-    //(outputFormatContext)->pb = output_io_context;
-
-    /* Guess the desired container format based on the file extension. */
-     /*if (!((outputFormatContext)->oformat = av_guess_format(NULL, filename,
-                                                           NULL))) {
-        fprintf(stderr, "Could not find output file format\n");
-        goto cleanup;
-    }*/
-
-
 
     /* Find the encoder to be used by its name. */
-    qDebug() << "*********************audio encoder:" << mOutputFormatContext->oformat->audio_codec;
     if (!(output_codec = avcodec_find_encoder(mOutputFormatContext->oformat->audio_codec)))
     {
         fprintf(stderr, "Could not find an AAC encoder.\n");
@@ -248,13 +238,13 @@ int AudioHandler::initResampler()
          * properly by the demuxer and/or decoder).
          */
     mResampleContext = swr_alloc_set_opts(NULL,
-                                         av_get_default_channel_layout(mOutputCodecContext->channels),
-                                         mOutputCodecContext->sample_fmt,
-                                         mOutputCodecContext->sample_rate,
-                                         av_get_default_channel_layout(mInputCodecContext->channels),
-                                         mInputCodecContext->sample_fmt,
-                                         mInputCodecContext->sample_rate,
-                                         0, NULL);
+                                          av_get_default_channel_layout(mOutputCodecContext->channels),
+                                          mOutputCodecContext->sample_fmt,
+                                          mOutputCodecContext->sample_rate,
+                                          av_get_default_channel_layout(mInputCodecContext->channels),
+                                          mInputCodecContext->sample_fmt,
+                                          mInputCodecContext->sample_rate,
+                                          0, NULL);
     if (!mResampleContext)
     {
         fprintf(stderr, "Could not allocate audio resample context\n");
@@ -285,7 +275,7 @@ int AudioHandler::initFifo()
 {
     /* Create the FIFO buffer based on the specified output sample format. */
     if (!(mFifo = av_audio_fifo_alloc(mOutputCodecContext->sample_fmt,
-                                     mOutputCodecContext->channels, 1)))
+                                      mOutputCodecContext->channels, 1)))
     {
         fprintf(stderr, "Could not allocate audio FIFO\n");
         return AVERROR(ENOMEM);
@@ -498,8 +488,6 @@ int AudioHandler::readDecodeConvertAndStore(int *finished)
         fprintf(stderr, "Could not allocate audio input frame\n");
         goto cleanup;
     }
-    //if (initInputFrame(&input_frame))
-    // goto cleanup;
     /* Decode one frame worth of audio samples. */
     if (decodeAudioFrame(input_frame,&data_present, finished))
     {
@@ -599,14 +587,12 @@ int AudioHandler::initOutputFrame(AVFrame **frame, int frame_size)
  * @return Error code (0 if successful)
  */
 int AudioHandler::initFilterGraph(AVFilterGraph **graph,
-                                     AVFilterContext **src,
-                                     AVFilterContext **sink)
+                                  AVFilterContext **src,
+                                  AVFilterContext **sink)
 {
     AVFilterGraph *filter_graph;
     AVFilterContext *abuffer_ctx;
     const AVFilter  *abuffer;
-    //AVFilterContext *volume_ctx;
-    //const AVFilter  *volume;
     AVFilterContext *silcence_ctx;
     const AVFilter  *silcence;
     AVFilterContext *gate_ctx;
@@ -639,20 +625,11 @@ int AudioHandler::initFilterGraph(AVFilterGraph **graph,
         return AVERROR(ENOMEM);
     }
 
-
     av_opt_set_int    (abuffer_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
     av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
     av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(mOutputCodecContext->sample_fmt), AV_OPT_SEARCH_CHILDREN);
-    //av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(AV_SAMPLE_FMT_S16), AV_OPT_SEARCH_CHILDREN);
     av_opt_set_q  (abuffer_ctx, "time_base",      (AVRational){ 1, 48000 }, AV_OPT_SEARCH_CHILDREN);
     av_opt_set_int(abuffer_ctx, "sample_rate",    mOutputCodecContext->sample_rate, AV_OPT_SEARCH_CHILDREN);
-    /*
-    av_opt_set_int    (abuffer_ctx, "channels", ctx->channels, AV_OPT_SEARCH_CHILDREN);
-    av_opt_set    (abuffer_ctx, "channel_layout",  QString::number(av_get_default_channel_layout(ctx->channels)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
-    av_opt_set    (abuffer_ctx, "sample_fmt",     av_get_sample_fmt_name(ctx->sample_fmt), AV_OPT_SEARCH_CHILDREN);
-    av_opt_set_q  (abuffer_ctx, "time_base",      ctx->time_base, AV_OPT_SEARCH_CHILDREN);
-    av_opt_set_int(abuffer_ctx, "sample_rate",    ctx->sample_rate, AV_OPT_SEARCH_CHILDREN);*/
-
 
     /* Now initialize the filter; we pass NULL options, since we have already
      * set all the options above. */
@@ -694,30 +671,6 @@ int AudioHandler::initFilterGraph(AVFilterGraph **graph,
         return err;
     }
 
-    /* Create volume filter. */
-    // avfilter_get_by_name("silencedetect");
-
-    /* volume = avfilter_get_by_name("volume");
-    if (!volume) {
-        fprintf(stderr, "Could not find the volume filter.\n");
-        return AVERROR_FILTER_NOT_FOUND;
-    }
-
-    volume_ctx = avfilter_graph_alloc_filter(filter_graph, volume, "volume");
-    if (!volume_ctx) {
-        fprintf(stderr, "Could not allocate the volume instance.\n");
-        return AVERROR(ENOMEM);
-    }
-
-
-    av_opt_set_double    (volume_ctx, "volume", 0.9, 0);
-
-    err = avfilter_init_dict(volume_ctx, NULL);
-    if (err < 0) {
-        fprintf(stderr, "Could not initialize the volume filter.\n");
-        return err;
-    }*/
-
     /* Create the aformat filter;
      * it ensures that the output is of the format we want. */
     aformat = avfilter_get_by_name("aformat");
@@ -731,7 +684,6 @@ int AudioHandler::initFilterGraph(AVFilterGraph **graph,
         fprintf(stderr, "Could not allocate the aformat instance.\n");
         return AVERROR(ENOMEM);
     }
-
 
     av_opt_set_int    (aformat_ctx, "channels", 2, AV_OPT_SEARCH_CHILDREN);
     av_opt_set    (aformat_ctx, "channel_layout", QString::number(av_get_default_channel_layout(2)).toUtf8().data(), AV_OPT_SEARCH_CHILDREN);
@@ -798,9 +750,6 @@ int AudioHandler::initFilterGraph(AVFilterGraph **graph,
 
     return 0;
 }
-/* Global timestamp for the audio frames. */
-static int64_t pts = 0;
-static bool first = true;
 
 /**
  * Encode one frame worth of audio to the output file.
@@ -812,6 +761,9 @@ static bool first = true;
 int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
 {
     int error;
+    /* Global timestamp for the audio frames. */
+    static int64_t pts = 0;
+    static bool first = true;
 
     /* push the audio data from decoded frame into the filtergraph */
     error = av_buffersrc_add_frame_flags(mBufferSourceContext, frame, AV_BUFFERSRC_FLAG_KEEP_REF);
@@ -851,10 +803,8 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
     }
     av_dict_free(&meta);
 
-
     /* Packet used for temporary storage. */
     AVPacket* output_packet = av_packet_alloc();
-
 
     /* Set a timestamp based on the sample rate for the container. */
     if(first)
@@ -868,7 +818,6 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
         frame->pts = pts;
         pts += frame->nb_samples;
     }
-    //frame->pts = frame->best_effort_timestamp;
 
     /* Send the audio frame stored in the temporary packet to the encoder.
      * The output audio stream encoder is used to do this. */
@@ -920,12 +869,10 @@ int AudioHandler::encodeAudioFrame(AVFrame *frame,int *data_present)
         mWriteLock->unlock();
         goto cleanup;
     }
-    //qDebug() << error;
     mWriteLock->unlock();
     av_packet_free(&output_packet);
 
 cleanup:
-    //av_packet_unref(output_packet);
     av_packet_free(&output_packet);
     return error;
 }
@@ -985,10 +932,6 @@ void AudioHandler::cleanup()
     {
         avcodec_free_context(&mOutputCodecContext);
     }
-    /*if (outputFormatContext) {
-        avio_closep(&outputFormatContext->pb);
-        avformat_free_context(outputFormatContext);
-    }*/
     if (mInputCodecContext)
     {
         avcodec_free_context(&mInputCodecContext);
@@ -1005,41 +948,34 @@ void AudioHandler::cleanup()
 int AudioHandler::init()
 {
     int ret = AVERROR_EXIT;
-    qDebug() << "audio init";
     /* Open the input file for reading. */
     if (openInputStream())
     {
         return ret;
     }
-    //qDebug() << "Stream opened";
     /* Open the output file for writing. */
     if (openOutputStream())
     {
         return ret;
     }
-    //qDebug() << "Output File opened";
     /* Initialize the resampler to be able to convert audio sample formats. */
     if (initResampler())
     {
         return ret;
     }
-    //qDebug() << "Sampler init";
     /* Initialize the FIFO buffer to store audio samples to be encoded. */
     if (initFifo())
     {
         return ret;
     }
-
     qDebug() << "dumping audiohandler output";
     av_dump_format(mOutputFormatContext, 0, NULL, 1);
-
     ret = avformat_write_header(mOutputFormatContext, &mOptions);
     if(ret<0)
     {
         fprintf(stderr, "Could not open write header");
         exit(-1);
     }
-
     /* Set up the filtergraph. */
     ret = initFilterGraph(&mFilterGraph, &mBufferSourceContext, &mBufferSinkContext);
     if (ret < 0) {
@@ -1073,12 +1009,10 @@ int AudioHandler::grabFrames()
         {
             if(mAbortGrabFrames) break;
 
-            //qDebug() << "fifo < outputframe zie";
             /* Decode one frame worth of audio samples, convert it to the
              * output sample format and put it into the FIFO buffer. */
             if (readDecodeConvertAndStore(&finished))
             {
-                //cleanup();
                 break;
             }
 
@@ -1105,7 +1039,6 @@ int AudioHandler::grabFrames()
              * encode it and write it to the output file. */
             if (loadEncodeAndWrite())
             {
-                //cleanup();
                 break;
             }
         }
@@ -1121,21 +1054,21 @@ int AudioHandler::grabFrames()
                 data_written = 0;
                 if (encodeAudioFrame(NULL, &data_written))
                 {
-                    //cleanup();
                     break;
                 }
             } while (data_written);
             break;
         }
     }
-    //avformat_close_input(&mInputFormatContext);
     mActive = false;
-
     cleanup();
     return 0;
 
 }
-
+/**
+ * @brief AudioHandler::getAudioInputDevices
+ * @return
+ */
 QVariantList AudioHandler::getAudioInputDevices()
 {
     QList<QVariant> q;
@@ -1143,7 +1076,6 @@ QVariantList AudioHandler::getAudioInputDevices()
     for (auto i: x)
     {
         q.append(i.deviceName());
-        //todo sjekk om den faktisk er gyldig før den legges til i listen.
     }
     return q;
 }
@@ -1157,11 +1089,13 @@ bool AudioHandler::isActive()
     return mActive;
 }
 
-
-void AudioHandler::changeAudioInputDevice(QString deviceName)
+/**
+ * @brief AudioHandler::changeAudioInputDevice
+ * @param deviceName
+ */
+void AudioHandler::setAudioInputDevice(QString deviceName)
 {
     mAudioDeviceName = deviceName;
-    qDebug() << "Changed audio device";
 }
 
 /**
