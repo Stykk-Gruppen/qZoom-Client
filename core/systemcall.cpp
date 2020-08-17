@@ -1,10 +1,10 @@
 #include "systemcall.h"
 
-/*SystemCall::SystemCall()
-{
-
-}*/
-
+/**
+ * @brief SystemCall::exec
+ * @param cmd
+ * @return
+ */
 QString SystemCall::exec(const char* cmd)
 {
     std::array<char, 128> buffer;

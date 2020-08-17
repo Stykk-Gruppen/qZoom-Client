@@ -1,5 +1,7 @@
 #include "participant.h"
-
+/**
+ * @brief Participant::Participant
+ */
 Participant::Participant()
 {
     mAudioIsDisabled = true;
@@ -53,12 +55,18 @@ QString Participant::getDisplayName() const
 {
     return mDisplayName;
 }
-
+/**
+ * @brief Participant::getIsTalking
+ * @return
+ */
 bool Participant::getIsTalking() const
 {
     return mIsTalking;
 }
-
+/**
+ * @brief Participant::getAudioIsDisabled
+ * @return
+ */
 bool Participant::getAudioIsDisabled() const
 {
     return mAudioIsDisabled;

@@ -25,7 +25,7 @@ public:
                  UdpSocketHandler*, int bufferSize ,ImageHandler *imageHandler);
     int grabFrames();
     int init();
-    void changeAudioInputDevice(QString deviceName);
+    void setAudioInputDevice(QString deviceName);
     void toggleGrabFrames(bool a);
     void cleanup();
     bool isActive();

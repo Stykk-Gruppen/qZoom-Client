@@ -1,5 +1,12 @@
 #include "playback.h"
-
+/**
+ * @brief Playback::Playback
+ * @param _writeLock
+ * @param buffer
+ * @param bufferSize
+ * @param _imageHandler
+ * @param index
+ */
 Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
                    size_t bufferSize,ImageHandler* _imageHandler, int index)
 {
@@ -12,18 +19,23 @@ Playback::Playback(std::mutex* _writeLock, QByteArray* buffer,
     mIndex = index;
     mImageHandler = _imageHandler;
 }
+/**
+ * @brief Playback::~Playback
+ */
 Playback::~Playback()
 {
     delete mStruct;
 }
-
+/**
+ * @brief Playback::stop
+ */
 void Playback::stop()
 {
     mStopPlayback = true;
 }
 
 /**
- * Custom readPacket function for av_read_frame and av_open_input.
+ * Custom readPacket function for av_open_input.
  * Will read and remove bytes from the buffer found in the struct
  * and copy them to buf.
  * @param buf_size int how many bytes to read from the buffer
@@ -33,7 +45,6 @@ void Playback::stop()
  */
 int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 {
-    static int counter = 0;
     mBufferAndLockStruct *s = reinterpret_cast<mBufferAndLockStruct*>(opaque);
     while(s->buffer->size() <= 0)
     {
@@ -43,17 +54,11 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
         }
     }
 
-
-    //qDebug() << *s->buffer;
     int stringLength = s->buffer->at(0);
     s->writeLock->lock();
-
     s->buffer->remove(0, 1);
-
     s->writeLock->unlock();
 
-
-    qDebug() << "Stringlength: " << stringLength;
     while(s->buffer->size() <= stringLength)
     {
         if((*s->stopPlayback))
@@ -64,13 +69,8 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
 
 
     QByteArray sizeArray = QByteArray(s->buffer->data(), stringLength);
-    qDebug() << "sizearray: " << sizeArray;
     QString sizeString = QString(sizeArray);
-    qDebug() << "sizestring: " << sizeString;
     buf_size = sizeString.toInt();
-
-
-    qDebug() << "Buf_size: " << buf_size;
 
     if(buf_size>2000 && buf_size > 0){
         s->writeLock->lock();
@@ -85,10 +85,6 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
         {
             return AVERROR_EOF;
         }
-        //int ms = 5;
-        //struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
-        //qDebug() << "sleeping";
-        //nanosleep(&ts, NULL);
     }
 
     s->writeLock->lock();
@@ -97,12 +93,6 @@ int Playback::customReadPacket(void *opaque, uint8_t *buf, int buf_size)
     s->buffer->remove(0, buf_size);
     s->writeLock->unlock();
 
-
     memcpy(buf, tempBuffer.constData(), buf_size);
-
-    //Since return value is fixed it will never stop reading, should not be a problem for us?
-    //qDebug() << tempBuffer.size();
-    counter++;
-    //qDebug() << counter;
     return buf_size;
 }

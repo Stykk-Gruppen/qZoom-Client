@@ -1,5 +1,9 @@
 #include "servertcpqueries.h"
-
+/**
+ * @brief ServerTcpQueries::ServerTcpQueries
+ * @param settings
+ * @param parent
+ */
 ServerTcpQueries::ServerTcpQueries(Settings* settings, QObject* parent): QTcpSocket(parent)
 {
     mSettings = settings;
@@ -88,7 +92,6 @@ QVariantList ServerTcpQueries::serverQuery(int code, const QVariantList& vars)
     data.prepend(code);
     if(connect())
     {
-        qDebug() <<"SQL TCP Query(" << code << ")" << " Sending data: " << data;
         this->write(data);
         if(this->waitForReadyRead(mMillisWait))
         {
@@ -97,11 +100,13 @@ QVariantList ServerTcpQueries::serverQuery(int code, const QVariantList& vars)
         }
         else
         {
+            qDebug() <<"SQL TCP query failed with(" << code << ")" << "data:" << data;
             returnList.append(int(-1));
         }
     }
     else
     {
+        qDebug() <<"SQL TCP query failed with(" << code << ")" << "data:" << data;
         returnList.append(int(-1));
     }
     disconnect();
